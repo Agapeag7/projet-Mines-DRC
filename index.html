@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.5">
+    <title>Kel Foncia RDC • Le logiciel du foncier professionnel</title>
+    <!-- Google Fonts (police sobre et pro) -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- Font Awesome 6 (gratuit) -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <!-- Leaflet pour la carte interactive statique (OpenStreetMap) -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <!-- HEADER -->
+    <header>
+        <div class="container navbar">
+            <div class="logo">KEL<span>FONCIA</span></div>
+            <div class="nav-links">
+                <a href="#">Foncier</a>
+                <a href="#">Comment ça marche</a>
+                <a href="#">Tarifs</a>
+                <a href="#">Contact</a>
+                <a href="#" class="nav-cta">Essai gratuit</a>
+            </div>
+            <div class="mobile-menu">
+                <i class="fas fa-bars"></i>
+            </div>
+        </div>
+    </header>
+
+    <!-- HERO SECTION -->
+    <section class="hero">
+        <div class="container hero-grid">
+            <div class="fade-in">
+                <h1 class="hero-title">Vous cherchez un terrain <i>sécurisé</i> à Kinshasa ?</h1>
+                <p class="hero-sub">KelFoncia est le premier logiciel qui centralise les opportunités foncières fiables en RDC. Identifiez, sécurisez et développez.</p>
+                <div class="hero-ctas">
+                    <a href="#" class="btn btn-primary">Trouver du foncier</a>
+                    <a href="#" class="btn btn-outline">Publier une opportunité</a>
+                </div>
+                <div class="hero-stats">
+                    <div class="stat-item">
+                        <span class="stat-number">+150</span>
+                        <span class="stat-label">Opportunités vérifiées</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-number">45+</span>
+                        <span class="stat-label">Promoteurs actifs</span>
+                    </div>
+                </div>
+            </div>
+            <div class="carte-preview fade-in">
+                <div id="map"></div>
+                <div class="map-badge">
+                    <i class="fas fa-map-marker-alt"></i> Kinshasa, Gombe • 12 opportunités
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 3 PILIERS : TROUVER / SÉCURISER / CONTACTER -->
+    <section class="piliers">
+        <div class="container">
+            <h2 class="section-title fade-in">Le logiciel qui structure votre développement foncier</h2>
+            <p class="section-sub fade-in">Inspiré de KelFoncier France, entièrement adapté aux réalités congolaises.</p>
+            <div class="piliers-grid">
+                <div class="pilier-card fade-in">
+                    <div class="pilier-icon"><i class="fas fa-magnifying-glass-chart"></i></div>
+                    <h3>JE TROUVE</h3>
+                    <p>les terrains à plus fort potentiel. Filtres par superficie, budget, usage. Carte interactive.</p>
+                    <a href="#" class="pilier-link">Explorer <i class="fas fa-arrow-right"></i></a>
+                </div>
+                <div class="pilier-card fade-in">
+                    <div class="pilier-icon"><i class="fas fa-shield"></i></div>
+                    <h3>JE SÉCURISE</h3>
+                    <p>Statut juridique, titre foncier, certificat. Chaque opportunité est documentée et vérifiée.</p>
+                    <a href="#" class="pilier-link">Voir la fiabilité <i class="fas fa-arrow-right"></i></a>
+                </div>
+                <div class="pilier-card fade-in">
+                    <div class="pilier-icon"><i class="fas fa-handshake"></i></div>
+                    <h3>JE CONTACTE</h3>
+                    <p>Messagerie interne sécurisée. Mise en relation qualifiée avec propriétaires et experts.</p>
+                    <a href="#" class="pilier-link">Démarrer <i class="fas fa-arrow-right"></i></a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- FONCTIONNALITÉS CLÉS -->
+    <section class="features">
+        <div class="container">
+            <h2 class="section-title fade-in">Une plateforme conçue pour les professionnels</h2>
+            <p class="section-sub fade-in">Centralisez, gérez, accélérez vos projets immobiliers.</p>
+            <div class="features-grid">
+                <div class="feature-item fade-in">
+                    <div class="feature-icon"><i class="fas fa-table-cells-large"></i></div>
+                    <div class="feature-text">
+                        <h4>Tableau de bord pro</h4>
+                        <p>Suivi des opportunités, favoris, statistiques de visibilité de vos annonces.</p>
+                    </div>
+                </div>
+                <div class="feature-item fade-in">
+                    <div class="feature-icon"><i class="fas fa-message"></i></div>
+                    <div class="feature-text">
+                        <h4>Messagerie sécurisée</h4>
+                        <p>Échanges traçables, historique, demandes de contact formalisées.</p>
+                    </div>
+                </div>
+                <div class="feature-item fade-in">
+                    <div class="feature-icon"><i class="fas fa-file-signature"></i></div>
+                    <div class="feature-text">
+                        <h4>Publication & vérification</h4>
+                        <p>Ajoutez photos, documents, statut juridique. KYC léger des utilisateurs.</p>
+                    </div>
+                </div>
+                <div class="feature-item fade-in">
+                    <div class="feature-icon"><i class="fas fa-chart-line"></i></div>
+                    <div class="feature-text">
+                        <h4>Filtres avancés</h4>
+                        <p>Province, ville, commune, prix, usage (résidentiel, commercial, industriel).</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- SPÉCIFICITÉS RDC -->
+    <section class="rdc-specific">
+        <div class="container">
+            <div class="rdc-grid">
+                <div class="fade-in">
+                    <span class="rdc-badge"><i class="fas fa-africa"></i> Conçu pour la RDC</span>
+                    <h2 class="section-title" style="margin-bottom: 24px;">Le foncier congolais devient lisible</h2>
+                    <ul class="rdc-list">
+                        <li><i class="fas fa-check-circle"></i> Titres fonciers, certificats, droits réels… pris en compte</li>
+                        <li><i class="fas fa-check-circle"></i> Experts fonciers locaux partenaires</li>
+                        <li><i class="fas fa-check-circle"></i> Mode hors ligne / connexion limitée</li>
+                        <li><i class="fas fa-check-circle"></i> Français · Lingala (prochainement)</li>
+                        <li><i class="fas fa-check-circle"></i> Administration foncière intégrée (2026)</li>
+                    </ul>
+                </div>
+                <div class="fade-in" style="background: var(--gris-clair); border-radius: 30px; padding: 40px;">
+                    <i class="fas fa-map" style="font-size: 3rem; color: var(--or); margin-bottom: 20px;"></i>
+                    <h3 style="color: var(--bleu-pro); margin-bottom: 16px;">Kinshasa, puis toute la RDC</h3>
+                    <p style="color: var(--gris-moyen);">Déploiement pilote à Kinshasa. Extension nationale prévue en 2026.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- TÉMOIGNAGES -->
+    <section class="testimonials">
+        <div class="container">
+            <h2 class="section-title fade-in">Ils utilisent déjà KelFoncia</h2>
+            <p class="section-sub fade-in">Des promoteurs et aménageurs témoignent.</p>
+            <div class="testimonial-grid">
+                <div class="testimonial-card fade-in">
+                    <div class="testimonial-text">« Enfin un outil qui comprend la complexité du foncier à Kinshasa. La vérisation des documents nous fait gagner des mois. »</div>
+                    <div class="testimonial-author">
+                        <div class="author-avatar">ML</div>
+                        <div class="author-info">
+                            <h5>Marc L.</h5>
+                            <p>Promoteur immobilier, Kin Ouest</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="testimonial-card fade-in">
+                    <div class="testimonial-text">« Je publie mes terrains et je reçois des demandes qualifiées. Plus de négociations à l'aveugle. »</div>
+                    <div class="testimonial-author">
+                        <div class="author-avatar">BT</div>
+                        <div class="author-info">
+                            <h5>Béatrice T.</h5>
+                            <p>Propriétaire foncier, Gombe</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- CTA FINAL -->
+    <section class="cta-final">
+        <div class="container">
+            <h2 class="fade-in">Prêt à structurer votre développement foncier ?</h2>
+            <p style="font-size: 1.3rem; opacity: 0.9; margin-bottom: 20px; fade-in">48h d'essai gratuit, sans engagement.</p>
+            <a href="#" class="btn btn-primary fade-in">Démarrer l'essai gratuit</a>
+        </div>
+    </section>
+
+    <!-- FOOTER -->
+    <footer>
+        <div class="container">
+            <div class="footer-grid">
+                <div>
+                    <div class="footer-logo">KEL<span>FONCIA</span></div>
+                    <p style="color: rgba(255,255,255,0.7); margin-bottom: 20px; max-width: 300px;">Le logiciel de référence du foncier professionnel en RDC et Afrique.</p>
+                    <p class="footer-small">© 2026 KelFoncia. Tous droits réservés.</p>
+                </div>
+                <div class="footer-links">
+                    <h5>Plateforme</h5>
+                    <ul>
+                        <li><a href="#">Trouver du foncier</a></li>
+                        <li><a href="#">Publier</a></li>
+                        <li><a href="#">Tarifs</a></li>
+                        <li><a href="#">Essai gratuit</a></li>
+                    </ul>
+                </div>
+                <div class="footer-links">
+                    <h5>Ressources</h5>
+                    <ul>
+                        <li><a href="#">FAQ</a></li>
+                        <li><a href="#">Guides fonciers RDC</a></li>
+                        <li><a href="#">Contact</a></li>
+                    </ul>
+                </div>
+                <div class="footer-links">
+                    <h5>Légal</h5>
+                    <ul>
+                        <li><a href="#">CGU</a></li>
+                        <li><a href="#">Confidentialité</a></li>
+                        <li><a href="#">Mentions légales</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="copyright">
+                Conçu pour la transformation numérique du foncier en République Démocratique du Congo.
+            </div>
+        </div>
+    </footer>
+
+    <!-- SCRIPTS : Leaflet + animations -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="scripts.js"></script>
+</body>
+</html>
