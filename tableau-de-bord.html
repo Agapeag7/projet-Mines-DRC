@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="fr">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Tableau de bord • KelFoncia RDC</title>
+        <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+        <link rel="stylesheet" href="css/style.css">
+    </head>
+    <body>
+        <header>
+            <div class="container navbar">
+                <a href="index.html" class="logo">KEL<span>FONCIA</span></a>
+                <div class="nav-links">
+                    <a href="recherche.html">Trouver du foncier</a>
+                    <a href="publier.html">Publier</a>
+                    <a href="tableau-de-bord.html" class="active">Tableau de bord</a>
+                    <a href="#">Tarifs</a>
+                    <a href="connexion.html" class="nav-cta">Se connecter</a>
+                </div>
+                <div class="mobile-menu">
+                    <i class="fas fa-bars"></i>
+                </div>
+            </div>
+        </header>
+
+        <main style="background: var(--gris-clair); min-height: 80vh;">
+            <div class="container dashboard">
+                <!-- SIDEBAR -->
+                <aside class="dashboard-sidebar fade-in">
+                    <div style="text-align: center; margin-bottom: 30px;">
+                        <div style="width: 80px; height: 80px; background: var(--bleu-clair); border-radius: 50%; margin: 0 auto 16px; display: flex; align-items: center; justify-content: center; color: white; font-size: 2rem; font-weight: 700;">
+                            PM
+                        </div>
+                        <h3 style="color: var(--bleu-pro); margin-bottom: 4px;">Promoteur</h3>
+                        <p style="color: var(--gris-moyen);">Marc L.</p>
+                        <span style="background: rgba(199, 154, 62, 0.1); color: var(--or); padding: 4px 12px; border-radius: 20px; font-size: 0.8rem; display: inline-block; margin-top: 8px;">Compte vérifié</span>
+                    </div>
+                    <ul class="dashboard-menu">
+                        <li><a href="#" class="active"><i class="fas fa-chart-pie"></i> Vue d'ensemble</a></li>
+                        <li><a href="#"><i class="fas fa-heart"></i> Mes favoris</a></li>
+                        <li><a href="#"><i class="fas fa-list"></i> Mes opportunités</a></li>
+                        <li><a href="#"><i class="fas fa-message"></i> Messages <span style="background: var(--or); color: white; padding: 2px 8px; border-radius: 20px; margin-left: 8px;">3</span></a></li>
+                        <li><a href="#"><i class="fas fa-file-signature"></i> Projets en cours</a></li>
+                        <li><a href="#"><i class="fas fa-chart-line"></i> Statistiques</a></li>
+                        <li><a href="#"><i class="fas fa-gear"></i> Paramètres</a></li>
+                    </ul>
+                </aside>
+
+                <!-- CONTENU PRINCIPAL -->
+                <div class="dashboard-main">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px;">
+                        <h1 style="font-size: 1.8rem; color: var(--bleu-pro);">Bonjour, Marc</h1>
+                        <span style="color: var(--gris-moyen);">Dernière connexion : 12/02/2026</span>
+                    </div>
+
+                    <!-- STATISTIQUES RAPIDES -->
+                    <div class="dashboard-stats">
+                        <div class="stat-card fade-in">
+                            <h4>Opportunités consultées</h4>
+                            <span class="stat-nombre">+124</span>
+                            <span style="color: #27ae60; font-size: 0.9rem;"><i class="fas fa-arrow-up"></i> +12%</span>
+                        </div>
+                        <div class="stat-card fade-in">
+                            <h4>Demandes envoyées</h4>
+                            <span class="stat-nombre">18</span>
+                            <span style="color: #27ae60; font-size: 0.9rem;">3 nouvelles réponses</span>
+                        </div>
+                        <div class="stat-card fade-in">
+                            <h4>Favoris</h4>
+                            <span class="stat-nombre">7</span>
+                            <span style="color: var(--gris-moyen); font-size: 0.9rem;">terrains suivis</span>
+                        </div>
+                    </div>
+
+                    <!-- ACTIVITÉ RÉCENTE -->
+                    <div style="background: white; border-radius: var(--border-radius-lg); padding: 30px; box-shadow: var(--ombre); margin-bottom: 30px;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
+                            <h3 style="color: var(--bleu-pro);">Activité récente</h3>
+                            <a href="#" style="color: var(--or); font-weight: 600;">Voir tout <i class="fas fa-arrow-right"></i></a>
+                        </div>
+                        <div style="display: flex; flex-direction: column; gap: 20px;">
+                            <div style="display: flex; align-items: center; gap: 16px; padding-bottom: 16px; border-bottom: 1px solid #e0e6ed;">
+                                <div style="width: 40px; height: 40px; background: rgba(199, 154, 62, 0.1); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: var(--or);">
+                                    <i class="fas fa-eye"></i>
+                                </div>
+                                <div style="flex: 1;">
+                                    <p style="font-weight: 600;">Vous avez consulté un terrain à Gombe</p>
+                                    <p style="color: var(--gris-moyen); font-size: 0.9rem;">Il y a 2 heures • 4 500 m² • $450 000</p>
+                                </div>
+                                <a href="#" style="color: var(--bleu-pro); font-weight: 500;">Voir</a>
+                            </div>
+                            <div style="display: flex; align-items: center; gap: 16px; padding-bottom: 16px; border-bottom: 1px solid #e0e6ed;">
+                                <div style="width: 40px; height: 40px; background: rgba(199, 154, 62, 0.1); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: var(--or);">
+                                    <i class="fas fa-message"></i>
+                                </div>
+                                <div style="flex: 1;">
+                                    <p style="font-weight: 600;">Nouveau message du propriétaire</p>
+                                    <p style="color: var(--gris-moyen); font-size: 0.9rem;">Il y a 5 heures • Terrain Limete</p>
+                                </div>
+                                <a href="#" style="color: var(--bleu-pro); font-weight: 500;">Répondre</a>
+                            </div>
+                            <div style="display: flex; align-items: center; gap: 16px;">
+                                <div style="width: 40px; height: 40px; background: rgba(199, 154, 62, 0.1); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: var(--or);">
+                                    <i class="fas fa-heart"></i>
+                                </div>
+                                <div style="flex: 1;">
+                                    <p style="font-weight: 600;">Nouvelle opportunité dans vos favoris</p>
+                                    <p style="color: var(--gris-moyen); font-size: 0.9rem;">Il y a 1 jour • Terrain industriel, Mont Ngafula</p>
+                                </div>
+                                <a href="#" style="color: var(--bleu-pro); font-weight: 500;">Voir</a>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- MES ANNONCES RÉCENTES -->
+                    <div style="background: white; border-radius: var(--border-radius-lg); padding: 30px; box-shadow: var(--ombre);">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
+                            <h3 style="color: var(--bleu-pro);">Mes opportunités publiées</h3>
+                            <a href="publier.html" class="btn btn-primary" style="padding: 10px 20px;">+ Nouvelle annonce</a>
+                        </div>
+                        <table style="width: 100%; border-collapse: collapse;">
+                            <thead>
+                                <tr style="color: var(--gris-moyen); font-size: 0.9rem; border-bottom: 2px solid #e0e6ed;">
+                                    <th style="text-align: left; padding-bottom: 12px;">Terrain</th>
+                                    <th style="text-align: left; padding-bottom: 12px;">Date</th>
+                                    <th style="text-align: left; padding-bottom: 12px;">Vues</th>
+                                    <th style="text-align: left; padding-bottom: 12px;">Demandes</th>
+                                    <th style="text-align: left; padding-bottom: 12px;">Statut</th>
+                                    <th style="text-align: left; padding-bottom: 12px;"></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr style="border-bottom: 1px solid #e0e6ed;">
+                                    <td style="padding: 16px 0; font-weight: 600;">Gombe, 4500m²</td>
+                                    <td style="padding: 16px 0; color: var(--gris-moyen);">10/02/2026</td>
+                                    <td style="padding: 16px 0;">45</td>
+                                    <td style="padding: 16px 0;">3</td>
+                                    <td style="padding: 16px 0;"><span class="terrain-statut statut-disponible">Active</span></td>
+                                    <td style="padding: 16px 0;"><a href="#" style="color: var(--or);"><i class="fas fa-edit"></i></a></td>
+                                </tr>
+                                <tr>
+                                    <td style="padding: 16px  0; font-weight: 600;">Limete, 8200m²</td>
+                                    <td style="padding: 16px 0; color: var(--gris-moyen);">05/02/2026</td>
+                                    <td style="padding: 16px 0;">32</td>
+                                    <td style="padding: 16px 0;">1</td>
+                                    <td style="padding: 16px 0;"><span class="terrain-statut statut-verifie">En négociation</span></td>
+                                    <td style="padding: 16px 0;"><a href="#" style="color: var(--or);"><i class="fas fa-edit"></i></a></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <footer>
+            <div class="container">
+                <div class="footer-grid">
+                    <div>
+                        <a href="index.html" class="footer-logo">KEL<span>FONCIA</span></a>
+                        <p style="color: rgba(255,255,255,0.7); margin-bottom: 20px; max-width: 300px;">
+                            Le logiciel de référence du foncier professionnel en RDC et Afrique.
+                        </p>
+                        <p class="footer-small">© 2026 KelFoncia. Tous droits réservés.</p>
+                    </div>
+                    <div class="footer-links">
+                        <h5>Plateforme</h5>
+                        <ul>
+                            <li><a href="recherche.html">Trouver du foncier</a></li>
+                            <li><a href="publier.html">Publier</a></li>
+                            <li><a href="#">Tarifs</a></li>
+                            <li><a href="#">Essai gratuit</a></li>
+                        </ul>
+                    </div>
+                    <div class="footer-links">
+                        <h5>Ressources</h5>
+                        <ul>
+                            <li><a href="#">FAQ</a></li>
+                            <li><a href="#">Guides fonciers RDC</a></li>
+                            <li><a href="#">Contact</a></li>
+                        </ul>
+                    </div>
+                    <div class="footer-links">
+                        <h5>Légal</h5>
+                        <ul>
+                            <li><a href="#">CGU</a></li>
+                            <li><a href="#">Confidentialité</a></li>
+                            <li><a href="#">Mentions légales</a></li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="copyright">
+                    Conçu pour la transformation numérique du foncier en République Démocratique du Congo.
+                </div>
+            </div>
+        </footer>
+
+        <script src="js/animations.js"></script>
+    </body>
+</html>
