@@ -1297,63 +1297,87 @@
                 
                 if (!sidebar || !dashboard) return;
                 
-                let menuToggle = document.querySelector('.menu-toggle-dashboard');
                 let overlay = document.querySelector('.dashboard-overlay');
+                let menuToggles = [];
                 
                 // Création des éléments au chargement si mobile
                 const setupMobileMenu = () => {
                     if (window.innerWidth <= 768) {
-                        // Créer le toggle si absent
-                        if (!menuToggle) {
-                            menuToggle = document.createElement('button');
-                            menuToggle.className = 'menu-toggle-dashboard';
-                            menuToggle.innerHTML = '<i class="fas fa-bars"></i>';
-                            
-                            const header = document.querySelector('.dashboard-header');
-                            if (header) {
-                                header.appendChild(menuToggle);
-                            }
-                        }
-                        
                         // Créer l'overlay si absent
                         if (!overlay) {
                             overlay = document.createElement('div');
                             overlay.className = 'dashboard-overlay';
                             dashboard.appendChild(overlay);
+                            overlay.addEventListener('click', closeSidebar);
                         }
                         
-                        // Event listeners
-                        menuToggle.addEventListener('click', toggleSidebar);
-                        overlay.addEventListener('click', closeSidebar);
-                        
-                        // Fermer au clic sur les liens
-                        sidebar.querySelectorAll('a').forEach(link => {
-                            link.addEventListener('click', closeSidebar);
+                        // Ajouter le toggle à TOUS les headers
+                        const headers = document.querySelectorAll('.dashboard-header');
+                        headers.forEach((header, index) => {
+                            // Vérifier s'il y a déjà un toggle dans ce header
+                            let menuToggle = header.querySelector('.menu-toggle-dashboard');
+                            
+                            if (!menuToggle) {
+                                menuToggle = document.createElement('button');
+                                menuToggle.className = 'menu-toggle-dashboard';
+                                menuToggle.innerHTML = '<i class="fas fa-bars"></i>';
+                                menuToggle.setAttribute('aria-label', 'Ouvrir le menu');
+                                
+                                // Ajouter le bouton au début du header
+                                header.insertBefore(menuToggle, header.firstChild);
+                            }
+                            
+                            // Ajouter les event listeners (vérifier qu'on ne les ajoute qu'une fois)
+                            if (!menuToggle.hasListener) {
+                                menuToggle.addEventListener('click', toggleSidebar);
+                                menuToggle.hasListener = true;
+                            }
+                            
+                            menuToggles.push(menuToggle);
                         });
+                        
+                        // Fermer au clic sur les liens du menu
+                        sidebar.querySelectorAll('a').forEach(link => {
+                            if (!link.hasListener) {
+                                link.addEventListener('click', closeSidebar);
+                                link.hasListener = true;
+                            }
+                        });
+                    } else {
+                        // Sur desktop, retirer les toggles
+                        document.querySelectorAll('.menu-toggle-dashboard').forEach(btn => {
+                            btn.remove();
+                        });
+                        menuToggles = [];
+                        closeSidebar();
                     }
                 };
                 
-                const toggleSidebar = () => {
+                const toggleSidebar = (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
                     sidebar.classList.toggle('active');
-                    overlay.classList.toggle('active');
-                    menuToggle.classList.toggle('active');
+                    overlay?.classList.toggle('active');
+                    
+                    // Mettre à jour l'icône de tous les toggles
+                    document.querySelectorAll('.menu-toggle-dashboard').forEach(btn => {
+                        btn.classList.toggle('active');
+                    });
                 };
                 
                 const closeSidebar = () => {
                     sidebar.classList.remove('active');
                     overlay?.classList.remove('active');
-                    menuToggle?.classList.remove('active');
+                    document.querySelectorAll('.menu-toggle-dashboard').forEach(btn => {
+                        btn.classList.remove('active');
+                    });
                 };
                 
                 setupMobileMenu();
                 
                 // Réappliquer au redimensionnement
                 window.addEventListener('resize', () => {
-                    if (window.innerWidth > 768) {
-                        closeSidebar();
-                    } else {
-                        setupMobileMenu();
-                    }
+                    setupMobileMenu();
                 });
             };
 
