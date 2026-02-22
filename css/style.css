@@ -779,6 +779,461 @@ footer {
     transform: translateX(0);
 }
 
+/* ===== RESPONSIVE TABLEAU DE BORD ===== */
+
+/* Tablets (1024px et moins) */
+@media (max-width: 1024px) {
+    .dashboard {
+        grid-template-columns: 1fr;
+    }
+    
+    .dashboard-sidebar {
+        position: sticky;
+        top: 80px;
+        z-index: 100;
+    }
+    
+    .dashboard-stats {
+        grid-template-columns: repeat(2, 1fr);
+    }
+    
+    .prix-box {
+        position: static;
+        margin-bottom: 30px;
+    }
+}
+
+/* Mobile (768px et moins) */
+@media (max-width: 768px) {
+    .dashboard {
+        grid-template-columns: 1fr;
+        padding: 15px 0;
+    }
+    
+    .dashboard-sidebar {
+        position: fixed;
+        left: -100%;
+        top: 80px;
+        width: 80%;
+        max-width: 280px;
+        height: calc(100vh - 80px);
+        background: white;
+        z-index: 999;
+        overflow-y: auto;
+        box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
+        transition: left 0.3s ease;
+        border-radius: 0;
+        padding: 25px;
+    }
+    
+    .dashboard-sidebar.active {
+        left: 0;
+    }
+    
+    .menu-toggle-dashboard {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 40px;
+        height: 40px;
+        background: rgba(199, 154, 62, 0.1);
+        border-radius: 8px;
+        cursor: pointer;
+        color: var(--or);
+        border: none;
+        font-size: 1.3rem;
+    }
+    
+    .menu-toggle-dashboard.active {
+        background: var(--or);
+        color: white;
+    }
+    
+    .dashboard-content {
+        padding: 20px;
+        border-radius: 0;
+    }
+    
+    .dashboard-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 12px;
+        margin-bottom: 20px;
+        padding-bottom: 15px;
+    }
+    
+    .dashboard-header h2 {
+        font-size: 1.3rem;
+        flex: 1;
+        min-width: 200px;
+    }
+    
+    .dashboard-header button,
+    .dashboard-header select {
+        padding: 8px 12px;
+        font-size: 0.85rem;
+    }
+    
+    .dashboard-stats {
+        grid-template-columns: 1fr;
+        gap: 15px;
+    }
+    
+    .stat-card {
+        padding: 18px;
+    }
+    
+    .stat-card .stat-nombre {
+        font-size: 1.8rem;
+    }
+    
+    /* MES FAVORIS SECTION */
+    .table-favoris {
+        font-size: 0.75rem;
+        display: block;
+        overflow-x: auto;
+        white-space: nowrap;
+    }
+    
+    .table-favoris th,
+    .table-favoris td {
+        padding: 8px 4px;
+    }
+    
+    .favoris-terrain {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 8px;
+    }
+    
+    .favoris-image {
+        width: 40px;
+        height: 40px;
+    }
+    
+    .favoris-info h4 {
+        font-size: 0.9rem;
+    }
+    
+    /* MES OPPORTUNITÉS SECTION */
+    div[style*="grid-template-columns: repeat(4, 1fr)"] {
+        grid-template-columns: repeat(2, 1fr) !important;
+        gap: 12px !important;
+        margin: 12px 0 !important;
+    }
+    
+    /* Grille 4 colonnes pour stats */
+    div[style*="grid-template-columns: repeat(4, 1fr)"] span,
+    div[style*="grid-template-columns: repeat(4, 1fr)"] div {
+        font-size: 0.75rem;
+    }
+    
+    /* Boutons dans les cartes */
+    .project-card {
+        padding: 12px;
+    }
+    
+    .project-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 8px;
+        margin-bottom: 12px;
+    }
+    
+    .project-title {
+        font-size: 1rem;
+    }
+    
+    .project-card > div[style*="flex"] {
+        flex-direction: column;
+        gap: 8px !important;
+    }
+    
+    /* MESSAGES SECTION */
+    div[style*="grid-template-columns: 1fr 2fr"] {
+        grid-template-columns: 1fr !important;
+        gap: 20px !important;
+    }
+    
+    div[style*="border-right: 1px solid #e0e6ed"]  {
+        border-right: none !important;
+        border-bottom: 1px solid #e0e6ed !important;
+        padding-right: 0 !important;
+        padding-bottom: 20px !important;
+    }
+    
+    /* Conversation active */
+    div[style*="height: 300px"] {
+        height: 200px !important;
+    }
+    
+    /* PROJETS EN COURS SECTION */
+    div[style*="display: flex; gap: 24px"] {
+        flex-direction: column;
+        gap: 12px !important;
+    }
+    
+    /* STATISTIQUES SECTION */
+    div[style*="grid-template-columns: repeat(2, 1fr)"] {
+        grid-template-columns: 1fr !important;
+        gap: 12px !important;
+    }
+    
+    .statistique-chart {
+        padding: 16px;
+    }
+    
+    .statistique-chart h4 {
+        font-size: 1rem;
+    }
+    
+    .chart-placeholder {
+        height: 150px;
+        font-size: 0.8rem;
+    }
+    
+    /* Grille des stats chiffrées */
+    div[style*="grid-template-columns: repeat(4, 1fr)"] + div {
+        grid-template-columns: repeat(2, 1fr) !important;
+    }
+    
+    /* Table de performance */
+    table {
+        font-size: 0.8rem;
+    }
+    
+    table th,
+    table td {
+        padding: 8px !important;
+    }
+    
+    /* PARAMÈTRES SECTION */
+    div[style*="display: flex; gap: 40px"] {
+        flex-direction: column;
+        gap: 20px !important;
+    }
+    
+    div[style*="width: 240px"] {
+        width: 100% !important;
+        border-right: none !important;
+        border-bottom: 1px solid #e0e6ed !important;
+        padding-right: 0 !important;
+        padding-bottom: 20px !important;
+    }
+    
+    .parametre-item {
+        padding: 12px 0;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 8px;
+    }
+    
+    .parametre-groupe {
+        margin-bottom: 20px;
+    }
+    
+    .notification {
+        flex-direction: column;
+        align-items: flex-start;
+        padding: 12px;
+    }
+    
+    .notification-meta {
+        flex-direction: column;
+        gap: 4px;
+    }
+    
+    .message-thread {
+        padding: 12px;
+        flex-direction: column;
+    }
+    
+    .prix-box {
+        position: static;
+        padding: 20px;
+    }
+}
+
+/* Overlay sidebar mobile */
+.dashboard-overlay {
+    display: none;
+    position: fixed;
+    top: 80px;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.4);
+    z-index: 998;
+}
+
+.dashboard-overlay.active {
+    display: block;
+}
+
+/* ===== RESPONSIVE ÉLÉMENTS INLINE ===== */
+@media (max-width: 768px) {
+    /* Grilles 4 et 2 colonnes */
+    @supports (display: grid) {
+        [style*="display: grid"][style*="grid-template-columns: repeat(4"] {
+            grid-template-columns: repeat(2, 1fr) !important;
+            gap: 12px !important;
+        }
+        
+        [style*="display: grid"][style*="grid-template-columns: repeat(2"] {
+            grid-template-columns: 1fr !important;
+            gap: 12px !important;
+        }
+    }
+    
+    /* Flex layouts */
+    @supports (display: flex) {
+        [style*="display: flex"][style*="gap: 40px"],
+        [style*="display: flex"][style*="gap: 30px"],
+        [style*="display: flex"][style*="gap: 24px"] {
+            flex-direction: column !important;
+            gap: 12px !important;
+        }
+        
+        [style*="display: flex"][style*="justify-content: space-between"] {
+            flex-direction: column !important;
+            align-items: flex-start !important;
+        }
+    }
+    
+    /* Inputs et selects */
+    input[type="text"],
+    input[type="email"],
+    input[type="number"],
+    select {
+        width: 100% !important;
+        max-width: 100% !important;
+    }
+    
+    /* Boutons responsifs */
+    .btn {
+        width: auto;
+    }
+    
+    /* Inline buttons specifiques */
+    [style*="padding: 8px"], 
+    [style*="padding: 10px"],
+    [style*="padding: 12px"] {
+        width: auto !important;
+    }
+    
+    /* Wrapper des boutons */
+    [style*="justify-content: flex-end"] {
+        flex-direction: column !important;
+        align-items: stretch !important;
+    }
+    
+    [style*="justify-content: flex-end"] .btn,
+    [style*="justify-content: flex-end"] button {
+        width: 100% !important;
+        margin-bottom: 8px !important;
+    }
+    
+    [style*="justify-content: flex-end"] .btn:last-child,
+    [style*="justify-content: flex-end"] button:last-child {
+        margin-bottom: 0;
+    }
+    
+    /* Conversation messages */
+    [style*="display: flex"] [style*="gap: 12px"] {
+        max-width: 100% !important;
+    }
+    
+    /* Saisie message */
+    [style*="display: flex"][style*="gap: 12px"] input[type="text"],
+    [style*="display: flex"][style*="gap: 12px"] textarea {
+        flex: 1 !important;
+        min-width: 0;
+    }
+    
+    /* Avatar et containers */
+    [style*="width: 50px"],
+    [style*="width: 40px"],
+    [style*="width: 36px"],
+    [style*="width: 80px"] {
+        flex-shrink: 0;
+    }
+    
+    /* Texte informatif */
+    [style*="font-size: 0.85rem"],
+    [style*="font-size: 0.8rem"] {
+        font-size: 0.75rem !important;
+    }
+}
+
+/* Petit mobile (480px et moins) */
+@media (max-width: 480px) {
+    .dashboard-content {
+        padding: 12px;
+    }
+    
+    .dashboard-header {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    
+    .dashboard-header h2 {
+        font-size: 1rem;
+        margin-bottom: 12px;
+    }
+    
+    .dashboard-header button,
+    .dashboard-header select {
+        width: 100%;
+    }
+    
+    .stat-card .stat-nombre {
+        font-size: 1.5rem;
+    }
+    
+    .badge {
+        font-size: 0.65rem;
+        padding: 2px 6px;
+    }
+    
+    .dashboard-sidebar {
+        width: 100%;
+        max-width: none;
+    }
+    
+    /* Réduire les tailles pour très petit écran */
+    .table-favoris {
+        font-size: 0.65rem;
+    }
+    
+    .favoris-info h4,
+    .project-title {
+        font-size: 0.85rem;
+    }
+    
+    div[style*="grid-template-columns: repeat(2, 1fr)"] {
+        grid-template-columns: 1fr !important;
+    }
+    
+    /* Boutons et inputs en pleine largeur */
+    .btn {
+        padding: 10px 16px;
+        font-size: 0.85rem;
+    }
+    
+    button[style*="padding: 8px"],
+    button[style*="padding: 10px"],
+    button[style*="padding: 12px"],
+    input[type="text"],
+    select {
+        width: 100% !important;
+        margin-bottom: 8px;
+        padding: 10px 12px !important;
+        font-size: 0.85rem;
+    }
+}
+
 /* ===== RESPONSIVE ===== */
 @media (max-width: 1024px) {
     .container { padding: 0 24px; }
@@ -827,3 +1282,4 @@ footer {
 @media (max-width: 480px) {
     .hero-title { font-size: 2.2rem; }
 }
+

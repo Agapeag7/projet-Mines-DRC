@@ -1289,6 +1289,76 @@
                     });
                 });
             });
+
+            // RESPONSIVE DASHBOARD MENU
+            const initDashboardResponsive = function() {
+                const sidebar = document.querySelector('.dashboard-sidebar');
+                const dashboard = document.querySelector('.dashboard');
+                
+                if (!sidebar || !dashboard) return;
+                
+                let menuToggle = document.querySelector('.menu-toggle-dashboard');
+                let overlay = document.querySelector('.dashboard-overlay');
+                
+                // Création des éléments au chargement si mobile
+                const setupMobileMenu = () => {
+                    if (window.innerWidth <= 768) {
+                        // Créer le toggle si absent
+                        if (!menuToggle) {
+                            menuToggle = document.createElement('button');
+                            menuToggle.className = 'menu-toggle-dashboard';
+                            menuToggle.innerHTML = '<i class="fas fa-bars"></i>';
+                            
+                            const header = document.querySelector('.dashboard-header');
+                            if (header) {
+                                header.appendChild(menuToggle);
+                            }
+                        }
+                        
+                        // Créer l'overlay si absent
+                        if (!overlay) {
+                            overlay = document.createElement('div');
+                            overlay.className = 'dashboard-overlay';
+                            dashboard.appendChild(overlay);
+                        }
+                        
+                        // Event listeners
+                        menuToggle.addEventListener('click', toggleSidebar);
+                        overlay.addEventListener('click', closeSidebar);
+                        
+                        // Fermer au clic sur les liens
+                        sidebar.querySelectorAll('a').forEach(link => {
+                            link.addEventListener('click', closeSidebar);
+                        });
+                    }
+                };
+                
+                const toggleSidebar = () => {
+                    sidebar.classList.toggle('active');
+                    overlay.classList.toggle('active');
+                    menuToggle.classList.toggle('active');
+                };
+                
+                const closeSidebar = () => {
+                    sidebar.classList.remove('active');
+                    overlay?.classList.remove('active');
+                    menuToggle?.classList.remove('active');
+                };
+                
+                setupMobileMenu();
+                
+                // Réappliquer au redimensionnement
+                window.addEventListener('resize', () => {
+                    if (window.innerWidth > 768) {
+                        closeSidebar();
+                    } else {
+                        setupMobileMenu();
+                    }
+                });
+            };
+
+            // Lancer au chargement du DOM
+            document.addEventListener('DOMContentLoaded', initDashboardResponsive);
         </script>
     </body>
 </html>
