@@ -301,6 +301,81 @@
                 text-decoration: none;
             }
             
+            .kyc-section {
+                margin-top: 32px;
+                padding-top: 24px;
+                border-top: 1px solid #e0e6ed;
+            }
+            
+            .kyc-options {
+                display: grid;
+                grid-template-columns: 1fr 1fr;
+                gap: 16px;
+            }
+            
+            .btn-kyc {
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                gap: 12px;
+                padding: 14px;
+                border: 1.5px solid var(--or);
+                border-radius: 12px;
+                background: rgba(199, 154, 62, 0.05);
+                color: var(--or);
+                font-weight: 600;
+                cursor: pointer;
+                transition: var(--transition);
+                font-size: 0.9rem;
+            }
+            
+            .btn-kyc:hover {
+                background: var(--or);
+                color: var(--bleu-pro);
+                transform: translateY(-2px);
+            }
+            
+            .btn-kyc i {
+                font-size: 1.2rem;
+            }
+            
+            .modal {
+                display: none;
+                position: fixed;
+                z-index: 1000;
+                left: 0;
+                top: 0;
+                width: 100%;
+                height: 100%;
+                background-color: rgba(0,0,0,0.5);
+                backdrop-filter: blur(5px);
+            }
+            
+            .modal-content {
+                background-color: white;
+                margin: 10% auto;
+                padding: 30px;
+                border-radius: var(--border-radius-lg);
+                width: 90%;
+                max-width: 500px;
+                box-shadow: var(--ombre-forte);
+                position: relative;
+            }
+            
+            .close {
+                position: absolute;
+                top: 15px;
+                right: 20px;
+                color: var(--gris-moyen);
+                font-size: 28px;
+                font-weight: bold;
+                cursor: pointer;
+            }
+            
+            .close:hover {
+                color: var(--or);
+            }
+            
             @media (max-width: 600px) {
                 .auth-card {
                     padding: 32px 24px;
@@ -312,6 +387,15 @@
                 
                 .social-login {
                     grid-template-columns: 1fr;
+                }
+                
+                .kyc-options {
+                    grid-template-columns: 1fr;
+                }
+                
+                .modal-content {
+                    margin: 20% auto;
+                    padding: 20px;
                 }
             }
         </style>
@@ -447,6 +531,27 @@
                                 </label>
                             </div>
                             
+                            <!-- SECTION KYC -->
+                            <div class="kyc-section">
+                                <h3 style="font-size: 1.1rem; color: var(--bleu-pro); margin-bottom: 16px; text-align: center;">
+                                    <i class="fas fa-shield-alt" style="color: var(--or); margin-right: 8px;"></i>
+                                    Vérification KYC Obligatoire
+                                </h3>
+                                <p style="font-size: 0.9rem; color: var(--gris-moyen); text-align: center; margin-bottom: 20px;">
+                                    Pour sécuriser votre compte professionnel, choisissez une méthode de vérification d'identité.
+                                </p>
+                                <div class="kyc-options">
+                                    <button type="button" class="btn-kyc" id="scan-id">
+                                        <i class="fas fa-id-card"></i>
+                                        Scanner Carte d'Électeur
+                                    </button>
+                                    <button type="button" class="btn-kyc" id="facial-recog">
+                                        <i class="fas fa-camera"></i>
+                                        Reconnaissance Faciale
+                                    </button>
+                                </div>
+                            </div>
+                            
                             <button type="submit" class="btn-auth" style="background: var(--or); color: var(--bleu-pro);">
                                 Créer mon compte professionnel
                             </button>
@@ -471,6 +576,26 @@
                     <div class="auth-footer">
                         <p>Vous êtes un professionnel du foncier ?</p>
                         <a href="#">Découvrir nos offres d'abonnement</a>
+                    </div>
+                </div>
+                
+                <!-- MODAL KYC -->
+                <div id="kyc-modal" class="modal">
+                    <div class="modal-content">
+                        <span class="close">&times;</span>
+                        <h3 id="modal-title" style="text-align: center; color: var(--bleu-pro); margin-bottom: 20px;">
+                            <i class="fas fa-camera" style="color: var(--or); margin-right: 8px;"></i>
+                            Vérification d'Identité
+                        </h3>
+                        <div id="camera-container">
+                            <video id="video" autoplay playsinline style="width: 100%; border-radius: 12px;"></video>
+                            <canvas id="canvas" style="display:none;"></canvas>
+                            <div class="camera-controls" style="text-align: center; margin-top: 20px;">
+                                <button id="capture-btn" class="btn-auth" style="width: auto; padding: 12px 24px;">Capturer la photo</button>
+                                <button id="retake-btn" class="btn-outline" style="width: auto; padding: 12px 24px; display:none; margin-left: 10px;">Reprendre</button>
+                            </div>
+                            <p id="status" style="text-align: center; margin-top: 10px; color: var(--gris-moyen); font-size: 0.9rem;"></p>
+                        </div>
                     </div>
                 </div>
                 
@@ -539,6 +664,109 @@
                     }
                 });
             });
+            
+            // KYC Modal
+            const modal = document.getElementById('kyc-modal');
+            const modalTitle = document.getElementById('modal-title');
+            const video = document.getElementById('video');
+            const canvas = document.getElementById('canvas');
+            const captureBtn = document.getElementById('capture-btn');
+            const retakeBtn = document.getElementById('retake-btn');
+            const status = document.getElementById('status');
+            const closeBtn = document.querySelector('.close');
+            
+            let stream;
+            let currentMode = '';
+            
+            // Ouvrir modal pour scan ID
+            document.getElementById('scan-id').addEventListener('click', function() {
+                openModal('Scanner Carte d\'Électeur', 'Positionnez votre carte d\'électeur dans le cadre et capturez la photo.');
+            });
+            
+            // Ouvrir modal pour reconnaissance faciale
+            document.getElementById('facial-recog').addEventListener('click', function() {
+                openModal('Reconnaissance Faciale', 'Positionnez-vous face à la caméra et capturez votre photo.');
+            });
+            
+            // Fermer modal
+            closeBtn.addEventListener('click', closeModal);
+            window.addEventListener('click', function(event) {
+                if (event.target === modal) {
+                    closeModal();
+                }
+            });
+            
+            function openModal(title, instruction) {
+                modalTitle.innerHTML = '<i class="fas fa-camera" style="color: var(--or); margin-right: 8px;"></i>' + title;
+                status.textContent = instruction;
+                modal.style.display = 'block';
+                startCamera();
+            }
+            
+            function closeModal() {
+                modal.style.display = 'none';
+                stopCamera();
+                resetCamera();
+            }
+            
+            function startCamera() {
+                navigator.mediaDevices.getUserMedia({ video: true })
+                    .then(function(mediaStream) {
+                        stream = mediaStream;
+                        video.srcObject = mediaStream;
+                        video.style.display = 'block';
+                        captureBtn.style.display = 'inline-block';
+                        retakeBtn.style.display = 'none';
+                        status.style.color = 'var(--gris-moyen)';
+                    })
+                    .catch(function(err) {
+                        console.error('Erreur d\'accès à la caméra:', err);
+                        status.textContent = 'Erreur: Impossible d\'accéder à la caméra. Vérifiez les permissions.';
+                        status.style.color = 'red';
+                    });
+            }
+            
+            function stopCamera() {
+                if (stream) {
+                    stream.getTracks().forEach(track => track.stop());
+                }
+            }
+            
+            function resetCamera() {
+                video.style.display = 'block';
+                canvas.style.display = 'none';
+                captureBtn.style.display = 'inline-block';
+                retakeBtn.style.display = 'none';
+            }
+            
+            // Capturer la photo
+            captureBtn.addEventListener('click', function() {
+                const context = canvas.getContext('2d');
+                canvas.width = video.videoWidth;
+                canvas.height = video.videoHeight;
+                context.drawImage(video, 0, 0, canvas.width, canvas.height);
+                
+                video.style.display = 'none';
+                canvas.style.display = 'block';
+                captureBtn.style.display = 'none';
+                retakeBtn.style.display = 'inline-block';
+                
+                status.textContent = 'Photo capturée avec succès ! Vous pouvez la reprendre ou fermer la fenêtre.';
+                status.style.color = 'green';
+                
+                // Ici, on pourrait envoyer l'image à un serveur pour vérification
+                // Pour la démo, on simule une vérification
+                setTimeout(() => {
+                    status.textContent = 'Vérification en cours...';
+                    setTimeout(() => {
+                        status.textContent = 'Vérification réussie ! Votre identité a été confirmée.';
+                        status.style.color = 'green';
+                    }, 2000);
+                }, 1000);
+            });
+            
+            // Reprendre la photo
+            retakeBtn.addEventListener('click', resetCamera);
         });
     </script>
 </html>
