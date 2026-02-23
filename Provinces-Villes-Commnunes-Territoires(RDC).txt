@@ -1,3 +1,23 @@
+il y'a 26 Provinces 
+les provinces ont des villes
+les villes ont des communes (donc les communes sont relier aux villes)
+les territoires (sont directement relier aux provinces sans faire partie des villes quelconques)
+
+
+Analyse le fichier Provinces-Villes-Commnunes-Territoires(RDC).txt , 
+ensuite modifie dans le fichier publier.html : 
+- dans Localisation change les Province aux 26 provinces se touvant dans le fichier .txt ,
+- Territoire : selectionnable par l'utilisateur
+- Ajoute : les villes selectionnable par l'utilisateur
+
+la selection d'un province doit directement modifier tout les elements à selection en mettant les elements correspondant à ce province là :
+Villes et Territoires
+ensuite si un utilisateur selectionne une ville quelconque , les communes qui correspondent à cette ville seront ceux qui sont selectionnable
+
+
+
+
+
 1. BAS UELE : 
 	1 ville : Buta
 	11 communes : 
@@ -12,7 +32,7 @@
 		- Zobia
 		- Poko
 		- Buta
-		
+
 2. EQUATEUR : 
 	1 ville : Mbandaka
 	4 communes : 

@@ -41,25 +41,26 @@
                         <div class="form-grid">
                             <div class="form-group">
                                 <label>Province *</label>
-                                <select required>
+                                <select id="province-select" required>
                                     <option value="">Sélectionnez une province</option>
-                                    <option>Kinshasa</option>
-                                    <option>Kongo Central</option>
-                                    <option>Haut-Katanga</option>
-                                    <option>Lualaba</option>
-                                    <option>Lomami</option>
                                 </select>
                             </div>
                             <div class="form-group">
-                                <label>Ville / Commune *</label>
-                                <select required>
-                                    <option value="">Sélectionnez une commune</option>
-                                    <option>Gombe</option>
-                                    <option>Limete</option>
-                                    <option>Ngaliema</option>
-                                    <option>Lingwala</option>
-                                    <option>Mont Ngafula</option>
-                                    <option>Kalamu</option>
+                                <label>Ville *</label>
+                                <select id="ville-select" required>
+                                    <option value="">Sélectionnez d'abord une province</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>Commune / Quartier *</label>
+                                <select id="commune-select" required>
+                                    <option value="">Sélectionnez d'abord une ville</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>Territoire (optionnel)</label>
+                                <select id="territoire-select">
+                                    <option value="">Aucun territoire</option>
                                 </select>
                             </div>
                             <div class="form-group full-width">
@@ -216,5 +217,96 @@
         </footer>
 
         <script src="js/animations.js"></script>
+        <script src="js/provinces-data.js"></script>
+        <script>
+            // ===== GESTION DES SÉLECTIONS EN CASCADE =====
+            document.addEventListener('DOMContentLoaded', function() {
+                const provinceSelect = document.getElementById('province-select');
+                const villeSelect = document.getElementById('ville-select');
+                const communeSelect = document.getElementById('commune-select');
+                const territoireSelect = document.getElementById('territoire-select');
+
+                // Remplir les provinces au chargement
+                function initProvinces() {
+                    const provinces = getProvinces();
+                    provinces.forEach(province => {
+                        const option = document.createElement('option');
+                        option.value = province;
+                        option.textContent = province;
+                        provinceSelect.appendChild(option);
+                    });
+                }
+
+                // Événement changement de province
+                provinceSelect.addEventListener('change', function() {
+                    const selectedProvince = this.value;
+                    
+                    // Réinitialiser les sélections
+                    villeSelect.innerHTML = '<option value="">Sélectionnez une ville</option>';
+                    communeSelect.innerHTML = '<option value="">Sélectionnez une commune</option>';
+                    territoireSelect.innerHTML = '<option value="">Aucun territoire</option>';
+
+                    if (!selectedProvince) {
+                        villeSelect.disabled = true;
+                        communeSelect.disabled = true;
+                        territoireSelect.disabled = true;
+                        return;
+                    }
+
+                    villeSelect.disabled = false;
+                    
+                    // Remplir les villes
+                    const villes = getVillesByProvince(selectedProvince);
+                    villes.forEach(ville => {
+                        const option = document.createElement('option');
+                        option.value = ville;
+                        option.textContent = ville;
+                        villeSelect.appendChild(option);
+                    });
+
+                    // Remplir les territoires
+                    const territoires = getTerritoiresByProvince(selectedProvince);
+                    if (territoires.length > 0) {
+                        territoireSelect.disabled = false;
+                        territoires.forEach(territoire => {
+                            const option = document.createElement('option');
+                            option.value = territoire;
+                            option.textContent = territoire;
+                            territoireSelect.appendChild(option);
+                        });
+                    } else {
+                        territoireSelect.disabled = true;
+                    }
+                });
+
+                // Événement changement de ville
+                villeSelect.addEventListener('change', function() {
+                    const selectedProvince = provinceSelect.value;
+                    const selectedVille = this.value;
+                    
+                    // Réinitialiser les communes
+                    communeSelect.innerHTML = '<option value="">Sélectionnez une commune</option>';
+
+                    if (!selectedVille) {
+                        communeSelect.disabled = true;
+                        return;
+                    }
+
+                    communeSelect.disabled = false;
+                    
+                    // Remplir les communes
+                    const communes = getCommunesByVille(selectedProvince, selectedVille);
+                    communes.forEach(commune => {
+                        const option = document.createElement('option');
+                        option.value = commune;
+                        option.textContent = commune;
+                        communeSelect.appendChild(option);
+                    });
+                });
+
+                // Initialisation
+                initProvinces();
+            });
+        </script>
     </body>
 </html>
