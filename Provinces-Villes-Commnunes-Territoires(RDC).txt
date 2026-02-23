@@ -1,0 +1,458 @@
+1. BAS UELE : 
+	1 ville : Buta
+	11 communes : 
+		- Aketi 
+		- Ango 
+		- Baye 
+		- Bili 
+		- Monga
+		- Ndu 
+		- Bambesa
+		- Titule 
+		- Zobia
+		- Poko
+		- Buta
+2. EQUATEUR : 
+	1 ville : Mbandaka
+	4 communes : 
+		- Commune de Mbandaka
+		- Commune de Wangata
+		- Commune d'Ikenge
+		- Commune de Bolumbu.
+3. HAUT KATANGA : 
+	2 villes : 
+		- Lubumbashi
+		- Likasi
+	11 communes : 
+		* Ville de Lubumbashi :
+			- Commune de Lubumbashi (Commune centre)
+			- Commune de Kampemba
+			- Commune de Katuba
+			- Commune de Ruashi
+			- Commune de Kenya
+			- Commune de Kamalondo
+			- Commune Annexe
+		* Ville de Likasi :
+			- Commune de Panda
+			- Commune de Kikula
+			- Commune de Likasi
+			- Commune de Shituru
+
+			- Commune de Kipushi (Territoire de Kipushi)
+			- Commune de Sakania (Territoire de Sakania)
+			- Commune de Mokambo (Territoire de Sakania)
+			- Commune de Kasumbalesa (Territoire de Sakania)
+			- Commune de Kasenga (Territoire de Kasenga)
+			- Commune de Mitwaba (Territoire de Mitwaba)
+			- Commune de Pweto (Territoire de Pweto)
+			- Commune de Kilwa (Territoire de Pweto)
+			- Commune de Kambove (Territoire de Kambove)
+4. HAUT LOMAMI :
+	1 ville : Kamina
+	10 communes : 
+		- Dimayi
+		- Kamina (ville)
+		- Sobongo
+		
+		- Bukama (Territoire)
+		- Luena (Territoire)
+		- Kabondo-Dianda (Territoire)
+		- Malemba-Nkulu (Territoire)
+		- Kaniama (Territoire)
+		- Kabongo (Territoire)
+		- Mulongo (Territoire)
+5. HAUT UELE :
+	1 ville : Isiro
+	6 communes : 
+		- Territoire de Rungu
+		- Territoire de Niangara
+		- Territoire de Dungu
+		- Territoire de Faradje
+		- Territoire de Wamba
+		- Territoire de Watsa
+		
+6. ITURI :
+	1 ville : Bunia
+	8 communes : 
+		- Nyakasanza (Commune de Bunia)
+		- Mbunya / Shari (Commune de Bunia)
+		- Lumumba
+
+		- Territoire d'Aru
+		- Territoire de Djugu
+		- Territoire d'Irumu
+		- Territoire de Mahagi
+		- Territoire de Mambasa
+
+7. KASAI :
+	1 ville : Tshikapa
+	5 communes : 
+		- Kanzala
+		- Mabondo
+		- Mbumba
+		- Dibumba 1
+		- Dibumba 2
+		
+8. KASAI CENTRAL :
+	1 ville : Kananga
+	10 communes : 
+		- Kananga
+		- Katoka
+		- Lukonga
+		- Ndesha
+		- Nganza 
+		- Demba
+		- Dibaya
+		- Dimbelenge
+		- Kazumba
+		- Luiza
+		
+9. KASAI ORIENTAL :
+	1 ville : Mbujimayi
+	10 communes : 
+		- Bipemba
+		- Dibindi
+		- Diulu
+		- Kanshi
+		- Muya
+
+		- Kabeya Kamwanga (Territoire)
+		- Katanda (Territoire)
+		- Lupatapata (Territoire)
+		- Miabi (Territoire)
+		- Tshilenge (Territoire)
+
+
+10. KINSHASA :
+	1 ville : Kinshasa
+	24 communes : 
+		- Bandalungwa
+		- Bumbu
+		- Kalamu
+		- Kasa-Vubu
+		- Makala
+		- Ngiri-Ngiri
+		- Selembao 
+		- Barumbu
+		- Gombe
+		- Kinshasa
+		- Kintambo
+		- Lingwala
+		- Mont-Ngafula
+		- Ngaliema 
+		- Kisenso
+		- Lemba
+		- Limete
+		- Matete
+		- Ngaba 
+		- Kimbanseke
+		- Maluku
+		- Masina
+		- Ndjili
+		- Nsele
+
+11. KONGO CENTRAL :
+	3 villes : 
+		- Matadi
+		- Boma
+		- Muanda (Territoire/Ville côtière)
+	16 communes : 
+		* Matadi :
+			- Matadi
+			- Mvuzi
+			- Nzanza
+		* Boma :
+			- Boma
+			- Kalamu
+			- Nzadi	
+
+		- Kasangulu (Territoire)
+		- Kimvula (Territoire)
+		- Lukula (Territoire)
+		- Luozi (Territoire)
+		- Madimba (Territoire)
+		- Mbanza-Ngungu (Territoire)
+		- Moanda (Territoire)
+		- Seke-Banza (Territoire)
+		- Songololo (Territoire)
+		- Tshela (Territoire)		
+
+12. KWANGO :
+	1 ville : Kenge
+	6 communes : 
+		- Ville de Kenge (chef-lieu)
+
+		- Territoire de Feshi
+		- Territoire de Kahemba
+		- Territoire de Kasongo-Lunda
+		- Territoire de Kenge
+		- Territoire de Popokabaka
+	
+13. KWILU :
+	2 villes : 
+		- Bandundu
+		- Kikwit
+	7 communes : 
+		* Kikwit :
+			- Lukolela
+			- Lukemi
+			- Mzinda
+			- Samba
+		* Bandundu :
+			- Basoko
+			- Disasi (avec Wombali)
+			- Mayoyo
+
+14. LOMAMI :
+	3 villes : 
+		- Kabinda
+		- Mwene-Ditu
+		- Bondoyi
+	11 communes : 
+		* Kabinda :
+			- Kabinda
+			- Congo
+			- Mudishi
+		* Mwene-Ditu :
+			- Mwene-Ditu
+			- Bondoyi
+			- Musadi
+
+		- Territoire de Kabinda
+		- Territoire de Ngandajika
+		- Territoire de Luilu
+		- Territoire de Kamiji
+		- Territoire de Lubao 
+	
+15. LUALABA :
+	2 ville :
+		- Kasaji
+		- Kolwezi 
+	10 communes : 
+		* Kolwezi :
+			- Manika
+			- Dilala
+		* Kadaji :
+			- Nyakasanza
+			- Commune de Mbunya
+			- Commune de Shari
+
+		- Territoire de Dilolo
+		- Territoire de Kapanga
+		- Territoire de Lubudi
+		- Territoire de Mutshatsha
+		- Territoire de Sandoa
+
+16. MAI-NDOMBE :
+	1 ville : Inongo
+	15 communes : 
+		- Inongo (Ville/Chef-lieu)
+
+		- Bolobo (Commune/Territoire)
+		- Kiri (Territoire)
+		- Kutu (Territoire)
+		- Kwamouth (Territoire)
+		- Mushie (Territoire)
+		- Oshwe (Territoire)
+		- Yumbi (Territoire)
+		
+17. MANIEMA :
+	1 ville : Kindu
+	11 communes : 
+		- Kasuku
+		- Mikelenge
+		- Alunguli
+
+		- Kambare (Territoire)
+		- Kailo (Territoire)
+		- Kasongo (Territoire)
+		- Kibombo (Territoire)
+		- Lubutu (Territoire)
+		- Pangi (Territoire)
+		- Punia (Territoire)
+		- Kampene (Territoire)
+
+18. MONGALA :
+	2 ville : 
+		- Lisala
+		- Bumba
+	5 communes : 
+		* Lisala :
+			- Commune de Lisala
+			- Commune de Bundji
+		* Bumba :
+			- Commune de Bumba
+
+		- Commune rurale de Bongandanga
+		- Commune rurale de Bumba
+
+19. NORD-KIVU :
+	3 villes :
+		- Goma
+		- Beni
+		- Butembo
+	16 communes : 
+		* Goma :
+			- Commune de Goma
+			- Commune de Karisimbi
+		* Beni :
+			- Commune de Beni
+			- Commune de Bungulu
+			- Commune de Ruwenzori
+			- Commune de Beu
+		* Butembo :
+			- Commune de Bulengera
+			- Commune de Kimemi
+			- Commune de Mususa
+			- Commune de Vulamba
+		
+		- Beni (Territoire)
+		- Lubero (Territoire)
+		- Masisi (Territoire)
+		- Nyiragongo (Territoire)
+		- Rutshuru (Territoire)
+		- Walikale (Territoire)
+			
+20. NORD-UBANGI :
+	1 ville : Gbadolite
+	7 communes : 
+		- Ville de Gbadolite
+
+		- Territoire de Bosobolo
+		- Territoire de Businga
+		- Territoire de Mobayi-Mbongo
+		- Territoire de Yakoma
+
+21. SANKURU :
+	1 ville :
+		- Lusambo
+		- Katako-Kombe
+		- Lodja
+	10 communes : 
+		* Lusambo :
+			- Kabondo
+			- Lupembe
+			- Lusambo
+			- Tusuanganyi
+		* Lodja :
+			- Lodja (centre urbain)
+
+		- Katako-Kombe (Territoire)
+		- Kole (Territoire)
+		- Lomela (Territoire)
+		- Lubefu (Territoire)
+		- Lusambo (Territoire)
+
+22. SUD-KIVU :
+	1 ville : 
+		- Bukavu
+		- Uvira
+		- Baraka
+		- Kamituga
+	18 communes : 
+		* Bukavu :
+			- Ibanda
+			- Kadutu
+			- Bagira
+		* Uvira :
+			- Kalundu
+			- Mulongwe
+		* Baraka :
+			- Kalundja
+			- Kasongelera
+			- Katanga
+		* Kamituga :
+			- Mobale
+			- Bitanda
+
+		- Fizi (Territoire)
+		- Idjwi (Territoire)
+		- Kabare (Territoire)
+		- Kalehe (Territoire)
+		- Mwenga (Territoire)
+		- Shabunda (Territoire)
+		- Uvira (Territoire)
+		- Walungu (Territoire)
+
+23. SUD-UBANGI :
+	2 villes : 
+		- Gemena
+		- Zongo
+	9 communes : 
+		* Gemena :
+			- Mont Gila
+			- Gbazubu
+			- Labo
+			- Lac-Ntumba
+		* Zongo :
+			- Nzulu
+			- Wango
+
+		- Libenge (Territoire)
+		- Budjala (Territoire)
+		- Kungu (Territoire)
+
+24. TANGANYIKA :
+	4 ville : 
+		- Kalemie
+		- Kongolo
+		- Manono
+		- Moba/Kaoze
+	19 communes : 
+		* Kalemie :
+			- Kalemie
+			- Lukuga
+			- Kampinda
+		* Kongolo :
+			- Kabinda
+			- Kangoyi
+			- Lualaba
+		* Manono :
+			- Lukushi
+			- Kanteba
+			- Kaulu-Minono
+			- Kitotolo
+		* Moba/Kaoze :
+			- Kirungu
+			- Moba port
+			- Murumbi
+
+		- Kalemie (Territoire)
+		- Kabalo (Territoire)
+		- Kongolo (Territoire)
+		- Manono (Territoire)
+		- Moba (Territoire)
+		- Nyunzu (Territoire)
+	
+25. TSHOPO :
+	1 ville : Kisangani
+	18 communes : 
+		* Kisangani :
+			- Kisangani
+			- Kabondo
+			- Lubunga
+			- Tshopo
+			- Mangobo
+			- Makiso
+
+		- Bafwasende (Territoire)
+		- Banalia (Territoire)
+		- Basoko (Territoire)
+		- Isangi (Territoire)
+		- Opala (Territoire)
+		- Ubundu (Territoire)
+		- Yahuma (Territoire)
+
+26. TSHUAPA :
+	1 ville : Boende
+	7 communes : 
+		* Boende :
+			- Commune de Boende
+			- Commune de Tshuapa
+
+		- Territoire de Befale
+		- Territoire de Boende
+		- Territoire de Bokungu (inclut la commune rurale de Bokungu)
+		- Territoire de Djolu
+		- Territoire d'Ikela
+		- Territoire de Monkoto
