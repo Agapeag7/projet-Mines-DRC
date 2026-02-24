@@ -226,6 +226,11 @@
                 const communeSelect = document.getElementById('commune-select');
                 const territoireSelect = document.getElementById('territoire-select');
 
+                // État initial : désactiver jusqu'à sélection
+                villeSelect.disabled = true;
+                communeSelect.disabled = true;
+                territoireSelect.disabled = true;
+
                 // Remplir les provinces au chargement
                 function initProvinces() {
                     const provinces = getProvinces();
@@ -296,12 +301,40 @@
                     
                     // Remplir les communes
                     const communes = getCommunesByVille(selectedProvince, selectedVille);
+                    console.log('Commune count for', selectedProvince, selectedVille, communes.length);
                     communes.forEach(commune => {
                         const option = document.createElement('option');
                         option.value = commune;
                         option.textContent = commune;
                         communeSelect.appendChild(option);
                     });
+                });
+
+                // Événement changement de commune : désactive le territoire si une commune est choisie
+                communeSelect.addEventListener('change', function() {
+                    const selectedProvince = provinceSelect.value;
+                    const selectedCommune = this.value;
+
+                    if (selectedCommune) {
+                        // Réinitialiser et désactiver le select territoire
+                        territoireSelect.innerHTML = '<option value="">Aucun territoire</option>';
+                        territoireSelect.disabled = true;
+                    } else {
+                        // Réactiver et remplir le territoire si la province en possède
+                        territoireSelect.innerHTML = '<option value="">Aucun territoire</option>';
+                        const territoires = getTerritoiresByProvince(selectedProvince);
+                        if (territoires.length > 0) {
+                            territoireSelect.disabled = false;
+                            territoires.forEach(territoire => {
+                                const option = document.createElement('option');
+                                option.value = territoire;
+                                option.textContent = territoire;
+                                territoireSelect.appendChild(option);
+                            });
+                        } else {
+                            territoireSelect.disabled = true;
+                        }
+                    }
                 });
 
                 // Initialisation
