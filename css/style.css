@@ -1306,3 +1306,85 @@ footer {
     .hero-title { font-size: 2.2rem; }
 }
 
+/* Fix responsive overflow for "Mes favoris" table/cards on small screens */
+@media (max-width: 768px) {
+    .table-favoris {
+        display: block;
+        width: 100%;
+        overflow: visible;
+    }
+
+    .table-favoris thead {
+        display: none;
+    }
+
+    .table-favoris tbody {
+        display: block;
+    }
+
+    .table-favoris tr {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        padding: 12px;
+        border: 1px solid #e0e6ed;
+        border-radius: 12px;
+        margin-bottom: 12px;
+        background: white;
+    }
+
+    .table-favoris td {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 6px 0;
+        border: none;
+    }
+
+    .favoris-terrain {
+        flex-direction: row;
+        align-items: center;
+        gap: 12px;
+        width: 100%;
+    }
+
+    .favoris-image {
+        width: 72px;
+        height: 72px;
+        flex: 0 0 72px;
+        border-radius: 8px;
+        object-fit: cover;
+    }
+
+    .favoris-info {
+        flex: 1 1 auto;
+        min-width: 0;
+    }
+
+    .favoris-info h4 {
+        font-size: 1rem;
+        margin: 0 0 4px 0;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    .favoris-info p {
+        margin: 0;
+        color: var(--gris-moyen);
+        font-size: 0.9rem;
+        overflow-wrap: anywhere;
+    }
+
+    .btn-icon {
+        flex: 0 0 auto;
+    }
+
+    /* Ensure actions don't wrap weirdly */
+    .table-favoris td:last-child {
+        display: flex;
+        justify-content: flex-end;
+        gap: 8px;
+    }
+}
+
