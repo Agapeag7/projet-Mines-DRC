@@ -1388,3 +1388,96 @@ footer {
     }
 }
 
+/* Responsive fixes for "Mes opportunités" */
+@media (max-width: 768px) {
+    .project-card {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+        padding: 16px;
+        align-items: stretch;
+    }
+
+    .project-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 8px;
+    }
+
+    .project-title {
+        font-size: 1rem;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        width: 100%;
+    }
+
+    .project-card img,
+    .project-card .project-image {
+        max-width: 100%;
+        height: auto;
+        border-radius: 8px;
+        object-fit: cover;
+    }
+
+    /* If cards contain a right column with actions/prix, stack it */
+    .project-card > div[style*="flex"] {
+        flex-direction: column !important;
+        align-items: stretch !important;
+        gap: 8px !important;
+    }
+
+    .project-card .actions,
+    .project-card .project-actions {
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+        justify-content: flex-end;
+        width: 100%;
+    }
+
+    /* Ensure long text wraps instead of overflowing */
+    .project-card p,
+    .project-card .project-meta {
+        overflow-wrap: anywhere;
+        word-break: break-word;
+    }
+
+    /* Make price block shrink and align correctly */
+    .project-card .prix-box,
+    .project-card .terrain-prix {
+        width: 100%;
+        text-align: left;
+    }
+}
+
+/* Additional overflow safeguards for very small screens */
+@media (max-width: 768px) {
+    /* prevent any child from forcing horizontal scroll */
+    html, body, .container, .dashboard, .dashboard-main {
+        box-sizing: border-box;
+        overflow-x: hidden;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    /* allow flex items to shrink and wrap correctly */
+    .project-card, .project-header, .project-card > div, .project-card * {
+        min-width: 0;
+        max-width: 100%;
+        box-sizing: border-box;
+        word-break: break-word;
+    }
+
+    .project-title, .project-meta, .project-description {
+        min-width: 0;
+        overflow-wrap: anywhere;
+    }
+
+    .project-card .actions button,
+    .project-card .actions .btn,
+    .project-card .btn-icon {
+        max-width: 100%;
+        white-space: normal;
+    }
+}
+

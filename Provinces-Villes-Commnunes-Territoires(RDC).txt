@@ -2,7 +2,7 @@ il y'a 26 Provinces
 les provinces ont des villes
 les villes ont des communes (donc les communes sont relier aux villes)
 les territoires (sont directement relier aux provinces sans faire partie des villes quelconques)
-
+Mes opportunités
 
 Analyse le fichier Provinces-Villes-Commnunes-Territoires(RDC).txt , 
 ensuite modifie dans le fichier publier.html : 
