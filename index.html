@@ -146,6 +146,7 @@
             display: none;
             font-size: 1.8rem;
             color: var(--bleu-pro);
+            cursor: pointer;
         }
         /* ---------- HERO SECTION ---------- */
         .hero {
@@ -469,7 +470,20 @@
             .hero-grid, .rdc-grid, .footer-grid { gap: 40px; }
         }
         @media (max-width: 900px) {
-            .nav-links { display: none; }
+            .nav-links { 
+                display: none;
+                position: absolute;
+                top: 70px;
+                right: 20px;
+                background: white;
+                border-radius: 12px;
+                padding: 16px;
+                flex-direction: column;
+                gap: 12px;
+                box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+                z-index: 50;
+            }
+            .nav-links.active { display: flex !important; }
             .mobile-menu { display: block; }
             .hero-grid, .piliers-grid, .features-grid, .testimonial-grid, .rdc-grid, .footer-grid {
                 grid-template-columns: 1fr;
@@ -504,11 +518,7 @@
         <div class="container navbar">
             <div class="logo">KEL<span>FONCIA</span></div>
             <div class="nav-links">
-                <a href="#">Foncier</a>
-                <a href="#">Comment ça marche</a>
-                <a href="#">Tarifs</a>
-                <a href="#">Contact</a>
-                <a href="#" class="nav-cta">Essai gratuit</a>
+                <a href="connexion.html" class="nav-cta">Se connecter</a>
             </div>
             <div class="mobile-menu">
                 <i class="fas fa-bars"></i>
@@ -755,6 +765,29 @@
         }
 
         // 3. INIT
+        // Mobile menu toggle
+        const mobileMenuBtn = document.querySelector('.mobile-menu');
+        const navLinks = document.querySelector('.nav-links');
+        
+        if (mobileMenuBtn && navLinks) {
+            mobileMenuBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                navLinks.classList.toggle('active');
+            });
+            
+            // Fermer le menu quand on clique sur un lien
+            navLinks.querySelectorAll('a').forEach(link => {
+                link.addEventListener('click', () => {
+                    navLinks.classList.remove('active');
+                });
+            });
+            
+            // Fermer le menu quand on clique ailleurs
+            document.addEventListener('click', () => {
+                navLinks.classList.remove('active');
+            });
+        }
+
         window.onload = function() {
             initMap();
             handleFadeIn();
