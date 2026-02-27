@@ -2,7 +2,41 @@
 
 document.addEventListener('DOMContentLoaded', function() {
     
-    // 1️⃣ ANIMATIONS AU SCROLL (Intersection Observer)
+    // 0️⃣ ROTATION DES PROVINCES (Hero Title)
+    const provincesList = [
+        "Kinshasa", "Kasai", "Kasai Central", "Kasai Oriental", "Lualaba", "Haut Katanga",
+        "Haut Lomami", "Katanga", "Maniema", "Nord Kivu", "Sud Kivu", "Ituri", "Tshopo",
+        "Bas Uele", "Haut Uele", "Équateur", "Kasai", "Kinshasa", "Kongo Central"
+    ];
+    
+    let provinceIndex = 0;
+    const rotatingProvince = document.getElementById('rotating-province');
+    
+    if (rotatingProvince) {
+        // Ajouter le style de transition
+        rotatingProvince.style.transition = 'opacity 0.5s ease, transform 0.5s ease';
+        
+        function rotateProvince() {
+            // Animation de sortie
+            rotatingProvince.style.opacity = '0';
+            rotatingProvince.style.transform = 'translateY(10px)';
+            
+            setTimeout(() => {
+                // Changer le texte
+                provinceIndex = (provinceIndex + 1) % provincesList.length;
+                rotatingProvince.textContent = provincesList[provinceIndex];
+                
+                // Animation d'entrée
+                rotatingProvince.style.opacity = '1';
+                rotatingProvince.style.transform = 'translateY(0)';
+            }, 250);
+        }
+        
+        // Changer de province toutes les 3 secondes
+        setInterval(rotateProvince, 3000);
+    }
+    
+    
     const observerOptions = {
         threshold: 0.15,
         rootMargin: '0px 0px -50px 0px'
@@ -63,7 +97,7 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    // 4️⃣ CARTES INTERACTIVES (Leaflet)
+    // 5️⃣ CARTES INTERACTIVES (Leaflet)
     window.initMap = function(containerId, lat, lng, zoom = 12, markers = []) {
         if (!document.getElementById(containerId)) return;
         
@@ -84,7 +118,7 @@ document.addEventListener('DOMContentLoaded', function() {
         return map;
     };
 
-    // 5️⃣ FILTRES DYNAMIQUES (simulation front)
+    // 6️⃣ FILTRES DYNAMIQUES (simulation front)
     const filtresForm = document.querySelector('.filtres-avances');
     if (filtresForm) {
         const inputs = filtresForm.querySelectorAll('select, input');
@@ -102,7 +136,7 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    // 6️⃣ UPLOAD AREA SIMULATION
+    // 7️⃣ UPLOAD AREA SIMULATION
     const uploadAreas = document.querySelectorAll('.upload-area');
     uploadAreas.forEach(area => {
         area.addEventListener('click', function() {
@@ -125,7 +159,7 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
 
-    // 7️⃣ STICKY NAVBAR
+    // 8️⃣ STICKY NAVBAR
     const header = document.querySelector('header');
     if (header) {
         let lastScroll = 0;
@@ -140,7 +174,7 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    // 8️⃣ INIT MAPS
+    // 9️⃣ INIT MAPS
     // Carte accueil
     if (document.getElementById('map')) {
         initMap('map', -4.325, 15.322, 12, [
@@ -161,7 +195,7 @@ document.addEventListener('DOMContentLoaded', function() {
         ]);
     }
 
-    // 9️⃣ ACTIVE NAVIGATION
+    // 🔟 ACTIVE NAVIGATION
     const currentPage = window.location.pathname.split('/').pop();
     document.querySelectorAll('.nav-links a').forEach(link => {
         const linkPage = link.getAttribute('href');

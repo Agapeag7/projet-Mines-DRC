@@ -757,6 +757,12 @@ footer {
     transform: translateY(0);
 }
 
+#rotating-province {
+    color: var(--or);
+    font-weight: 700;
+    display: inline-block;
+}
+
 .slide-in-left {
     opacity: 0;
     transform: translateX(-30px);
