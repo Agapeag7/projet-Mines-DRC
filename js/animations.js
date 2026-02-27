@@ -1,6 +1,7 @@
 // ===== ANIMATIONS AVANCÉES KELFONCIA =====
 
-document.addEventListener('DOMContentLoaded', function() {
+function main() {
+    console.log('main() start');
     
     // 0️⃣ ROTATION DES PROVINCES (Hero Title)
     const provincesList = [
@@ -217,6 +218,212 @@ document.addEventListener('DOMContentLoaded', function() {
         ]);
     }
 
+    // 🔟 FIL D'ACTUALITÉS (données simulées)
+    function initFeed() {
+        console.log('initFeed called');
+        const container = document.getElementById('feed-list');
+        if (!container) {
+            console.warn('feed-list container not found');
+            return;
+        }
+
+        // Données simulées (dans une app réelle, récupérer via API)
+        const allItems = [
+            {
+                title: "Terrain résidentiel - Gombe",
+                date: "2026-02-25",
+                size: "4 500 m²",
+                statut: "Titre foncier",
+                location: "Kinshasa, Gombe",
+                province: "Kinshasa",
+                price: "$450 000",
+                verified: true,
+                available: true,
+                img: "https://via.placeholder.com/180x140"
+            },
+            {
+                title: "Terrain commercial - Limete",
+                date: "2026-02-23",
+                size: "8 200 m²",
+                statut: "Certificat",
+                location: "Kinshasa, Limete",
+                province: "Kinshasa",
+                price: "$720 000",
+                verified: true,
+                available: true,
+                img: "https://via.placeholder.com/180x140"
+            },
+            {
+                title: "Terrain industriel - Mont Ngafula",
+                date: "2026-02-20",
+                size: "12 500 m²",
+                statut: "Titre foncier",
+                location: "Kinshasa, Mont Ngafula",
+                province: "Kinshasa",
+                price: "$950 000",
+                verified: true,
+                available: true,
+                img: "https://via.placeholder.com/180x140"
+            },
+            {
+                title: "Terrain agricole - Matadi",
+                date: "2026-02-18",
+                size: "25 000 m²",
+                statut: "Contrat de location",
+                location: "Bas-Congo, Matadi",
+                province: "Kongo Central",
+                price: "$1 200 000",
+                verified: false,
+                available: true,
+                img: "https://via.placeholder.com/180x140"
+            },
+            {
+                title: "Lot urbain - Lubumbashi",
+                date: "2026-02-15",
+                size: "1 200 m²",
+                statut: "Certificat",
+                location: "Haut Katanga, Lubumbashi",
+                province: "Haut-Katanga",
+                price: "$300 000",
+                verified: true,
+                available: false,
+                img: "https://via.placeholder.com/180x140"
+            },
+            {
+                title: "Terrain mixte - Kisangani",
+                date: "2026-02-10",
+                size: "3 500 m²",
+                statut: "Titre foncier",
+                location: "Tshopo, Kisangani",
+                province: "Tshopo",
+                price: "$500 000",
+                verified: true,
+                available: true,
+                img: "https://via.placeholder.com/180x140"
+            }
+        ];
+
+        let currentItems = [...allItems];
+        let displayedCount = 0;
+        const perPage = 3;
+
+        const provinceSelect = document.getElementById('filter-province');
+        const statutSelect = document.getElementById('filter-statut');
+        const keywordInput = document.getElementById('filter-keyword');
+        const applyBtn = document.getElementById('filter-apply');
+        const resetBtn = document.getElementById('filter-reset');
+        const loadBtn = document.getElementById('load-more');
+
+        function renderItems(reset = false) {
+            if (reset) {
+                container.innerHTML = '';
+                displayedCount = 0;
+            }
+            const slice = currentItems.slice(displayedCount, displayedCount + perPage);
+            slice.forEach(item => {
+                const card = document.createElement('div');
+                card.className = 'terrain-card fade-in';
+                card.innerHTML = `
+                    <img src="${item.img}" alt="Terrain" class="terrain-image">
+                    <div class="terrain-infos">
+                        <div class="feed-date">${item.date}</div>
+                        <h3>${item.title}</h3>
+                        <div class="terrain-details">
+                            <span class="terrain-detail-item"><i class="fas fa-ruler-combined"></i> ${item.size}</span>
+                            <span class="terrain-detail-item"><i class="fas fa-file-signature"></i> ${item.statut}</span>
+                            <span class="terrain-detail-item"><i class="fas fa-map-pin"></i> ${item.location}</span>
+                        </div>
+                        ${item.verified ? '<span class="terrain-statut statut-verifie"><i class="fas fa-check-circle"></i> Vérifié</span>' : ''}
+                        <div class="feed-actions">
+                            <span class="like-btn"><i class="fas fa-heart"></i> <em>0</em></span>
+                            <span class="comment-btn"><i class="fas fa-comment"></i> <em>0</em></span>
+                        </div>
+                    </div>
+                    <div class="terrain-prix">
+                        <span class="prix-valeur">${item.price}</span>
+                        <span class="prix-devise">USD</span>
+                        ${item.available ? '<span class="terrain-statut statut-disponible" style="margin-top: 16px;">Disponible</span>' : ''}
+                    </div>
+                `;
+                attachInteractions(card);
+                container.appendChild(card);
+                // make visible immediately and observe if observer exists
+                if (observer) {
+                    observer.observe(card);
+                }
+                card.classList.add('visible');
+            });
+            displayedCount += slice.length;
+            if (loadBtn) {
+                if (displayedCount >= currentItems.length) {
+                    loadBtn.style.display = 'none';
+                } else {
+                    loadBtn.style.display = 'inline-block';
+                }
+            }
+        }
+
+        function attachInteractions(card) {
+            const likeSpan = card.querySelector('.like-btn');
+            const commentSpan = card.querySelector('.comment-btn');
+            likeSpan.addEventListener('click', () => {
+                likeSpan.classList.toggle('liked');
+                const countEl = likeSpan.querySelector('em');
+                let cnt = parseInt(countEl.innerText, 10);
+                cnt += likeSpan.classList.contains('liked') ? 1 : -1;
+                countEl.innerText = cnt;
+            });
+            commentSpan.addEventListener('click', () => {
+                const countEl = commentSpan.querySelector('em');
+                let cnt = parseInt(countEl.innerText, 10);
+                cnt += 1;
+                countEl.innerText = cnt;
+            });
+        }
+
+        function applyFilters() {
+            if (!provinceSelect || !statutSelect || !keywordInput) return;
+            const prov = provinceSelect.value;
+            const stat = statutSelect.value;
+            const key = keywordInput.value.toLowerCase();
+            currentItems = allItems.filter(it => {
+                let ok = true;
+                if (prov && it.province !== prov) ok = false;
+                if (stat && it.statut !== stat) ok = false;
+                if (key && !it.title.toLowerCase().includes(key)) ok = false;
+                return ok;
+            });
+            renderItems(true);
+        }
+
+        function resetFilters() {
+            if (provinceSelect) provinceSelect.value = '';
+            if (statutSelect) statutSelect.value = '';
+            if (keywordInput) keywordInput.value = '';
+            currentItems = [...allItems];
+            renderItems(true);
+        }
+
+        // populate province list (simply unique values)
+        if (provinceSelect) {
+            const provs = [...new Set(allItems.map(i => i.province))];
+            provs.forEach(p => {
+                const opt = document.createElement('option');
+                opt.value = p; opt.innerText = p;
+                provinceSelect.appendChild(opt);
+            });
+            applyBtn.addEventListener('click', applyFilters);
+            resetBtn.addEventListener('click', resetFilters);
+        }
+
+        if (loadBtn) loadBtn.addEventListener('click', () => renderItems());
+
+        // initial render
+        resetFilters();
+    }
+
+    initFeed();
+
     // 🔟 ACTIVE NAVIGATION
     const currentPage = window.location.pathname.split('/').pop();
     document.querySelectorAll('.nav-links a').forEach(link => {
@@ -225,5 +432,12 @@ document.addEventListener('DOMContentLoaded', function() {
             link.classList.add('active');
         }
     });
-});
+}
+
+// ensure main runs even if DOMContentLoaded already fired
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', main);
+} else {
+    main();
+}
 

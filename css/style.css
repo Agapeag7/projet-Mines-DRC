@@ -338,6 +338,43 @@ footer {
     gap: 20px;
 }
 
+.feed-date {
+    font-size: 0.85rem;
+    color: var(--gris-moyen);
+    margin-bottom: 8px;
+}
+
+/* interactions like/comment */
+.feed-actions {
+    margin-top: 12px;
+    display: flex;
+    gap: 16px;
+    font-size: 0.9rem;
+    align-items: center;
+}
+
+.feed-actions span {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    color: var(--gris-moyen);
+    cursor: pointer;
+    user-select: none;
+}
+
+.feed-actions span.liked {
+    color: var(--or);
+}
+
+/* small modification for filters on actualités page */
+#filter-keyword {
+    padding: 8px 12px;
+    border: 1px solid #e0e6ed;
+    border-radius: 8px;
+    width: 100%;
+    font-family: 'Inter', sans-serif;
+}
+
 .terrain-card {
     display: grid;
     grid-template-columns: 180px 1fr auto;
