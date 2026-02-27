@@ -171,7 +171,8 @@ function main() {
             input.click();
             
             input.addEventListener('change', function(e) {
-                const count = e.target.files.length;
+                const files = Array.from(e.target.files);
+                const count = files.length;
                 const icon = area.querySelector('i');
                 const text = area.querySelector('p');
                 if (count > 0) {
@@ -179,6 +180,23 @@ function main() {
                     icon.style.color = '#27ae60';
                     if (text) text.innerHTML = count + ' fichier(s) sélectionné(s)';
                 }
+                // preview
+                let preview = area.querySelector('.upload-preview');
+                if (!preview) {
+                    preview = document.createElement('div');
+                    preview.className = 'upload-preview';
+                    area.appendChild(preview);
+                }
+                preview.innerHTML = '';
+                files.forEach(f => {
+                    const reader = new FileReader();
+                    reader.onload = function(evt) {
+                        const img = document.createElement('img');
+                        img.src = evt.target.result;
+                        preview.appendChild(img);
+                    };
+                    reader.readAsDataURL(f);
+                });
             });
         });
     });
@@ -227,7 +245,88 @@ function main() {
             console.warn('feed-list container not found');
             return;
         }
-
+        // montre palette modal
+        const modal = document.getElementById('detail-modal');
+        const modalBody = document.getElementById('modal-body');
+        const closeBtn = modal && modal.querySelector('.modal-close');
+        if (closeBtn) closeBtn.addEventListener('click', () => { modal.style.display = 'none'; });
+        // fermer en cliquant sur la zone grisée en dehors du contenu
+        if (modal) {
+            modal.addEventListener('click', (e) => {
+                if (e.target === modal) modal.style.display = 'none';
+            });
+        }
+        function showTerrainDetail(item) {
+            if (!modal || !modalBody) return;
+            item.comments = item.comments || [];
+            modalBody.innerHTML = `
+                <h2 class="modal-title">${item.title}</h2>
+                <div class="modal-body-grid">
+                    <div class="terrain-details-col">
+                        <div class="terrain-image-large">
+                            ${item.img ? `<img src="${item.img}" alt="${item.title}"/>` : '<i class="fas fa-map placeholder-icon"></i>'}
+                        </div>
+                        <div class="terrain-info">
+                            <p><strong>Date :</strong> ${item.date}</p>
+                            <p><strong>Superficie :</strong> ${item.size}</p>
+                            <p><strong>Statut juridique :</strong> ${item.statut}</p>
+                            <p><strong>Localisation :</strong> ${item.location}</p>
+                            ${item.address ? `<p><strong>Adresse :</strong> ${item.address}</p>` : ``}
+                            ${item.usage ? `<p><strong>Usage :</strong> ${item.usage}</p>` : ``}
+                            ${item.reference ? `<p><strong>Réf. titre :</strong> ${item.reference}</p>` : ``}
+                            ${item.annee ? `<p><strong>Année :</strong> ${item.annee}</p>` : ``}
+                            <p><strong>Prix :</strong> ${item.price}</p>
+                            ${item.description ? `<p class="terrain-desc"><strong>Description :</strong><br>${item.description}</p>` : ``}
+                            <p>${item.verified ? '<span class="terrain-statut statut-verifie"><i class="fas fa-check-circle"></i> Vérifié</span>' : ''} ${item.available ? '<span class="terrain-statut statut-disponible">Disponible</span>' : '<span class="terrain-statut">Indisponible</span>'}</p>
+                        </div>
+                    </div>
+                    <div class="comments-col">
+                        <h3>Commentaires</h3>
+                        <ul class="comment-list">
+                            ${item.comments.map(c => `<li>${c}</li>`).join('')}
+                        </ul>
+                        <div class="comment-form">
+                            <textarea id="modal-comment-input" placeholder="Écrire un commentaire..."></textarea>
+                            <button id="modal-comment-submit" class="btn btn-primary btn-comment">Envoyer</button>
+                        </div>
+                        <div class="payment-box">
+                            <p>Pour poster un commentaire, vous devez <strong>payer</strong> 2 $.</p>
+                            <button class="btn btn-or" id="modal-payment-btn">Payer maintenant</button>
+                        </div>
+                    </div>
+                </div>
+                <p class="more-info">Plus d'infos ici...</p>
+            `;
+            const submit = document.getElementById('modal-comment-submit');
+            const input = document.getElementById('modal-comment-input');
+            const payBtn = document.getElementById('modal-payment-btn');
+            if (submit && input) {
+                submit.addEventListener('click', () => {
+                    const text = input.value.trim();
+                    if (text) {
+                        item.comments.push(text);
+                        const list = modalBody.querySelector('.comment-list');
+                        if (list) {
+                            const li = document.createElement('li');
+                            li.textContent = text;
+                            list.appendChild(li);
+                        }
+                        input.value = '';
+                        const card = document.querySelector(`.terrain-card[data-title="${item.title}"]`);
+                        if (card) {
+                            const em = card.querySelector('.comment-btn em');
+                            if (em) em.innerText = item.comments.length;
+                        }
+                    }
+                });
+            }
+            if (payBtn) {
+                payBtn.addEventListener('click', () => {
+                    alert('Paiement simulé : implémentation future.');
+                });
+            }
+            modal.style.display = 'flex';
+        }
         // Données simulées (dans une app réelle, récupérer via API)
         const allItems = [
             {
@@ -240,8 +339,16 @@ function main() {
                 price: "$450 000",
                 verified: true,
                 available: true,
-                img: "https://via.placeholder.com/180x140"
+                address: "Avenue du Commerce, n°45",
+                usage: "Résidentiel",
+                statut_juridique: "Titre foncier",
+                reference: "TF-12345/2025",
+                annee: 2020,
+                description: "Magnifique terrain dans le quartier huppé de Gombe, proche des services administratifs.",
+                img: "https://via.placeholder.com/180x140",
+                comments: []
             },
+
             {
                 title: "Terrain commercial - Limete",
                 date: "2026-02-23",
@@ -252,7 +359,11 @@ function main() {
                 price: "$720 000",
                 verified: true,
                 available: true,
-                img: "https://via.placeholder.com/180x140"
+                address: "Quartier Limete, avenue de la Paix",
+                usage: "Commercial",
+                description: "Terrain bien situé à Limete, idéal pour commerce ou bureaux.",
+                img: "https://via.placeholder.com/180x140",
+                comments: []
             },
             {
                 title: "Terrain industriel - Mont Ngafula",
@@ -264,7 +375,11 @@ function main() {
                 price: "$950 000",
                 verified: true,
                 available: true,
-                img: "https://via.placeholder.com/180x140"
+                address: "Route de Matadi, Mont Ngafula",
+                usage: "Industriel",
+                description: "Grand terrain plat, parfait pour usine ou entrepôt.",
+                img: "https://via.placeholder.com/180x140",
+                comments: []
             },
             {
                 title: "Terrain agricole - Matadi",
@@ -276,7 +391,10 @@ function main() {
                 price: "$1 200 000",
                 verified: false,
                 available: true,
-                img: "https://via.placeholder.com/180x140"
+                usage: "Agricole",
+                description: "Terres fertiles, proche du port maritime.",
+                img: "https://via.placeholder.com/180x140",
+                comments: []
             },
             {
                 title: "Lot urbain - Lubumbashi",
@@ -288,7 +406,10 @@ function main() {
                 price: "$300 000",
                 verified: true,
                 available: false,
-                img: "https://via.placeholder.com/180x140"
+                address: "Avenue Lubumashi 3ème",
+                usage: "Résidentiel",
+                img: "https://via.placeholder.com/180x140",
+                comments: []
             },
             {
                 title: "Terrain mixte - Kisangani",
@@ -300,7 +421,11 @@ function main() {
                 price: "$500 000",
                 verified: true,
                 available: true,
-                img: "https://via.placeholder.com/180x140"
+                address: "Quartier Makiso, Kisangani",
+                usage: "Mixte",
+                description: "Proche du fleuve, mixte résidentiel/commercial.",
+                img: "https://via.placeholder.com/180x140",
+                comments: []
             }
         ];
 
@@ -338,7 +463,7 @@ function main() {
                         ${item.verified ? '<span class="terrain-statut statut-verifie"><i class="fas fa-check-circle"></i> Vérifié</span>' : ''}
                         <div class="feed-actions">
                             <span class="like-btn"><i class="fas fa-heart"></i> <em>0</em></span>
-                            <span class="comment-btn"><i class="fas fa-comment"></i> <em>0</em></span>
+                            <span class="comment-btn"><i class="fas fa-comment"></i> <em>${item.comments ? item.comments.length : 0}</em></span>
                         </div>
                     </div>
                     <div class="terrain-prix">
@@ -347,7 +472,10 @@ function main() {
                         ${item.available ? '<span class="terrain-statut statut-disponible" style="margin-top: 16px;">Disponible</span>' : ''}
                     </div>
                 `;
-                attachInteractions(card);
+                attachInteractions(card, item);
+                card.addEventListener('click', () => showTerrainDetail(item));
+                // mark card so updates can find it
+                card.setAttribute('data-title', item.title);
                 container.appendChild(card);
                 // make visible immediately and observe if observer exists
                 if (observer) {
@@ -365,21 +493,24 @@ function main() {
             }
         }
 
-        function attachInteractions(card) {
+        function attachInteractions(card, item) {
             const likeSpan = card.querySelector('.like-btn');
             const commentSpan = card.querySelector('.comment-btn');
-            likeSpan.addEventListener('click', () => {
+            likeSpan.addEventListener('click', (e) => {
+                e.stopPropagation();
                 likeSpan.classList.toggle('liked');
                 const countEl = likeSpan.querySelector('em');
                 let cnt = parseInt(countEl.innerText, 10);
                 cnt += likeSpan.classList.contains('liked') ? 1 : -1;
                 countEl.innerText = cnt;
             });
-            commentSpan.addEventListener('click', () => {
-                const countEl = commentSpan.querySelector('em');
-                let cnt = parseInt(countEl.innerText, 10);
-                cnt += 1;
-                countEl.innerText = cnt;
+            commentSpan.addEventListener('click', (e) => {
+                e.stopPropagation();
+                showTerrainDetail(item);
+                setTimeout(() => {
+                    const textarea = document.getElementById('modal-comment-input');
+                    if (textarea) textarea.focus();
+                }, 50);
             });
         }
 

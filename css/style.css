@@ -344,13 +344,176 @@ footer {
     margin-bottom: 8px;
 }
 
+/* modal detail palette */
+#detail-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0,0,0,0.6);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 2000;
+}
+#detail-modal .modal-content {
+    background: white;
+    border-radius: var(--border-radius-lg);
+    max-width: 900px;
+    width: 95%;
+    max-height: 90%;
+    overflow-y: auto;
+    padding: 32px;
+    position: relative;
+    box-shadow: var(--ombre-forte);
+}
+#detail-modal .modal-close {
+    position: absolute;
+    top: 16px;
+    right: 16px;
+    font-size: 1.5rem;
+    cursor: pointer;
+    color: var(--gris-fonce);
+}
+#detail-modal .modal-title {
+    font-size: 2rem;
+    margin-bottom: 24px;
+    color: var(--bleu-pro);
+}
+#detail-modal .modal-body-grid {
+    display: flex;
+    gap: 40px;
+    flex-wrap: wrap;
+}
+#detail-modal .terrain-details-col {
+    flex: 2 1 60%;
+}
+#detail-modal .terrain-image-large {
+    width: 100%;
+    height: 300px;
+    background: var(--gris-clair);
+    border-radius: var(--border-radius);
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 20px;
+}
+#detail-modal .terrain-image-large img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+#detail-modal .terrain-image-large { box-shadow: var(--ombre); }
+#detail-modal .placeholder-icon {
+    font-size: 4rem;
+    color: var(--gris-moyen);
+}
+#detail-modal .terrain-info p {
+    margin: 8px 0;
+    line-height: 1.4;
+}
+#detail-modal .terrain-desc {
+    margin-top: 16px;
+    font-size: 0.95rem;
+    color: var(--gris-fonce);
+}
+#detail-modal .comments-col {
+    flex: 1 1 35%;
+    min-width: 280px;
+    background: #fcfcfc;
+    padding: 20px;
+    border-radius: 8px;
+}
+#detail-modal .comments-col h3 {
+    margin-bottom: 16px;
+    color: var(--bleu-pro);
+    font-size: 1.3rem;
+}
+#detail-modal .comment-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    max-height: 280px;
+    overflow-y: auto;
+}
+#detail-modal .comment-list li {
+    background: #f7f7f7;
+    padding: 10px 14px;
+    border-radius: 8px;
+    margin-bottom: 10px;
+    font-size: 0.9rem;
+    transition: background 0.2s;
+}
+#detail-modal .comment-list li:hover {
+    background: #eaeaea;
+}
+#detail-modal .comment-form textarea {
+    width: 100%;
+    height: 90px;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    resize: vertical;
+    font-family: inherit;
+    font-size: 0.95rem;
+    background: #fff;
+}
+#detail-modal .comment-form button.btn-comment {
+    margin-top: 10px;
+    width: 100%;
+}
+#detail-modal .payment-box {
+    margin-top: 24px;
+    padding: 16px;
+    background: #fafafa;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    font-size: 0.9rem;
+    text-align: center;
+}
+#detail-modal .payment-box button {
+    width: 100%;
+}
+#detail-modal .payment-box p {
+    margin: 0 0 12px;
+}
+#detail-modal .more-info {
+    margin-top: 24px;
+    text-align: center;
+    color: var(--gris-moyen);
+    font-size: 0.9rem;
+}
+
+/* image preview thumbnails in publier page */
+.upload-preview {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+    margin-top: 16px;
+}
+.upload-preview img {
+    width: 80px;
+    height: 80px;
+    object-fit: cover;
+    border-radius: 8px;
+    border: 1px solid #e0e6ed;
+}
+
+
+
+
 /* interactions like/comment */
 .feed-actions {
     margin-top: 12px;
     display: flex;
     gap: 16px;
     font-size: 0.9rem;
-    align-items: center;
+}
+.feed-actions span {
+    cursor: pointer;
+}    align-items: center;
 }
 
 .feed-actions span {
