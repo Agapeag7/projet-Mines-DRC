@@ -262,10 +262,22 @@ function main() {
             modalBody.innerHTML = `
                 <h2 class="modal-title">${item.title}</h2>
                 <div class="modal-body-grid">
-                    <div class="terrain-details-col">
+                    <div class="modal-left-col">
                         <div class="terrain-image-large">
                             ${item.img ? `<img src="${item.img}" alt="${item.title}"/>` : '<i class="fas fa-map placeholder-icon"></i>'}
                         </div>
+                        <div class="comments-section">
+                            <h3>Commentaires (${item.comments.length})</h3>
+                            <ul class="comment-list">
+                                ${item.comments.map(c => `<li>${c}</li>`).join('')}
+                            </ul>
+                            <div class="comment-form">
+                                <textarea id="modal-comment-input" placeholder="Écrire un commentaire..."></textarea>
+                                <button id="modal-comment-submit" class="btn btn-primary btn-comment">Envoyer</button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-right-col">
                         <div class="terrain-info">
                             <p><strong>Date :</strong> ${item.date}</p>
                             <p><strong>Superficie :</strong> ${item.size}</p>
@@ -279,19 +291,9 @@ function main() {
                             ${item.description ? `<p class="terrain-desc"><strong>Description :</strong><br>${item.description}</p>` : ``}
                             <p>${item.verified ? '<span class="terrain-statut statut-verifie"><i class="fas fa-check-circle"></i> Vérifié</span>' : ''} ${item.available ? '<span class="terrain-statut statut-disponible">Disponible</span>' : '<span class="terrain-statut">Indisponible</span>'}</p>
                         </div>
-                    </div>
-                    <div class="comments-col">
-                        <h3>Commentaires</h3>
-                        <ul class="comment-list">
-                            ${item.comments.map(c => `<li>${c}</li>`).join('')}
-                        </ul>
-                        <div class="comment-form">
-                            <textarea id="modal-comment-input" placeholder="Écrire un commentaire..."></textarea>
-                            <button id="modal-comment-submit" class="btn btn-primary btn-comment">Envoyer</button>
-                        </div>
                         <div class="payment-box">
                             <p>Pour poster un commentaire, vous devez <strong>payer</strong> 2 $.</p>
-                            <button class="btn btn-or" id="modal-payment-btn">Payer maintenant</button>
+                            <button class="btn btn-or btn-payment" id="modal-payment-btn">Payer</button>
                         </div>
                     </div>
                 </div>
@@ -310,6 +312,7 @@ function main() {
                             const li = document.createElement('li');
                             li.textContent = text;
                             list.appendChild(li);
+                            list.parentElement.querySelector('h3').textContent = `Commentaires (${item.comments.length})`;
                         }
                         input.value = '';
                         const card = document.querySelector(`.terrain-card[data-title="${item.title}"]`);

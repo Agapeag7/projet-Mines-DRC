@@ -386,72 +386,85 @@ footer {
     gap: 40px;
     flex-wrap: wrap;
 }
-#detail-modal .terrain-details-col {
-    flex: 2 1 60%;
+#detail-modal .modal-left-col {
+    flex: 1 1 60%;
+    min-width: 280px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+#detail-modal .modal-right-col {
+    flex: 1 1 35%;
+    min-width: 280px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
 }
 #detail-modal .terrain-image-large {
     width: 100%;
-    height: 300px;
+    height: 280px;
     background: var(--gris-clair);
     border-radius: var(--border-radius);
     overflow: hidden;
     display: flex;
     align-items: center;
     justify-content: center;
-    margin-bottom: 20px;
+    box-shadow: var(--ombre);
 }
 #detail-modal .terrain-image-large img {
     width: 100%;
     height: 100%;
     object-fit: cover;
 }
-#detail-modal .terrain-image-large { box-shadow: var(--ombre); }
 #detail-modal .placeholder-icon {
     font-size: 4rem;
     color: var(--gris-moyen);
 }
-#detail-modal .terrain-info p {
-    margin: 8px 0;
-    line-height: 1.4;
+#detail-modal .comments-section {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    max-height: 350px;
 }
-#detail-modal .terrain-desc {
-    margin-top: 16px;
-    font-size: 0.95rem;
-    color: var(--gris-fonce);
-}
-#detail-modal .comments-col {
-    flex: 1 1 35%;
-    min-width: 280px;
-    background: #fcfcfc;
-    padding: 20px;
-    border-radius: 8px;
-}
-#detail-modal .comments-col h3 {
-    margin-bottom: 16px;
+#detail-modal .comments-section h3 {
+    margin: 0;
     color: var(--bleu-pro);
-    font-size: 1.3rem;
+    font-size: 1.1rem;
 }
 #detail-modal .comment-list {
     list-style: none;
     margin: 0;
     padding: 0;
-    max-height: 280px;
+    flex: 1;
     overflow-y: auto;
+    border-radius: 8px;
+    background: #f7f7f7;
+    padding: 12px;
 }
 #detail-modal .comment-list li {
-    background: #f7f7f7;
-    padding: 10px 14px;
-    border-radius: 8px;
-    margin-bottom: 10px;
+    background: white;
+    padding: 10px 12px;
+    border-radius: 6px;
+    margin-bottom: 8px;
     font-size: 0.9rem;
     transition: background 0.2s;
 }
 #detail-modal .comment-list li:hover {
-    background: #eaeaea;
+    background: #f0f0f0;
+}
+#detail-modal .comment-form {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    position: sticky;
+    bottom: 0;
+    background: white;
+    padding-top: 8px;
+    z-index: 10;
 }
 #detail-modal .comment-form textarea {
     width: 100%;
-    height: 90px;
+    height: 80px;
     padding: 10px;
     border: 1px solid #ccc;
     border-radius: 8px;
@@ -461,23 +474,40 @@ footer {
     background: #fff;
 }
 #detail-modal .comment-form button.btn-comment {
-    margin-top: 10px;
     width: 100%;
+    padding: 10px 16px;
+}
+#detail-modal .terrain-info {
+    background: #fcfcfc;
+    padding: 20px;
+    border-radius: 8px;
+}
+#detail-modal .terrain-info p {
+    margin: 8px 0;
+    line-height: 1.4;
+    font-size: 0.95rem;
+}
+#detail-modal .terrain-desc {
+    margin-top: 12px;
+    font-size: 0.9rem;
+    color: var(--gris-fonce);
 }
 #detail-modal .payment-box {
-    margin-top: 24px;
-    padding: 16px;
-    background: #fafafa;
-    border: 1px solid #e0e0e0;
+    padding: 12px;
+    background: #fffbf0;
+    border: 1px solid #f0e0c8;
     border-radius: 8px;
-    font-size: 0.9rem;
+    font-size: 0.85rem;
     text-align: center;
 }
-#detail-modal .payment-box button {
-    width: 100%;
-}
 #detail-modal .payment-box p {
-    margin: 0 0 12px;
+    margin: 0 0 10px;
+    font-size: 0.85rem;
+}
+#detail-modal .payment-box button.btn-payment {
+    width: 100%;
+    padding: 8px 12px;
+    font-size: 0.9rem;
 }
 #detail-modal .more-info {
     margin-top: 24px;
