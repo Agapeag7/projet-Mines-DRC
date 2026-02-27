@@ -1,4 +1,5 @@
 // ===== ANIMATIONS AVANCÉES KELFONCIA =====
+console.log('animations.js loaded');
 
 function main() {
     console.log('main() start');
@@ -320,11 +321,12 @@ function main() {
                 displayedCount = 0;
             }
             const slice = currentItems.slice(displayedCount, displayedCount + perPage);
-            slice.forEach(item => {
+            slice.forEach((item, idx) => {
                 const card = document.createElement('div');
                 card.className = 'terrain-card fade-in';
+                const bgColor = ['#e3f2fd', '#f3e5f5', '#e8f5e9', '#fff3e0', '#fce4ec'][idx % 5];
                 card.innerHTML = `
-                    <img src="${item.img}" alt="Terrain" class="terrain-image">
+                    <div class="terrain-image" style="background-color: ${bgColor}; display: flex; align-items: center; justify-content: center; font-size: 2rem; border-radius: 8px;"><i class="fas fa-map"></i></div>
                     <div class="terrain-infos">
                         <div class="feed-date">${item.date}</div>
                         <h3>${item.title}</h3>
