@@ -1,0 +1,234 @@
+-- Schéma enrichi (aligné sur Modelisation.txt)
+-- Utilisation d'UUID (CHAR(36)) pour les identifiants principaux
+-- MySQL 5.7+ / 8.0 recommandé pour JSON & fonctions modernes
+
+-- Table `users` (correspond à User dans Modelisation)
+CREATE TABLE IF NOT EXISTS `users` (
+    `id` CHAR(36) PRIMARY KEY,
+    `role` ENUM('admin','agent','proprietaire','promoteur','visiteur') NOT NULL DEFAULT 'visiteur',
+    `email` VARCHAR(255) NOT NULL UNIQUE,
+    `phone` VARCHAR(30) DEFAULT NULL UNIQUE,
+    `password_hash` VARCHAR(255) NOT NULL,
+    `display_name` VARCHAR(150) DEFAULT NULL,
+    `profile_picture_id` CHAR(36) DEFAULT NULL,
+    `kyc_status` ENUM('none','pending','verified','rejected') NOT NULL DEFAULT 'none',
+    `status` ENUM('active','suspended','deleted') NOT NULL DEFAULT 'active',
+    `created_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    `updated_at` DATETIME DEFAULT NULL,
+    FOREIGN KEY (`profile_picture_id`) REFERENCES `media`(`id`) ON DELETE SET NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- Table `media` : images / documents / avatars
+CREATE TABLE IF NOT EXISTS `media` (
+    `id` CHAR(36) PRIMARY KEY,
+    `owner_id` CHAR(36) DEFAULT NULL,
+    `listing_id` CHAR(36) DEFAULT NULL,
+    `type` ENUM('image','document','video','avatar','other') NOT NULL DEFAULT 'image',
+    `filename` VARCHAR(255) DEFAULT NULL,
+    `path` VARCHAR(1024) NOT NULL,
+    `mime_type` VARCHAR(100) DEFAULT NULL,
+    `size_bytes` BIGINT DEFAULT NULL,
+    `width` INT DEFAULT NULL,
+    `height` INT DEFAULT NULL,
+    `caption` VARCHAR(500) DEFAULT NULL,
+    `is_public` TINYINT(1) NOT NULL DEFAULT 1,
+    `created_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (`owner_id`) REFERENCES `users`(`id`) ON DELETE SET NULL,
+    FOREIGN KEY (`listing_id`) REFERENCES `listings`(`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- Table `provinces` : références localisations (petit id pour rapidité)
+CREATE TABLE IF NOT EXISTS `provinces` (
+    `id` TINYINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    `code` VARCHAR(20) DEFAULT NULL,
+    `nom` VARCHAR(150) NOT NULL UNIQUE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- Table `villes`
+CREATE TABLE IF NOT EXISTS `villes` (
+    `id` INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    `province_id` TINYINT UNSIGNED NOT NULL,
+    `nom` VARCHAR(150) NOT NULL,
+    UNIQUE (`province_id`,`nom`),
+    FOREIGN KEY (`province_id`) REFERENCES `provinces`(`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- Table `communes`
+CREATE TABLE IF NOT EXISTS `communes` (
+    `id` INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    `ville_id` INT UNSIGNED NOT NULL,
+    `nom` VARCHAR(150) NOT NULL,
+    UNIQUE (`ville_id`,`nom`),
+    FOREIGN KEY (`ville_id`) REFERENCES `villes`(`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- Table `territoires`
+CREATE TABLE IF NOT EXISTS `territoires` (
+    `id` INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    `province_id` TINYINT UNSIGNED NOT NULL,
+    `nom` VARCHAR(150) NOT NULL,
+    UNIQUE (`province_id`,`nom`),
+    FOREIGN KEY (`province_id`) REFERENCES `provinces`(`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- Table `listings` (anciennement `terrains`) — conforme à Listing
+CREATE TABLE IF NOT EXISTS `listings` (
+    `id` CHAR(36) PRIMARY KEY,
+    `owner_id` CHAR(36) NOT NULL,
+    `title` VARCHAR(255) NOT NULL,
+    `description` TEXT DEFAULT NULL,
+    `area_m2` DECIMAL(12,2) DEFAULT NULL,
+    `price` DECIMAL(20,2) DEFAULT NULL,
+    `currency` ENUM('CDF','USD','EUR') NOT NULL DEFAULT 'CDF',
+    `statut` ENUM('available','reserved','sold','archived') NOT NULL DEFAULT 'available',
+    `address_text` VARCHAR(500) DEFAULT NULL,
+    `latitude` DECIMAL(10,7) DEFAULT NULL,
+    `longitude` DECIMAL(10,7) DEFAULT NULL,
+    `province_id` TINYINT UNSIGNED DEFAULT NULL,
+    `province` VARCHAR(150) DEFAULT NULL,
+    `ville` VARCHAR(150) DEFAULT NULL,
+    `commune` VARCHAR(150) DEFAULT NULL,
+    `territoire` VARCHAR(150) DEFAULT NULL,
+    `features` JSON DEFAULT NULL,
+    `thumbnail_id` CHAR(36) DEFAULT NULL,
+    `visible` TINYINT(1) NOT NULL DEFAULT 1,
+    `is_published` TINYINT(1) NOT NULL DEFAULT 0,
+    `view_count` INT UNSIGNED NOT NULL DEFAULT 0,
+    `fav_count` INT UNSIGNED NOT NULL DEFAULT 0,
+    `contact_count` INT UNSIGNED NOT NULL DEFAULT 0,
+    `created_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    `updated_at` DATETIME DEFAULT NULL,
+    FOREIGN KEY (`owner_id`) REFERENCES `users`(`id`) ON DELETE CASCADE,
+    FOREIGN KEY (`thumbnail_id`) REFERENCES `media`(`id`) ON DELETE SET NULL,
+    FOREIGN KEY (`province_id`) REFERENCES `provinces`(`id`) ON DELETE SET NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- Table `listing_media` (relation n:m pour médias liés à une annonce)
+CREATE TABLE IF NOT EXISTS `listing_media` (
+    `listing_id` CHAR(36) NOT NULL,
+    `media_id` CHAR(36) NOT NULL,
+    `role` ENUM('image','document','plan','other') DEFAULT 'image',
+    `ordre` INT DEFAULT 0,
+    PRIMARY KEY (`listing_id`,`media_id`),
+    FOREIGN KEY (`listing_id`) REFERENCES `listings`(`id`) ON DELETE CASCADE,
+    FOREIGN KEY (`media_id`) REFERENCES `media`(`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- Table `favorites` (Favorite)
+CREATE TABLE IF NOT EXISTS `favorites` (
+    `id` CHAR(36) PRIMARY KEY,
+    `user_id` CHAR(36) NOT NULL,
+    `listing_id` CHAR(36) NOT NULL,
+    `created_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE (`user_id`,`listing_id`),
+    FOREIGN KEY (`user_id`) REFERENCES `users`(`id`) ON DELETE CASCADE,
+    FOREIGN KEY (`listing_id`) REFERENCES `listings`(`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- Table `notifications`
+CREATE TABLE IF NOT EXISTS `notifications` (
+    `id` CHAR(36) PRIMARY KEY,
+    `user_id` CHAR(36) DEFAULT NULL,
+    `type` ENUM('new_message','listing_view','listing_favorite','booking_request','kyc_update','system') DEFAULT 'system',
+    `payload` JSON DEFAULT NULL,
+    `titre` VARCHAR(200) DEFAULT NULL,
+    `message` TEXT DEFAULT NULL,
+    `is_read` TINYINT(1) NOT NULL DEFAULT 0,
+    `created_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (`user_id`) REFERENCES `users`(`id`) ON DELETE SET NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- Messagerie (Conversation / Message)
+CREATE TABLE IF NOT EXISTS `conversations` (
+    `id` CHAR(36) PRIMARY KEY,
+    `sujet` VARCHAR(255) DEFAULT NULL,
+    `listing_id` CHAR(36) DEFAULT NULL,
+    `created_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (`listing_id`) REFERENCES `listings`(`id`) ON DELETE SET NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE IF NOT EXISTS `conversation_members` (
+    `conversation_id` CHAR(36) NOT NULL,
+    `user_id` CHAR(36) NOT NULL,
+    PRIMARY KEY (`conversation_id`,`user_id`),
+    FOREIGN KEY (`conversation_id`) REFERENCES `conversations`(`id`) ON DELETE CASCADE,
+    FOREIGN KEY (`user_id`) REFERENCES `users`(`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE IF NOT EXISTS `messages` (
+    `id` CHAR(36) PRIMARY KEY,
+    `conversation_id` CHAR(36) NOT NULL,
+    `sender_id` CHAR(36) NOT NULL,
+    `content` TEXT DEFAULT NULL,
+    `attachments` JSON DEFAULT NULL,
+    `is_read` TINYINT(1) NOT NULL DEFAULT 0,
+    `created_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (`conversation_id`) REFERENCES `conversations`(`id`) ON DELETE CASCADE,
+    FOREIGN KEY (`sender_id`) REFERENCES `users`(`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- KYC records
+CREATE TABLE IF NOT EXISTS `kyc_records` (
+    `id` CHAR(36) PRIMARY KEY,
+    `user_id` CHAR(36) NOT NULL,
+    `kyc_type` ENUM('id_scan','facial_recog') DEFAULT 'id_scan',
+    `status` ENUM('pending','approved','rejected') DEFAULT 'pending',
+    `evidence_media_ids` JSON DEFAULT NULL,
+    `review_notes` TEXT DEFAULT NULL,
+    `requested_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    `reviewed_at` DATETIME DEFAULT NULL,
+    FOREIGN KEY (`user_id`) REFERENCES `users`(`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- Testimonials
+CREATE TABLE IF NOT EXISTS `testimonials` (
+    `id` CHAR(36) PRIMARY KEY,
+    `author_name` VARCHAR(200) NOT NULL,
+    `author_role` VARCHAR(150) DEFAULT NULL,
+    `text` TEXT NOT NULL,
+    `rating` TINYINT DEFAULT NULL,
+    `created_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- Pricing / Subscription
+CREATE TABLE IF NOT EXISTS `pricing_plans` (
+    `id` CHAR(36) PRIMARY KEY,
+    `plan_name` VARCHAR(200) NOT NULL,
+    `price` DECIMAL(20,2) NOT NULL,
+    `currency` ENUM('CDF','USD','EUR') DEFAULT 'CDF',
+    `features` JSON DEFAULT NULL,
+    `billing_cycle` ENUM('monthly','yearly') DEFAULT 'monthly'
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- Analytics / stats (simple)
+CREATE TABLE IF NOT EXISTS `listing_views` (
+    `listing_id` CHAR(36) NOT NULL,
+    `date` DATE NOT NULL,
+    `views` INT UNSIGNED NOT NULL DEFAULT 0,
+    PRIMARY KEY (`listing_id`,`date`),
+    FOREIGN KEY (`listing_id`) REFERENCES `listings`(`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE IF NOT EXISTS `user_logins` (
+    `user_id` CHAR(36) NOT NULL,
+    `date` DATE NOT NULL,
+    `count` INT UNSIGNED NOT NULL DEFAULT 0,
+    PRIMARY KEY (`user_id`,`date`),
+    FOREIGN KEY (`user_id`) REFERENCES `users`(`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- Page content / CMS
+CREATE TABLE IF NOT EXISTS `page_content` (
+    `key` VARCHAR(200) PRIMARY KEY,
+    `value` TEXT DEFAULT NULL,
+    `locale` VARCHAR(10) DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- Indexes utiles
+CREATE INDEX IF NOT EXISTS `idx_listings_owner` ON `listings` (`owner_id`);
+CREATE INDEX IF NOT EXISTS `idx_listings_province` ON `listings` (`province_id`);
+
+-- Notes :
+-- - Les identifiants UUID sont gérés côté application (ex : UUIDv4) et stockés en CHAR(36).
+-- - Les champs JSON nécessitent MySQL 5.7+ (ou MariaDB équivalent).
+-- - Avant migration depuis un schéma entier INT -> UUID, prévoir scripts de migration et mises à jour des FK.
