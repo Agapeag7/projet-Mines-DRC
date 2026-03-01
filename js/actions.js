@@ -95,6 +95,17 @@
         }
 
         const res = await window.KelFonciaAPI.postJSON('register', obj);
+        // after registration attempt, if we have accumulated KYC evidence send it
+        if (res && res.ok && window._kycEvidence && window._kycEvidence.length) {
+            const payload = { type: window._kycType || 'id_card', evidence: window._kycEvidence };
+            try {
+                await requestKyc(payload.type, payload.evidence);
+                // optionally notify user
+                showToast('Vérification KYC envoyée', 'success');
+            } catch(e){
+                console.error('KYC request failed', e);
+            }
+        }
         return res;
     }
 
@@ -237,6 +248,12 @@
         });
     }
 
+    // KYC helpers
+    async function requestKyc(type, evidence){
+        if (!type || !evidence || !evidence.length) return { error:'missing' };
+        return await window.KelFonciaAPI.postJSON('kyc_request', { type, evidence });
+    }
+
     // expose API
     window.KelActions = {
         login,
@@ -247,7 +264,8 @@
         attachFavoriteButtons,
         showToast,
         register,
-        attachRegisterForm
+        attachRegisterForm,
+        requestKyc
     };
 
 })();

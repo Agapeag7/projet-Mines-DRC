@@ -697,11 +697,13 @@
             
             document.getElementById('scan-id').addEventListener('click', function(e){
                 e.preventDefault();
+                currentMode = 'id_card';
                 openModal('Scanner Carte d\'Électeur', 'Positionnez votre carte d\'électeur dans le cadre et capturez la photo.');
             });
             
             document.getElementById('facial-recog').addEventListener('click', function(e){
                 e.preventDefault();
+                currentMode = 'facial';
                 openModal('Reconnaissance Faciale', 'Positionnez-vous face à la caméra et capturez votre photo.');
             });
             
@@ -764,8 +766,30 @@
                 captureBtn.style.display = 'none';
                 retakeBtn.style.display = 'inline-block';
                 
-                status.textContent = 'Photo capturée avec succès ! Vous pouvez la reprendre ou fermer la fenêtre.';
-                status.style.color = 'green';
+                status.textContent = 'Photo capturée. Analyse en cours...';
+                status.style.color = 'var(--gris-moyen)';
+
+                // simulate simple recognition algorithm (placeholder)
+                // a real implementation would call an ML model or external service
+                setTimeout(() => {
+                    let ok = true;
+                    // small chance of failure to mimic detection issues
+                    if (Math.random() < 0.1) ok = false;
+                    if (currentMode === 'id_card') {
+                        status.textContent = ok ? 'Carte d\'électeur reconnue.' : 'Erreur: carte invalide ou floue. Réessayez.';
+                    } else if (currentMode === 'facial') {
+                        status.textContent = ok ? 'Visage détecté.' : 'Erreur: visage non clair. Réessayez.';
+                    } else {
+                        status.textContent = ok ? 'Analyse terminée.' : 'Analyse échouée.';
+                    }
+                    status.style.color = ok ? 'green' : '#dc2626';
+                }, 1200);
+
+                // save evidence for later KYC submission
+                const dataUrl = canvas.toDataURL('image/jpeg');
+                if (!window._kycEvidence) window._kycEvidence = [];
+                window._kycEvidence.push(dataUrl);
+                window._kycType = currentMode; // 'id_card' or 'facial'
             });
             
             retakeBtn.addEventListener('click', resetCamera);

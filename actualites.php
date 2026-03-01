@@ -57,19 +57,58 @@
         <!-- scripts -->
         <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
         <script src="js/api.js"></script>
+        <script src="js/actions.js"></script>
         <script>
         document.addEventListener('DOMContentLoaded', async function(){
             const container = document.getElementById('feed-list');
-            if (!container) return;
-            const res = await KelFonciaAPI.get('listings_list');
-            if (!res || !res.ok) { container.innerHTML = '<p>Erreur de chargement.</p>'; return; }
-            container.innerHTML = '';
-            res.listings.forEach(l => {
-                const card = document.createElement('div');
-                card.className = 'terrain-card';
-                card.innerHTML = `<h3>${l.title}</h3><p>${l.description ? l.description.substring(0,200):''}</p><a href="detail-terrain.php?id=${l.id}">Voir</a>`;
-                container.appendChild(card);
+            const loadMore = document.getElementById('load-more');
+            let page = 1;
+            const perPage = 8;
+
+            async function loadPage() {
+                container.innerHTML = `<div style="text-align:center;padding:40px;"><i class="fas fa-spinner fa-spin" style="font-size:2rem;color:var(--or);"></i></div>`;
+                const res = await KelFonciaAPI.get('listings_list', { limit: perPage, offset: (page-1)*perPage });
+                if (!res || !res.ok) {
+                    container.innerHTML = '<p>Erreur de chargement.</p>';
+                    return;
+                }
+                if (page === 1) container.innerHTML = '';
+                if (!res.listings || res.listings.length === 0) {
+                    if (page === 1) container.innerHTML = '<p>Aucun contenu disponible pour le moment.</p>';
+                    loadMore.style.display = 'none';
+                    return;
+                }
+                res.listings.forEach(l => {
+                    const card = document.createElement('div');
+                    card.className = 'terrain-card';
+                    const imgSrc = l.thumbnail_id ? '/KelFoncia-DRC/uploads/'+l.thumbnail_id : 'https://via.placeholder.com/180x140';
+                    const loc = [l.ville, l.province].filter(x=>x).join(', ');
+                    card.innerHTML = `
+                        <img src="${imgSrc}" class="terrain-image" onerror="this.src='https://via.placeholder.com/180x140'">
+                        <div class="terrain-infos">
+                            <h3><a href="detail-terrain.php?id=${l.id}" style="color:inherit;text-decoration:none;">${l.title || 'Actualité'}</a></h3>
+                            <p>${l.description?l.description.substring(0,150):''}</p>
+                            <div class="terrain-details">
+                                ${loc?`<span class="terrain-detail-item"><i class="fas fa-map-pin"></i> ${loc}</span>`:''}
+                            </div>
+                        </div>
+                        <div class="terrain-prix">
+                            <span class="prix-valeur">${l.price||''}</span>
+                            <span class="prix-devise">${l.currency||''}</span>
+                        </div>`;
+                    container.appendChild(card);
+                });
+                KelActions.attachFavoriteButtons('.fav-btn');
+                if (res.listings.length < perPage) loadMore.style.display = 'none';
+            }
+
+            loadMore && loadMore.addEventListener('click', function(e){
+                e.preventDefault();
+                page++;
+                loadPage();
             });
+
+            loadPage();
         });
         </script>
         <script src="js/animations.js"></script>
