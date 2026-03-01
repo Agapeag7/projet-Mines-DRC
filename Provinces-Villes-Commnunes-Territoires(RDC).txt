@@ -5,7 +5,7 @@ les territoires (sont directement relier aux provinces sans faire partie des vil
 Mes opportunités
 
 Analyse le fichier Provinces-Villes-Commnunes-Territoires(RDC).txt , 
-ensuite modifie dans le fichier publier.html : 
+ensuite modifie dans le fichier publier.php : 
 - dans Localisation change les Province aux 26 provinces se touvant dans le fichier .txt ,
 - Territoire : selectionnable par l'utilisateur
 - Ajoute : les villes selectionnable par l'utilisateur

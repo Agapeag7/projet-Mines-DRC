@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-    <html lang="fr">
+<html lang="fr">
     <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -808,13 +808,13 @@
     <body>
         <header>
             <div class="container navbar">
-                <a href="index.html" class="logo">KEL<span>FONCIA</span></a>
+                <a href="index.php" class="logo">KEL<span>FONCIA</span></a>
                 <div class="nav-links">
-                    <a href="recherche.html">Trouver du foncier</a>
-                    <a href="publier.html">Publier</a>
-                    <a href="tableau-de-bord.html" class="active">Tableau de bord</a>
+                    <a href="recherche.php">Trouver du foncier</a>
+                    <a href="publier.php">Publier</a>
+                    <a href="tableau-de-bord.php" class="active">Tableau de bord</a>
                     <a href="#">Tarifs</a>
-                    <a href="connexion.html" class="nav-cta">Se connecter</a>
+                    <a href="connexion.php" class="nav-cta">Se connecter</a>
                 </div>
                 <div class="mobile-menu">
                     <i class="fas fa-bars"></i>
@@ -901,7 +901,7 @@
                                 <div class="notification-time">
                                     Il y a 2 heures
                                 </div>
-                                <a href="detail-terrain.html" class="btn-icon">
+                                <a href="detail-terrain.php" class="btn-icon">
                                     <i class="fas fa-arrow-right"></i>
                                 </a>
                             </div>
@@ -1084,7 +1084,7 @@
                         <div class="dashboard-content">
                             <div class="dashboard-header">
                                 <h2><i class="fas fa-list"></i> Mes opportunités</h2>
-                                <a href="publier.html" class="btn btn-primary" style="background: var(--or); color: var(--bleu-pro);">
+                                <a href="publier.php" class="btn btn-primary" style="background: var(--or); color: var(--bleu-pro);">
                                     <i class="fas fa-plus"></i> Publier une annonce
                                 </a>
                             </div>
@@ -1608,15 +1608,15 @@
             <div class="container">
                 <div class="footer-grid">
                     <div>
-                        <a href="index.html" class="footer-logo">KEL<span>FONCIA</span></a>
+                        <a href="index.php" class="footer-logo">KEL<span>FONCIA</span></a>
                         <p style="color: rgba(255,255,255,0.7); margin-bottom: 20px; max-width: 300px;">Le logiciel de référence du foncier professionnel en RDC et Afrique.</p>
                         <p class="footer-small">© 2026 KelFoncia. Tous droits réservés.</p>
                     </div>
                     <div class="footer-links">
                         <h5>Plateforme</h5>
                         <ul>
-                            <li><a href="recherche.html">Trouver du foncier</a></li>
-                            <li><a href="publier.html">Publier</a></li>
+                            <li><a href="recherche.php">Trouver du foncier</a></li>
+                            <li><a href="publier.php">Publier</a></li>
                             <li><a href="#">Tarifs</a></li>
                             <li><a href="#">Essai gratuit</a></li>
                         </ul>
@@ -1687,7 +1687,7 @@
                 const viewButtons = document.querySelectorAll('.btn-icon .fa-eye');
                 viewButtons.forEach(btn => {
                     btn.closest('button')?.addEventListener('click', function() {
-                        window.location.href = 'detail-terrain.html';
+                        window.location.href = 'detail-terrain.php';
                     });
                 });
             });

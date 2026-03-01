@@ -11,14 +11,14 @@
     <body>
         <header>
             <div class="container navbar">
-                <a href="index.html" class="logo">KEL<span>FONCIA</span></a>
+                <a href="index.php" class="logo">KEL<span>FONCIA</span></a>
                 <div class="nav-links">
-                    <a href="recherche.html">Trouver du foncier</a>
-                    <a href="actualites.html">Fil d'actualités</a>
-                    <a href="publier.html" class="active">Publier</a>
-                    <a href="tableau-de-bord.html">Tableau de bord</a>
+                    <a href="recherche.php">Trouver du foncier</a>
+                    <a href="actualites.php">Fil d'actualités</a>
+                    <a href="publier.php" class="active">Publier</a>
+                    <a href="tableau-de-bord.php">Tableau de bord</a>
                     <a href="#">Tarifs</a>
-                    <a href="connexion.html" class="nav-cta">Se connecter</a>
+                    <a href="connexion.php" class="nav-cta">Se connecter</a>
                 </div>
                 <div class="mobile-menu">
                     <i class="fas fa-bars"></i>
@@ -179,7 +179,7 @@
             <div class="container">
                 <div class="footer-grid">
                     <div>
-                        <a href="index.html" class="footer-logo">KEL<span>FONCIA</span></a>
+                        <a href="index.php" class="footer-logo">KEL<span>FONCIA</span></a>
                         <p style="color: rgba(255,255,255,0.7); margin-bottom: 20px; max-width: 300px;">
                             Le logiciel de référence du foncier professionnel en RDC et Afrique.
                         </p>
@@ -188,8 +188,8 @@
                     <div class="footer-links">
                         <h5>Plateforme</h5>
                         <ul>
-                            <li><a href="recherche.html">Trouver du foncier</a></li>
-                            <li><a href="publier.html">Publier</a></li>
+                            <li><a href="recherche.php">Trouver du foncier</a></li>
+                            <li><a href="publier.php">Publier</a></li>
                             <li><a href="#">Tarifs</a></li>
                             <li><a href="#">Essai gratuit</a></li>
                         </ul>

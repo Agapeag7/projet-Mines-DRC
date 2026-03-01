@@ -405,7 +405,7 @@
             <div class="auth-container fade-in">
                 <div class="auth-card">
                     <div class="auth-header">
-                        <a href="index.html" class="logo">KEL<span>FONCIA</span></a>
+                        <a href="index.php" class="logo">KEL<span>FONCIA</span></a>
                         <h1>Bienvenue</h1>
                         <p>Accédez à votre espace professionnel</p>
                     </div>
