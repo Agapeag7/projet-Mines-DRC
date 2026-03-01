@@ -31,7 +31,7 @@
      * Usage: include 'kel.class.php' in endpoint scripts and call KelFoncia\Router::handle()
      */
 
-        session_start();
+        if (session_status() === PHP_SESSION_NONE) session_start();
 
         class Database {
             private $pdo;

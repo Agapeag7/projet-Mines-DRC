@@ -514,7 +514,7 @@
     </head>
     <body>
         <!-- HEADER -->
-        <?php session_start(); $logged = !empty($_SESSION['user_id']); ?>
+        <?php $logged = false; ?>
         <header>
             <div class="container navbar">
                 <div class="logo">KEL<span>FONCIA</span></div>

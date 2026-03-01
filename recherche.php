@@ -1,3 +1,4 @@
+<?php if (session_status() === PHP_SESSION_NONE) session_start(); $logged = !empty($_SESSION['user_id']); ?>
 <!DOCTYPE html>
 <html lang="fr">
     <head>
@@ -11,7 +12,6 @@
     </head>
     <body>
         <!-- HEADER (copier depuis header.php) -->
-        <?php session_start(); $logged = !empty($_SESSION['user_id']); ?>
         <header>
             <div class="container navbar">
                 <a href="index.php" class="logo">KEL<span>FONCIA</span></a>
