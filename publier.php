@@ -219,6 +219,7 @@
 
         <script src="js/animations.js"></script>
         <script src="js/provinces-data.js"></script>
+        <script src="js/api.js"></script>
         <script>
             // ===== GESTION DES SÉLECTIONS EN CASCADE =====
             document.addEventListener('DOMContentLoaded', function() {
@@ -340,6 +341,25 @@
 
                 // Initialisation
                 initProvinces();
+            });
+            // AJAX submit for publishing (prevent full page reload)
+            document.addEventListener('DOMContentLoaded', function(){
+                const form = document.querySelector('.publier-form');
+                if (form) {
+                    form.addEventListener('submit', async function(e){
+                        e.preventDefault();
+                        const submit = form.querySelector('button[type=submit]');
+                        if (submit) submit.disabled = true;
+                        const res = await KelFonciaAPI.postForm('listings_create', form);
+                        if (submit) submit.disabled = false;
+                        if (res && res.ok) {
+                            alert('Annonce publiée (ID: '+res.id+')');
+                            window.location.href = 'tableau-de-bord.php';
+                        } else {
+                            alert('Erreur: '+(res.error || JSON.stringify(res)));
+                        }
+                    });
+                }
             });
         </script>
     </body>

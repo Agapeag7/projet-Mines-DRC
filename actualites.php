@@ -52,6 +52,22 @@
 
         <!-- scripts -->
         <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+        <script src="js/api.js"></script>
+        <script>
+        document.addEventListener('DOMContentLoaded', async function(){
+            const container = document.getElementById('feed-list');
+            if (!container) return;
+            const res = await KelFonciaAPI.get('listings_list');
+            if (!res || !res.ok) { container.innerHTML = '<p>Erreur de chargement.</p>'; return; }
+            container.innerHTML = '';
+            res.listings.forEach(l => {
+                const card = document.createElement('div');
+                card.className = 'terrain-card';
+                card.innerHTML = `<h3>${l.title}</h3><p>${l.description ? l.description.substring(0,200):''}</p><a href="detail-terrain.php?id=${l.id}">Voir</a>`;
+                container.appendChild(card);
+            });
+        });
+        </script>
         <script src="js/animations.js"></script>
     </body>
 </html>

@@ -1645,6 +1645,20 @@
         </footer>
 
         <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+        <script src="js/api.js"></script>
+        <script>
+        // Toggle favorite buttons in dashboard (delegated)
+        document.addEventListener('DOMContentLoaded', function(){
+            document.body.addEventListener('click', async function(e){
+                const t = e.target.closest('[data-fav-id]');
+                if (!t) return;
+                e.preventDefault();
+                const id = t.dataset.favId;
+                const res = await KelFonciaAPI.postJSON('toggle_favorite', { listing_id: id });
+                if (res && res.ok) alert('Favoris mis à jour'); else alert('Erreur');
+            });
+        });
+        </script>
         <script src="js/animations.js"></script>
         <script>
             // SCRIPT POUR LA NAVIGATION DANS LE TABLEAU DE BORD

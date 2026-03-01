@@ -311,6 +311,35 @@
             territoireSelect.disabled = true;
         });
         </script>
+        <script src="js/api.js"></script>
+        <script>
+        // Load listings via AJAX and render minimal cards
+        document.addEventListener('DOMContentLoaded', async function(){
+            const container = document.querySelector('.liste-terrains');
+            if (!container) return;
+            const res = await KelFonciaAPI.get('listings_list');
+            if (!res || !res.ok) {
+                container.innerHTML = '<p>Erreur de chargement des annonces.</p>';
+                return;
+            }
+            container.innerHTML = '';
+            res.listings.forEach(l => {
+                const div = document.createElement('div');
+                div.className = 'terrain-card';
+                div.innerHTML = `<h4>${l.title}</h4><p>${l.province||''} ${l.ville||''}</p><p>${l.price?l.price+' '+l.currency:''}</p><button class="fav-btn" data-id="${l.id}">❤</button>`;
+                container.appendChild(div);
+            });
+
+            // attach favorites
+            container.querySelectorAll('.fav-btn').forEach(btn => {
+                btn.addEventListener('click', async function(){
+                    const id = this.dataset.id;
+                    const r = await KelFonciaAPI.postJSON('toggle_favorite', { listing_id: id });
+                    alert(r.result ? r.result.action : JSON.stringify(r));
+                });
+            });
+        });
+        </script>
         <script src="js/animations.js"></script>
     </body>
 </html>

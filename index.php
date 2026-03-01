@@ -728,6 +728,23 @@
 
         <!-- SCRIPTS : Leaflet + animations -->
         <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+        <script src="js/api.js"></script>
+        <script>
+        // small initializer to fetch latest listings for homepage preview
+        document.addEventListener('DOMContentLoaded', async function(){
+            const preview = document.querySelector('.rdc-list');
+            if (!preview) return;
+            const res = await KelFonciaAPI.get('listings_list');
+            if (!res || !res.ok) return;
+            // render first 3 items
+            preview.innerHTML = '';
+            res.listings.slice(0,3).forEach(l => {
+                const li = document.createElement('li');
+                li.innerHTML = `<i class="fas fa-map-marker-alt"></i> ${l.title} — ${l.province||''}`;
+                preview.appendChild(li);
+            });
+        });
+        </script>
         <script src="js/animations.js"></script>
         <script>
             // 1. CARTE INTERACTIVE (statique / preview)
