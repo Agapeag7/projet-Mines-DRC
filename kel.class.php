@@ -1,23 +1,24 @@
 <?php
-    interface DatabaseInterface {
-        public function connect();
-        public function disconnect();
+
+    abstract class BaseModel {
+        protected $pdo;
+        public function __construct($pdo = null) {
+            $this->pdo = $pdo ?? (new Database())->pdo();
+        }
+        protected function uuid() { return Utils::uuidv4(); }
     }
 
-    abstract class BaseModel implements DatabaseInterface {
-        protected $connection;
-
-        public function connect() {
-            $this->connection = new PDO('mysql:host=localhost;dbname=election_2025', 'root', '');
-        }
-
-        public function disconnect() {
-            $this->connection = null;
-        }
-    }
-
+    // Utilisateur: façade francophone vers UserModel (évite duplication)
     class Utilisateur extends BaseModel {
-        // placeholder methods could go here
+        private $um;
+        public function __construct($pdo = null) {
+            parent::__construct($pdo);
+            $this->um = new UserModel($this->pdo);
+        }
+        public function create(array $data) { return $this->um->create($data); }
+        public function findByEmail($email) { return $this->um->findByEmail($email); }
+        public function findById($id) { return $this->um->findById($id); }
+        public function verifyCredentials($email, $password) { return $this->um->verifyCredentials($email, $password); }
     }
 
     /*
@@ -161,6 +162,28 @@
                 return $listing;
             }
 
+            public function update($id, array $data) {
+                $fields = [];
+                $params = [];
+                $allowed = ['title','description','area_m2','price','currency','statut','address_text','latitude','longitude','province_id','province','ville','commune','territoire','features','thumbnail_id','visible','is_published'];
+                foreach ($allowed as $f) {
+                    if (array_key_exists($f, $data)) {
+                        if ($f === 'features') { $fields[] = "$f = ?"; $params[] = $data[$f] ? json_encode($data[$f]) : null; }
+                        else { $fields[] = "$f = ?"; $params[] = $data[$f]; }
+                    }
+                }
+                if (empty($fields)) return false;
+                $params[] = $id;
+                $sql = 'UPDATE listings SET ' . implode(', ', $fields) . ', updated_at = NOW() WHERE id = ?';
+                $stmt = $this->pdo->prepare($sql);
+                return $stmt->execute($params);
+            }
+
+            public function delete($id) {
+                $stmt = $this->pdo->prepare('DELETE FROM listings WHERE id = ?');
+                return $stmt->execute([$id]);
+            }
+
             public function list(array $filters = [], $limit = 50, $offset = 0) {
                 $sql = 'SELECT * FROM listings WHERE 1=1';
                 $params = [];
@@ -174,6 +197,34 @@
                 foreach ($rows as &$r) if ($r['features']) $r['features'] = json_decode($r['features'], true);
                 return $rows;
             }
+        }
+
+        /* ----------------- MediaModel ----------------- */
+        class MediaModel {
+            private $pdo; public function __construct($pdo){ $this->pdo = $pdo; }
+            public function create(array $data) {
+                $id = Utils::uuidv4();
+                $sql = 'INSERT INTO media (id, owner_id, listing_id, type, filename, path, mime_type, size_bytes, width, height, caption, is_public, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW())';
+                $stmt = $this->pdo->prepare($sql);
+                $stmt->execute([
+                    $id,
+                    $data['owner_id'] ?? null,
+                    $data['listing_id'] ?? null,
+                    $data['type'] ?? 'image',
+                    $data['filename'] ?? null,
+                    $data['path'],
+                    $data['mime_type'] ?? null,
+                    $data['size_bytes'] ?? null,
+                    $data['width'] ?? null,
+                    $data['height'] ?? null,
+                    $data['caption'] ?? null,
+                    isset($data['is_public']) ? (int)$data['is_public'] : 1
+                ]);
+                return $id;
+            }
+            public function getById($id) { $stmt = $this->pdo->prepare('SELECT * FROM media WHERE id = ? LIMIT 1'); $stmt->execute([$id]); return $stmt->fetch(); }
+            public function listByListing($listing_id) { $stmt = $this->pdo->prepare('SELECT * FROM media WHERE listing_id = ? ORDER BY created_at ASC'); $stmt->execute([$listing_id]); return $stmt->fetchAll(); }
+            public function delete($id) { $stmt = $this->pdo->prepare('DELETE FROM media WHERE id = ?'); return $stmt->execute([$id]); }
         }
 
         /* ----------------- FavoriteModel ----------------- */
@@ -192,6 +243,37 @@
                 $id = Utils::uuidv4();
                 $this->pdo->prepare('INSERT INTO favorites (id, user_id, listing_id, created_at) VALUES (?, ?, ?, NOW())')->execute([$id, $user_id, $listing_id]);
                 return ['action' => 'added'];
+            }
+        }
+
+        /* ----------------- NotificationModel ----------------- */
+        class NotificationModel {
+            private $pdo; public function __construct($pdo){ $this->pdo = $pdo; }
+            public function create(array $data) {
+                $id = Utils::uuidv4();
+                $sql = 'INSERT INTO notifications (id, user_id, type, payload, titre, message, is_read, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, NOW())';
+                $stmt = $this->pdo->prepare($sql);
+                $stmt->execute([
+                    $id,
+                    $data['user_id'] ?? null,
+                    $data['type'] ?? 'system',
+                    isset($data['payload']) ? json_encode($data['payload']) : null,
+                    $data['titre'] ?? null,
+                    $data['message'] ?? null,
+                    isset($data['is_read']) ? (int)$data['is_read'] : 0
+                ]);
+                return $id;
+            }
+            public function listForUser($user_id, $limit = 50, $offset = 0) {
+                $stmt = $this->pdo->prepare('SELECT * FROM notifications WHERE user_id = ? ORDER BY created_at DESC LIMIT ? OFFSET ?');
+                $stmt->execute([$user_id, (int)$limit, (int)$offset]);
+                $rows = $stmt->fetchAll();
+                foreach ($rows as &$r) if ($r['payload']) $r['payload'] = json_decode($r['payload'], true);
+                return $rows;
+            }
+            public function markRead($id) {
+                $stmt = $this->pdo->prepare('UPDATE notifications SET is_read = 1 WHERE id = ?');
+                return $stmt->execute([$id]);
             }
         }
 

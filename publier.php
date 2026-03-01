@@ -339,28 +339,16 @@
                     }
                 });
 
-                // Initialisation
-                initProvinces();
-            });
-            // AJAX submit for publishing (prevent full page reload)
-            document.addEventListener('DOMContentLoaded', function(){
-                const form = document.querySelector('.publier-form');
-                if (form) {
-                    form.addEventListener('submit', async function(e){
-                        e.preventDefault();
-                        const submit = form.querySelector('button[type=submit]');
-                        if (submit) submit.disabled = true;
-                        const res = await KelFonciaAPI.postForm('listings_create', form);
-                        if (submit) submit.disabled = false;
-                        if (res && res.ok) {
-                            alert('Annonce publiée (ID: '+res.id+')');
-                            window.location.href = 'tableau-de-bord.php';
-                        } else {
-                            alert('Erreur: '+(res.error || JSON.stringify(res)));
-                        }
-                    });
-                }
-            });
+                    // Initialisation
+                    initProvinces();
+                });
+            </script>
+            <script src="js/actions.js"></script>
+            <script>
+                document.addEventListener('DOMContentLoaded', function(){
+                    KelActions.attachCreateListingForm('.publier-form');
+                });
+            </script>
         </script>
     </body>
 </html>

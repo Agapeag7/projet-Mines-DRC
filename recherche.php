@@ -312,6 +312,7 @@
         });
         </script>
         <script src="js/api.js"></script>
+        <script src="js/actions.js"></script>
         <script>
         // Load listings via AJAX and render minimal cards
         document.addEventListener('DOMContentLoaded', async function(){
@@ -330,14 +331,8 @@
                 container.appendChild(div);
             });
 
-            // attach favorites
-            container.querySelectorAll('.fav-btn').forEach(btn => {
-                btn.addEventListener('click', async function(){
-                    const id = this.dataset.id;
-                    const r = await KelFonciaAPI.postJSON('toggle_favorite', { listing_id: id });
-                    alert(r.result ? r.result.action : JSON.stringify(r));
-                });
-            });
+            // attach favorites via shared helper
+            KelActions.attachFavoriteButtons('.fav-btn');
         });
         </script>
         <script src="js/animations.js"></script>

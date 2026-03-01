@@ -423,7 +423,7 @@
                                 <label>Email professionnel</label>
                                 <div class="input-group">
                                     <span class="input-group-icon"><i class="fas fa-envelope"></i></span>
-                                    <input type="email" placeholder="contact@votreentreprise.cd" required>
+                                    <input name="email" type="email" placeholder="contact@votreentreprise.cd" required>
                                 </div>
                             </div>
                             
@@ -431,7 +431,7 @@
                                 <label>Mot de passe</label>
                                 <div class="input-group">
                                     <span class="input-group-icon"><i class="fas fa-lock"></i></span>
-                                    <input type="password" placeholder="••••••••" required>
+                                    <input name="password" type="password" placeholder="••••••••" required>
                                     <span class="input-group-icon" style="cursor: pointer;">
                                         <i class="fas fa-eye"></i>
                                     </span>
@@ -767,6 +767,13 @@
             
             // Reprendre la photo
             retakeBtn.addEventListener('click', resetCamera);
+        });
+    </script>
+    <script src="js/api.js"></script>
+    <script src="js/actions.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function(){
+            KelActions.attachLoginForm('#login-form form');
         });
     </script>
 </html>

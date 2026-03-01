@@ -49,6 +49,38 @@ if ($action === 'listings_create' || $action === 'create') {
     Utils::jsonResponse(['ok' => true, 'id' => $id]);
 }
 
+if ($action === 'listings_get' || $action === 'get') {
+    $id = $input['id'] ?? $_GET['id'] ?? null;
+    if (!$id) Utils::jsonResponse(['error' => 'missing_id'], 400);
+    $listing = $lm->getById($id);
+    if (!$listing) Utils::jsonResponse(['error' => 'not_found'], 404);
+    Utils::jsonResponse(['ok' => true, 'listing' => $listing]);
+}
+
+if ($action === 'listings_update' || $action === 'update') {
+    if (empty($_SESSION['user_id'])) Utils::jsonResponse(['error' => 'not_authenticated'], 401);
+    $id = $input['id'] ?? null;
+    if (!$id) Utils::jsonResponse(['error' => 'missing_id'], 400);
+    $existing = $lm->getById($id);
+    if (!$existing) Utils::jsonResponse(['error' => 'not_found'], 404);
+    if ($existing['owner_id'] !== $_SESSION['user_id']) Utils::jsonResponse(['error' => 'forbidden'], 403);
+    $data = $input;
+    unset($data['action']);
+    $ok = $lm->update($id, $data);
+    Utils::jsonResponse(['ok' => (bool)$ok]);
+}
+
+if ($action === 'listings_delete' || $action === 'delete') {
+    if (empty($_SESSION['user_id'])) Utils::jsonResponse(['error' => 'not_authenticated'], 401);
+    $id = $input['id'] ?? null;
+    if (!$id) Utils::jsonResponse(['error' => 'missing_id'], 400);
+    $existing = $lm->getById($id);
+    if (!$existing) Utils::jsonResponse(['error' => 'not_found'], 404);
+    if ($existing['owner_id'] !== $_SESSION['user_id']) Utils::jsonResponse(['error' => 'forbidden'], 403);
+    $ok = $lm->delete($id);
+    Utils::jsonResponse(['ok' => (bool)$ok]);
+}
+
 if ($action === 'toggle_favorite' || $action === 'favorite_toggle') {
     if (empty($_SESSION['user_id'])) Utils::jsonResponse(['error' => 'not_authenticated'], 401);
     $listing_id = $input['listing_id'] ?? null;
