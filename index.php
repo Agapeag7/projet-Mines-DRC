@@ -514,11 +514,17 @@
     </head>
     <body>
         <!-- HEADER -->
+        <?php session_start(); $logged = !empty($_SESSION['user_id']); ?>
         <header>
             <div class="container navbar">
                 <div class="logo">KEL<span>FONCIA</span></div>
                 <div class="nav-links">
-                    <a href="connexion.php" class="nav-cta">Se connecter</a>
+                    <?php if($logged): ?>
+                        <a href="tableau-de-bord.php">Tableau de bord</a>
+                        <a href="deconnexion.php">Déconnexion</a>
+                    <?php else: ?>
+                        <a href="connexion.php" class="nav-cta">Se connecter</a>
+                    <?php endif; ?>
                 </div>
                 <div class="mobile-menu">
                     <i class="fas fa-bars"></i>

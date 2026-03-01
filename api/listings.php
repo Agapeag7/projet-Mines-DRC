@@ -24,6 +24,7 @@ if (!$action) Utils::jsonResponse(['error' => 'missing_action'], 400);
 
 if ($action === 'listings_list' || $action === 'list') {
     $filters = [];
+    if (!empty($input['owner_id'])) $filters['owner_id'] = $input['owner_id'];
     if (!empty($input['province_id'])) $filters['province_id'] = (int)$input['province_id'];
     if (!empty($input['ville'])) $filters['ville'] = $input['ville'];
     $rows = $lm->list($filters, 100, 0);
@@ -87,6 +88,12 @@ if ($action === 'toggle_favorite' || $action === 'favorite_toggle') {
     if (!$listing_id) Utils::jsonResponse(['error' => 'missing_listing_id'], 400);
     $res = $fm->toggle($_SESSION['user_id'], $listing_id);
     Utils::jsonResponse(['ok' => true, 'result' => $res]);
+}
+
+if ($action === 'favorite_list' || $action === 'list_favorites') {
+    if (empty($_SESSION['user_id'])) Utils::jsonResponse(['error' => 'not_authenticated'], 401);
+    $ids = $fm->listForUser($_SESSION['user_id']);
+    Utils::jsonResponse(['ok' => true, 'listing_ids' => $ids]);
 }
 
 Utils::jsonResponse(['error' => 'unknown_action'], 400);

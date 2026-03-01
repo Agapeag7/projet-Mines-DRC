@@ -187,6 +187,7 @@
             public function list(array $filters = [], $limit = 50, $offset = 0) {
                 $sql = 'SELECT * FROM listings WHERE 1=1';
                 $params = [];
+                if (!empty($filters['owner_id'])) { $sql .= ' AND owner_id = ?'; $params[] = $filters['owner_id']; }
                 if (!empty($filters['province_id'])) { $sql .= ' AND province_id = ?'; $params[] = $filters['province_id']; }
                 if (!empty($filters['ville'])) { $sql .= ' AND ville = ?'; $params[] = $filters['ville']; }
                 $sql .= ' ORDER BY created_at DESC LIMIT ? OFFSET ?';
@@ -243,6 +244,12 @@
                 $id = Utils::uuidv4();
                 $this->pdo->prepare('INSERT INTO favorites (id, user_id, listing_id, created_at) VALUES (?, ?, ?, NOW())')->execute([$id, $user_id, $listing_id]);
                 return ['action' => 'added'];
+            }
+
+            public function listForUser($user_id) {
+                $stmt = $this->pdo->prepare('SELECT listing_id FROM favorites WHERE user_id = ?');
+                $stmt->execute([$user_id]);
+                return array_column($stmt->fetchAll(), 'listing_id');
             }
         }
 

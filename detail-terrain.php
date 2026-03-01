@@ -295,6 +295,7 @@
         </style>
     </head>
     <body>
+        <?php session_start(); $logged = !empty($_SESSION['user_id']); ?>
         <header>
             <div class="container navbar">
                 <a href="index.php" class="logo">KEL<span>FONCIA</span></a>
@@ -302,9 +303,12 @@
                     <a href="recherche.php">Trouver du foncier</a>
                     <a href="actualites.php">Fil d'actualités</a>
                     <a href="publier.php">Publier</a>
-                    <a href="tableau-de-bord.php">Tableau de bord</a>
-                    <a href="#">Tarifs</a>
-                    <a href="connexion.php" class="nav-cta">Se connecter</a>
+                    <?php if($logged): ?>
+                        <a href="tableau-de-bord.php">Tableau de bord</a>
+                        <a href="deconnexion.php">Déconnexion</a>
+                    <?php else: ?>
+                        <a href="connexion.php" class="nav-cta">Se connecter</a>
+                    <?php endif; ?>
                 </div>
                 <div class="mobile-menu">
                     <i class="fas fa-bars"></i>
@@ -641,6 +645,48 @@
                     ]);
                 }
             });
+        </script>
+        <script src="js/api.js"></script>
+        <script>
+        document.addEventListener('DOMContentLoaded', async function(){
+            const params = new URLSearchParams(window.location.search);
+            const id = params.get('id');
+            if (!id) return;
+            const res = await KelFonciaAPI.get('listings_get', { id });
+            if (!res || !res.ok) return;
+            const l = res.listing;
+            // update title/meta
+            const titleEl = document.querySelector('.detail-title');
+            if (titleEl) titleEl.textContent = l.title || titleEl.textContent;
+            document.title = (l.title ? l.title + ' • KelFoncia RDC' : document.title);
+            // update meta items
+            const metaItems = document.querySelectorAll('.detail-meta .meta-item');
+            if (metaItems && metaItems.length>0) {
+                if (metaItems[0]) metaItems[0].innerHTML = '<i class="fas fa-map-pin"></i> '+(l.ville?l.ville+', ':'')+(l.province||'');
+                if (metaItems[1]) metaItems[1].innerHTML = '<i class="fas fa-calendar"></i> Publié le '+(l.created_at?l.created_at.split(' ')[0]:'');
+                if (metaItems[2]) metaItems[2].innerHTML = '<i class="fas fa-eye"></i> '+(l.view_count||0)+' vues';
+            }
+            // gallery
+            const mainImg = document.querySelector('.gallery-main img');
+            if (mainImg && l.thumbnail_id) mainImg.src = '/KelFoncia-DRC/uploads/'+l.thumbnail_id;
+            // description
+            const desc = document.querySelector('.detail-section p');
+            if (desc && l.description) desc.textContent = l.description;
+            // characteristics
+            document.querySelectorAll('.carac-value').forEach(node=>{
+                // map known labels
+                const label = node.previousElementSibling ? node.previousElementSibling.textContent.toLowerCase() : '';
+            });
+            // price
+            const priceNode = document.querySelector('.prix');
+            if (priceNode) priceNode.textContent = (l.price ? (l.price + ' ' + (l.currency||'')) : priceNode.textContent);
+            // contact button handler
+            const contactBtn = document.querySelector('.contact-actions .btn-primary');
+            if (contactBtn) contactBtn.addEventListener('click', function(){
+                if (!confirm('Voulez-vous contacter le propriétaire de cette annonce ?')) return;
+                alert('Fonction contact non-implémentée dans la démo.');
+            });
+        });
         </script>
     </body>
 </html>

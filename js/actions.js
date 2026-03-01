@@ -13,6 +13,13 @@
         return res;
     }
 
+    async function register(obj){
+        // obj should contain email, password, role, display_name, phone, etc.
+        if (!obj.email || !obj.password) return { error: 'missing_fields' };
+        const res = await window.KelFonciaAPI.postJSON('register', obj);
+        return res;
+    }
+
     function attachLoginForm(selector){
         const form = document.querySelector(selector);
         if (!form) return;
@@ -31,6 +38,28 @@
                 window.location.reload();
             } else {
                 showToast('Erreur connexion: ' + (res.error || JSON.stringify(res)), 'error');
+            }
+        });
+    }
+
+    function attachRegisterForm(selector){
+        const form = document.querySelector(selector);
+        if (!form) return;
+        form.addEventListener('submit', async function(e){
+            e.preventDefault();
+            const btn = form.querySelector('button[type=submit]');
+            if (btn) btn.disabled = true;
+            const formData = new FormData(form);
+            const obj = {};
+            formData.forEach((v,k)=>obj[k]=v);
+            const res = await register(obj);
+            if (btn) btn.disabled = false;
+            if (res && res.ok) {
+                showToast('Inscription réussie');
+                // maybe auto login or redirect
+                window.location.href = '/KelFoncia-DRC/connexion.php';
+            } else {
+                showToast('Erreur inscription: ' + (res.error || JSON.stringify(res)), 'error');
             }
         });
     }
@@ -96,6 +125,8 @@
         toggleFavorite,
         attachFavoriteButtons,
         showToast
+        ,register,
+        attachRegisterForm
     };
 
 })();

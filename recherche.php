@@ -11,6 +11,7 @@
     </head>
     <body>
         <!-- HEADER (copier depuis header.php) -->
+        <?php session_start(); $logged = !empty($_SESSION['user_id']); ?>
         <header>
             <div class="container navbar">
                 <a href="index.php" class="logo">KEL<span>FONCIA</span></a>
@@ -18,9 +19,12 @@
                     <a href="recherche.php" class="active">Trouver du foncier</a>                
                     <a href="actualites.php">Fil d'actualités</a>                
                     <a href="publier.php">Publier</a>
-                    <a href="tableau-de-bord.php">Tableau de bord</a>
-                    <a href="#">Tarifs</a>
-                    <a href="connexion.php" class="nav-cta">Se connecter</a>
+                    <?php if($logged): ?>
+                        <a href="tableau-de-bord.php">Tableau de bord</a>
+                        <a href="deconnexion.php">Déconnexion</a>
+                    <?php else: ?>
+                        <a href="connexion.php" class="nav-cta">Se connecter</a>
+                    <?php endif; ?>
                 </div>
                 <div class="mobile-menu">
                     <i class="fas fa-bars"></i>
@@ -318,21 +322,63 @@
         document.addEventListener('DOMContentLoaded', async function(){
             const container = document.querySelector('.liste-terrains');
             if (!container) return;
-            const res = await KelFonciaAPI.get('listings_list');
-            if (!res || !res.ok) {
-                container.innerHTML = '<p>Erreur de chargement des annonces.</p>';
-                return;
-            }
-            container.innerHTML = '';
-            res.listings.forEach(l => {
-                const div = document.createElement('div');
-                div.className = 'terrain-card';
-                div.innerHTML = `<h4>${l.title}</h4><p>${l.province||''} ${l.ville||''}</p><p>${l.price?l.price+' '+l.currency:''}</p><button class="fav-btn" data-id="${l.id}">❤</button>`;
-                container.appendChild(div);
-            });
 
-            // attach favorites via shared helper
-            KelActions.attachFavoriteButtons('.fav-btn');
+            async function renderListings(rows) {
+                container.innerHTML = '';
+                if (!rows || rows.length === 0) {
+                    container.innerHTML = '<p>Aucune annonce trouvée.</p>';
+                    return;
+                }
+                rows.forEach(l => {
+                    const div = document.createElement('div');
+                    div.className = 'terrain-card';
+                    div.innerHTML = `
+                        <img src="${l.thumbnail_id ? '/KelFoncia-DRC/uploads/'+l.thumbnail_id : 'https://via.placeholder.com/180x140'}" class="terrain-image">
+                        <div class="terrain-infos">
+                            <h3><a href="detail-terrain.php?id=${l.id}">${l.title}</a></h3>
+                            <div class="terrain-details">
+                                <span class="terrain-detail-item"><i class="fas fa-ruler-combined"></i> ${l.area_m2||''} m²</span>
+                                <span class="terrain-detail-item"><i class="fas fa-map-pin"></i> ${l.ville||''}, ${l.province||''}</span>
+                            </div>
+                        </div>
+                        <div class="terrain-prix">
+                            <span class="prix-valeur">${l.price||''}</span>
+                            <span class="prix-devise">${l.currency||''}</span>
+                        </div>`;
+                    container.appendChild(div);
+                });
+                KelActions.attachFavoriteButtons('.fav-btn');
+            }
+
+            async function load(filters={}) {
+                const res = await KelFonciaAPI.get('listings_list', filters);
+                if (!res || !res.ok) {
+                    container.innerHTML = '<p>Erreur de chargement des annonces.</p>';
+                    return;
+                }
+                renderListings(res.listings);
+            }
+
+            // initial load
+            load();
+
+            // wire filter buttons
+            const applyBtn = document.querySelector('.filtres-actions .btn-primary');
+            const resetBtn = document.querySelector('.filtres-actions .btn-outline');
+            applyBtn && applyBtn.addEventListener('click', function(e){
+                e.preventDefault();
+                const filters = {};
+                const prov = document.getElementById('province-select').value;
+                const ville = document.getElementById('ville-select').value;
+                if (prov) filters.province_id = prov;
+                if (ville) filters.ville = ville;
+                load(filters);
+            });
+            resetBtn && resetBtn.addEventListener('click', function(e){
+                e.preventDefault();
+                document.querySelector('form')?.reset();
+                load();
+            });
         });
         </script>
         <script src="js/animations.js"></script>

@@ -806,6 +806,7 @@
         </style>
     </head>
     <body>
+        <?php session_start(); $logged = !empty($_SESSION['user_id']); ?>
         <header>
             <div class="container navbar">
                 <a href="index.php" class="logo">KEL<span>FONCIA</span></a>
@@ -813,8 +814,11 @@
                     <a href="recherche.php">Trouver du foncier</a>
                     <a href="publier.php">Publier</a>
                     <a href="tableau-de-bord.php" class="active">Tableau de bord</a>
-                    <a href="#">Tarifs</a>
-                    <a href="connexion.php" class="nav-cta">Se connecter</a>
+                    <?php if($logged): ?>
+                        <a href="deconnexion.php">Déconnexion</a>
+                    <?php else: ?>
+                        <a href="connexion.php" class="nav-cta">Se connecter</a>
+                    <?php endif; ?>
                 </div>
                 <div class="mobile-menu">
                     <i class="fas fa-bars"></i>

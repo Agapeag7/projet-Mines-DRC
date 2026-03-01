@@ -467,6 +467,7 @@
                         <form>
                             <div class="form-group">
                                 <label>Type de compte</label>
+                                <input type="hidden" name="role" value="promoteur">
                                 <div class="role-selector">
                                     <div class="role-card active" data-role="promoteur">
                                         <i class="fas fa-building"></i>
@@ -487,7 +488,7 @@
                                 <label>Nom complet / Raison sociale</label>
                                 <div class="input-group">
                                     <span class="input-group-icon"><i class="fas fa-user"></i></span>
-                                    <input type="text" placeholder="Votre nom ou société" required>
+                                    <input name="display_name" type="text" placeholder="Votre nom ou société" required>
                                 </div>
                             </div>
                             
@@ -495,7 +496,7 @@
                                 <label>Email professionnel</label>
                                 <div class="input-group">
                                     <span class="input-group-icon"><i class="fas fa-envelope"></i></span>
-                                    <input type="email" placeholder="contact@votreentreprise.cd" required>
+                                    <input name="email" type="email" placeholder="contact@votreentreprise.cd" required>
                                 </div>
                             </div>
                             
@@ -503,7 +504,7 @@
                                 <label>Téléphone (WhatsApp)</label>
                                 <div class="input-group">
                                     <span class="input-group-icon"><i class="fas fa-phone-alt"></i></span>
-                                    <input type="tel" placeholder="+243 81 234 5678" required>
+                                    <input name="phone" type="tel" placeholder="+243 81 234 5678" required>
                                 </div>
                             </div>
                             
@@ -511,7 +512,7 @@
                                 <label>Mot de passe</label>
                                 <div class="input-group">
                                     <span class="input-group-icon"><i class="fas fa-lock"></i></span>
-                                    <input type="password" placeholder="Minimum 8 caractères" required>
+                                    <input name="password" type="password" placeholder="Minimum 8 caractères" required>
                                 </div>
                             </div>
                             
@@ -519,7 +520,7 @@
                                 <label>Confirmer le mot de passe</label>
                                 <div class="input-group">
                                     <span class="input-group-icon"><i class="fas fa-lock"></i></span>
-                                    <input type="password" placeholder="Confirmez votre mot de passe" required>
+                                    <input name="password_confirm" type="password" placeholder="Confirmez votre mot de passe" required>
                                 </div>
                             </div>
                             
@@ -773,7 +774,29 @@
     <script src="js/actions.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', function(){
+            // switch tabs
+            const tabs = document.querySelectorAll('.auth-tab');
+            const forms = document.querySelectorAll('.auth-form');
+            tabs.forEach(tab => tab.addEventListener('click', function(){
+                tabs.forEach(t=>t.classList.remove('active'));
+                forms.forEach(f=>f.classList.remove('active'));
+                tab.classList.add('active');
+                const id = tab.dataset.tab + '-form';
+                document.getElementById(id).classList.add('active');
+            }));
+            // role selection logic
+            const roleInput = document.querySelector('input[name=role]');
+            const roleCards = document.querySelectorAll('.role-card');
+            roleCards.forEach(card=>{
+                card.addEventListener('click', function(){
+                    roleCards.forEach(c=>c.classList.remove('active'));
+                    card.classList.add('active');
+                    if(roleInput) roleInput.value = card.dataset.role;
+                });
+            });
+
             KelActions.attachLoginForm('#login-form form');
+            KelActions.attachRegisterForm('#register-form form');
         });
     </script>
 </html>

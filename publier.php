@@ -9,6 +9,7 @@
         <link rel="stylesheet" href="css/style.css">
     </head>
     <body>
+        <?php session_start(); $logged = !empty($_SESSION['user_id']); ?>
         <header>
             <div class="container navbar">
                 <a href="index.php" class="logo">KEL<span>FONCIA</span></a>
@@ -16,9 +17,12 @@
                     <a href="recherche.php">Trouver du foncier</a>
                     <a href="actualites.php">Fil d'actualités</a>
                     <a href="publier.php" class="active">Publier</a>
-                    <a href="tableau-de-bord.php">Tableau de bord</a>
-                    <a href="#">Tarifs</a>
-                    <a href="connexion.php" class="nav-cta">Se connecter</a>
+                    <?php if($logged): ?>
+                        <a href="tableau-de-bord.php">Tableau de bord</a>
+                        <a href="deconnexion.php">Déconnexion</a>
+                    <?php else: ?>
+                        <a href="connexion.php" class="nav-cta">Se connecter</a>
+                    <?php endif; ?>
                 </div>
                 <div class="mobile-menu">
                     <i class="fas fa-bars"></i>
@@ -64,18 +68,18 @@
                                     <option value="">Aucun territoire</option>
                                 </select>
                             </div>
-                            <div class="form-group full-width">
-                                <label>Adresse ou lieu-dit *</label>
-                                <input type="text" placeholder="Ex: Avenue du Commerce, n°45" required>
-                            </div>
-                            <div class="form-group">
-                                <label>Latitude (optionnel)</label>
-                                <input type="text" placeholder="-4.3300">
-                            </div>
-                            <div class="form-group">
-                                <label>Longitude (optionnel)</label>
-                                <input type="text" placeholder="15.3150">
-                            </div>
+                                <div class="form-group full-width">
+                                    <label>Adresse ou lieu-dit *</label>
+                                    <input name="address_text" type="text" placeholder="Ex: Avenue du Commerce, n°45" required>
+                                </div>
+                                <div class="form-group">
+                                    <label>Latitude (optionnel)</label>
+                                    <input name="latitude" type="text" placeholder="-4.3300">
+                                </div>
+                                <div class="form-group">
+                                    <label>Longitude (optionnel)</label>
+                                    <input name="longitude" type="text" placeholder="15.3150">
+                                </div>
                         </div>
                     </div>
 
@@ -85,45 +89,45 @@
                         <div class="form-grid">
                             <div class="form-group">
                                 <label>Superficie (m²) *</label>
-                                <input type="number" placeholder="Ex: 5000" required>
+                                <input name="area_m2" type="number" placeholder="Ex: 5000" required>
                             </div>
                             <div class="form-group">
                                 <label>Usage principal *</label>
-                                <select required>
+                                <select name="usage" required>
                                     <option value="">Sélectionnez un usage</option>
-                                    <option>Résidentiel</option>
-                                    <option>Commercial</option>
-                                    <option>Industriel</option>
-                                    <option>Mixte</option>
-                                    <option>Agricole</option>
+                                    <option value="residentiel">Résidentiel</option>
+                                    <option value="commercial">Commercial</option>
+                                    <option value="industriel">Industriel</option>
+                                    <option value="mixte">Mixte</option>
+                                    <option value="agricole">Agricole</option>
                                 </select>
                             </div>
                             <div class="form-group">
                                 <label>Prix (USD) *</label>
-                                <input type="number" placeholder="Ex: 450000" required>
+                                <input name="price" type="number" placeholder="Ex: 450000" required>
                             </div>
                             <div class="form-group">
                                 <label>Statut juridique *</label>
-                                <select required>
+                                <select name="statut" required>
                                     <option value="">Sélectionnez le statut</option>
-                                    <option>Titre foncier</option>
-                                    <option>Certificat d'enregistrement</option>
-                                    <option>Contrat de location longue durée</option>
-                                    <option>Droit de superficie</option>
-                                    <option>Droit coutumier</option>
+                                    <option value="titre_foncier">Titre foncier</option>
+                                    <option value="certificat">Certificat d'enregistrement</option>
+                                    <option value="contrat_location">Contrat de location longue durée</option>
+                                    <option value="droit_superficie">Droit de superficie</option>
+                                    <option value="droit_coutumier">Droit coutumier</option>
                                 </select>
                             </div>
                             <div class="form-group">
                                 <label>Référence du titre (si dispo)</label>
-                                <input type="text" placeholder="Ex: TF-12345/2025">
+                                <input name="reference_titre" type="text" placeholder="Ex: TF-12345/2025">
                             </div>
                             <div class="form-group">
                                 <label>Année d'acquisition</label>
-                                <input type="number" placeholder="Ex: 2020">
+                                <input name="annee_acquisition" type="number" placeholder="Ex: 2020">
                             </div>
                             <div class="form-group full-width">
                                 <label>Description détaillée *</label>
-                                <textarea placeholder="Décrivez le terrain, ses atouts, accès, viabilisation, environnement..." required></textarea>
+                                <textarea name="description" placeholder="Décrivez le terrain, ses atouts, accès, viabilisation, environnement..." required></textarea>
                             </div>
                         </div>
                     </div>
@@ -135,13 +139,15 @@
                             <i class="fas fa-cloud-upload-alt"></i>
                             <p style="font-weight: 600; margin-bottom: 8px;">Cliquez pour télécharger des photos</p>
                             <p style="color: var(--gris-moyen); font-size: 0.9rem;">JPG, PNG jusqu'à 10 Mo</p>
+                            <input type="file" name="photos[]" accept="image/*" multiple style="display:none;">
                         </div>
-                        <div style="margin-top: 20px;">
+                            <div style="margin-top: 20px;">
                             <label style="display: block; margin-bottom: 12px; font-weight: 600;">Documents juridiques (optionnel)</label>
                             <div class="upload-area" style="padding: 20px;">
                                 <i class="fas fa-file-pdf" style="font-size: 1.8rem;"></i>
                                 <p style="font-weight: 600; margin-bottom: 4px;">Ajouter des documents</p>
                                 <p style="color: var(--gris-moyen); font-size: 0.8rem;">Titre foncier, certificat, plans...</p>
+                                    <input type="file" name="documents[]" accept="application/pdf,image/*" multiple style="display:none;">
                             </div>
                         </div>
                     </div>
@@ -220,9 +226,9 @@
         <script src="js/animations.js"></script>
         <script src="js/provinces-data.js"></script>
         <script src="js/api.js"></script>
-        <script>
+                <script>
             // ===== GESTION DES SÉLECTIONS EN CASCADE =====
-            document.addEventListener('DOMContentLoaded', function() {
+                document.addEventListener('DOMContentLoaded', function() {
                 const provinceSelect = document.getElementById('province-select');
                 const villeSelect = document.getElementById('ville-select');
                 const communeSelect = document.getElementById('commune-select');
@@ -339,16 +345,25 @@
                     }
                 });
 
-                    // Initialisation
-                    initProvinces();
-                });
-            </script>
-            <script src="js/actions.js"></script>
-            <script>
-                document.addEventListener('DOMContentLoaded', function(){
-                    KelActions.attachCreateListingForm('.publier-form');
-                });
-            </script>
+                        // Initialisation
+                        initProvinces();
+
+                        // wire upload areas
+                        document.querySelectorAll('.upload-area').forEach(area => {
+                            const fileInput = area.querySelector('input[type=file]');
+                            if (!fileInput) return;
+                            area.addEventListener('click', () => fileInput.click());
+                            fileInput.addEventListener('change', () => {
+                                const cnt = fileInput.files.length;
+                                area.querySelector('p').textContent = cnt + ' fichier(s) sélectionné(s)';
+                            });
+                        });
+
+                        // attach create listing
+                        KelActions.attachCreateListingForm('.publier-form');
+                    });
+                </script>
+                <script src="js/actions.js"></script>
         </script>
     </body>
 </html>
