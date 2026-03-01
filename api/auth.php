@@ -61,9 +61,14 @@ if ($action === 'register') {
     $phone = trim($input['phone'] ?? '');
     $role = trim($input['role'] ?? 'proprietaire');
 
-    // Validation
-    if (!$email || !$password || !$password_confirm || !$display_name || !$phone) {
-        Utils::jsonResponse(['error' => 'missing_fields', 'message' => 'Tous les champs sont obligatoires'], 400);
+    // Validation - phone optional
+    $missing = [];
+    if (!$email) $missing[] = 'email';
+    if (!$password) $missing[] = 'password';
+    if (!$password_confirm) $missing[] = 'password_confirm';
+    if (!$display_name) $missing[] = 'display_name';
+    if (!empty($missing)) {
+        Utils::jsonResponse(['error' => 'missing_fields', 'message' => 'Champs manquants: '.implode(', ', $missing), 'missing' => $missing], 400);
     }
     
     if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {

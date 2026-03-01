@@ -68,6 +68,7 @@
     }
 
     async function register(obj){
+        console.debug('register payload', obj);
         // Validate on client side first
         if (!obj.email || !obj.password) {
             showToast('Email et mot de passe obligatoires', 'error');

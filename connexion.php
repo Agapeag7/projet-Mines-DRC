@@ -7,6 +7,8 @@
         <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
         <link rel="stylesheet" href="css/style.css">
+        <!-- face-api.js for real facial recognition -->
+        <script defer src="https://cdn.jsdelivr.net/npm/face-api.js@0.22.2/dist/face-api.min.js"></script>
         <style>
             /* Styles spécifiques à la page auth */
             .auth-page {
@@ -504,7 +506,7 @@
                                 <label>Téléphone (WhatsApp)</label>
                                 <div class="input-group">
                                     <span class="input-group-icon"><i class="fas fa-phone-alt"></i></span>
-                                    <input name="phone" type="tel" placeholder="+243 81 234 5678" required>
+                                    <input name="phone" type="tel" placeholder="+243 81 234 5678">
                                 </div>
                             </div>
                             
@@ -694,6 +696,7 @@
             const closeBtn = document.querySelector('.close');
             
             let stream;
+            let currentMode = ''; // 'id_card' or 'facial'
             
             document.getElementById('scan-id').addEventListener('click', function(e){
                 e.preventDefault();
@@ -725,9 +728,28 @@
                 resetCamera();
             }
             
+            async function ensureFaceModel() {
+                if (window.faceModelLoaded) return;
+                try {
+                    // load tiny face detector from github CDN
+                    await faceapi.nets.tinyFaceDetector.loadFromUri('https://cdn.jsdelivr.net/gh/justadudewhohacks/face-api.js/models');
+                    window.faceModelLoaded = true;
+                } catch(e){
+                    console.warn('face-api model load failed', e);
+                }
+            }
+
             function startCamera() {
+                console.debug('startCamera invoked');
+                if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+                    console.error('getUserMedia not supported');
+                    status.textContent = 'Votre navigateur ne supporte pas la caméra.';
+                    status.style.color = 'red';
+                    return;
+                }
                 navigator.mediaDevices.getUserMedia({ video: true })
                     .then(function(mediaStream) {
+                        console.debug('mediaStream obtained', mediaStream);
                         stream = mediaStream;
                         video.srcObject = mediaStream;
                         video.style.display = 'block';
@@ -755,7 +777,7 @@
                 retakeBtn.style.display = 'none';
             }
             
-            captureBtn.addEventListener('click', function() {
+            captureBtn.addEventListener('click', async function() {
                 const context = canvas.getContext('2d');
                 canvas.width = video.videoWidth;
                 canvas.height = video.videoHeight;
@@ -769,21 +791,30 @@
                 status.textContent = 'Photo capturée. Analyse en cours...';
                 status.style.color = 'var(--gris-moyen)';
 
-                // simulate simple recognition algorithm (placeholder)
-                // a real implementation would call an ML model or external service
-                setTimeout(() => {
-                    let ok = true;
-                    // small chance of failure to mimic detection issues
-                    if (Math.random() < 0.1) ok = false;
-                    if (currentMode === 'id_card') {
-                        status.textContent = ok ? 'Carte d\'électeur reconnue.' : 'Erreur: carte invalide ou floue. Réessayez.';
-                    } else if (currentMode === 'facial') {
-                        status.textContent = ok ? 'Visage détecté.' : 'Erreur: visage non clair. Réessayez.';
+                // run actual face-api detection if facial mode
+                if (currentMode === 'facial' && window.faceapi) {
+                    await ensureFaceModel();
+                    const detection = await faceapi.detectSingleFace(canvas, new faceapi.TinyFaceDetectorOptions());
+                    if (!detection) {
+                        status.textContent = 'Aucun visage détecté. Réessayez.';
+                        status.style.color = '#dc2626';
                     } else {
-                        status.textContent = ok ? 'Analyse terminée.' : 'Analyse échouée.';
+                        status.textContent = 'Visage détecté avec succès.';
+                        status.style.color = 'green';
                     }
-                    status.style.color = ok ? 'green' : '#dc2626';
-                }, 1200);
+                } else {
+                    // simple id_card placeholder
+                    setTimeout(() => {
+                        let ok = true;
+                        if (Math.random() < 0.1) ok = false;
+                        if (currentMode === 'id_card') {
+                            status.textContent = ok ? 'Carte d\'électeur reconnue.' : 'Erreur: carte invalide ou floue. Réessayez.';
+                        } else {
+                            status.textContent = ok ? 'Analyse terminée.' : 'Analyse échouée.';
+                        }
+                        status.style.color = ok ? 'green' : '#dc2626';
+                    }, 1200);
+                }
 
                 // save evidence for later KYC submission
                 const dataUrl = canvas.toDataURL('image/jpeg');
