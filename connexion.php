@@ -607,66 +607,83 @@
                 </div>
             </div>
         </main>
-    </body>
     <script src="js/animations.js"></script>
+    <script src="js/api.js"></script>
+    <script src="js/actions.js"></script>
     <script>
-        //Script pour les tabs connexion/inscription
-        document.addEventListener('DOMContentLoaded', function() {
+        document.addEventListener('DOMContentLoaded', function(){
+            // ===== TAB SWITCHING =====
             const tabs = document.querySelectorAll('.auth-tab');
-            const forms = {
-                'login': document.getElementById('login-form'),
-                'register': document.getElementById('register-form')
-            };
-            
+            const forms = document.querySelectorAll('.auth-form');
             tabs.forEach(tab => {
-                tab.addEventListener('click', function() {
-                    // Désactiver tous les tabs
+                tab.addEventListener('click', function(){
                     tabs.forEach(t => t.classList.remove('active'));
-                    this.classList.add('active');
-                    
-                    // Cacher tous les formulaires
-                    Object.values(forms).forEach(form => {
-                        if (form) form.classList.remove('active');
-                    });
-                    
-                    // Afficher le formulaire correspondant
-                    const tabName = this.dataset.tab;
-                    if (tabName === 'login' && forms.login) {
-                        forms.login.classList.add('active');
-                    } else if (tabName === 'register' && forms.register) {
-                        forms.register.classList.add('active');
-                    }
+                    forms.forEach(f => f.classList.remove('active'));
+                    tab.classList.add('active');
+                    const id = tab.dataset.tab + '-form';
+                    document.getElementById(id).classList.add('active');
                 });
             });
-            
-        //     // Sélection des rôles
+
+            // ===== ROLE SELECTION =====
+            const roleInput = document.querySelector('input[name=role]');
             const roleCards = document.querySelectorAll('.role-card');
             roleCards.forEach(card => {
-                card.addEventListener('click', function() {
-                    const parent = this.closest('.role-selector');
-                    parent.querySelectorAll('.role-card').forEach(c => c.classList.remove('active'));
-                    this.classList.add('active');
+                card.addEventListener('click', function(){
+                    roleCards.forEach(c => c.classList.remove('active'));
+                    card.classList.add('active');
+                    if(roleInput) roleInput.value = card.dataset.role;
                 });
             });
-            
-            // Afficher/masquer mot de passe
-            const eyeIcons = document.querySelectorAll('.fa-eye, .fa-eye-slash');
-            eyeIcons.forEach(icon => {
-                icon.addEventListener('click', function() {
-                    const input = this.closest('.input-group').querySelector('input');
-                    if (input.type === 'password') {
-                        input.type = 'text';
-                        this.classList.remove('fa-eye');
-                        this.classList.add('fa-eye-slash');
-                    } else {
-                        input.type = 'password';
-                        this.classList.remove('fa-eye-slash');
-                        this.classList.add('fa-eye');
+
+            // ===== REAL-TIME PASSWORD VALIDATION =====
+            const registerForm = document.querySelector('#register-form form');
+            if (registerForm) {
+                const pwdInput = registerForm.querySelector('input[name=password]');
+                const pwdConfirmInput = registerForm.querySelector('input[name=password_confirm]');
+                
+                if (pwdConfirmInput && pwdInput) {
+                    pwdConfirmInput.addEventListener('input', function() {
+                        if (this.value && pwdInput.value !== this.value) {
+                            this.style.borderColor = '#dc2626';
+                        } else if (this.value) {
+                            this.closest('.input-group').style.borderColor = '#10b981';
+                        } else {
+                            this.closest('.input-group').style.borderColor = '#e0e6ed';
+                        }
+                    });
+                    
+                    pwdInput.addEventListener('input', function() {
+                        if (pwdConfirmInput.value) {
+                            if (this.value === pwdConfirmInput.value) {
+                                pwdConfirmInput.closest('.input-group').style.borderColor = '#10b981';
+                            } else {
+                                pwdConfirmInput.closest('.input-group').style.borderColor = '#dc2626';
+                            }
+                        }
+                    });
+                }
+            }
+
+            // ===== PASSWORD TOGGLE =====
+            document.addEventListener('click', function(e) {
+                if (e.target.classList.contains('fa-eye') || e.target.classList.contains('fa-eye-slash')) {
+                    const input = e.target.closest('.input-group')?.querySelector('input');
+                    if (input) {
+                        if (input.type === 'password') {
+                            input.type = 'text';
+                            e.target.classList.remove('fa-eye');
+                            e.target.classList.add('fa-eye-slash');
+                        } else {
+                            input.type = 'password';
+                            e.target.classList.remove('fa-eye-slash');
+                            e.target.classList.add('fa-eye');
+                        }
                     }
-                });
+                }
             });
-            
-            // KYC Modal
+
+            // ===== KYC MODAL =====
             const modal = document.getElementById('kyc-modal');
             const modalTitle = document.getElementById('modal-title');
             const video = document.getElementById('video');
@@ -677,24 +694,20 @@
             const closeBtn = document.querySelector('.close');
             
             let stream;
-            let currentMode = '';
             
-            // Ouvrir modal pour scan ID
-            document.getElementById('scan-id').addEventListener('click', function() {
+            document.getElementById('scan-id').addEventListener('click', function(e){
+                e.preventDefault();
                 openModal('Scanner Carte d\'Électeur', 'Positionnez votre carte d\'électeur dans le cadre et capturez la photo.');
             });
             
-            // Ouvrir modal pour reconnaissance faciale
-            document.getElementById('facial-recog').addEventListener('click', function() {
+            document.getElementById('facial-recog').addEventListener('click', function(e){
+                e.preventDefault();
                 openModal('Reconnaissance Faciale', 'Positionnez-vous face à la caméra et capturez votre photo.');
             });
             
-            // Fermer modal
             closeBtn.addEventListener('click', closeModal);
             window.addEventListener('click', function(event) {
-                if (event.target === modal) {
-                    closeModal();
-                }
+                if (event.target === modal) closeModal();
             });
             
             function openModal(title, instruction) {
@@ -740,7 +753,6 @@
                 retakeBtn.style.display = 'none';
             }
             
-            // Capturer la photo
             captureBtn.addEventListener('click', function() {
                 const context = canvas.getContext('2d');
                 canvas.width = video.videoWidth;
@@ -754,49 +766,12 @@
                 
                 status.textContent = 'Photo capturée avec succès ! Vous pouvez la reprendre ou fermer la fenêtre.';
                 status.style.color = 'green';
-                
-                // Ici, on pourrait envoyer l'image à un serveur pour vérification
-                // Pour la démo, on simule une vérification
-                setTimeout(() => {
-                    status.textContent = 'Vérification en cours...';
-                    setTimeout(() => {
-                        status.textContent = 'Vérification réussie ! Votre identité a été confirmée.';
-                        status.style.color = 'green';
-                    }, 2000);
-                }, 1000);
             });
             
-            // Reprendre la photo
             retakeBtn.addEventListener('click', resetCamera);
-        });
-    </script>
-    <script src="js/api.js"></script>
-    <script src="js/actions.js"></script>
-    <script>
-        document.addEventListener('DOMContentLoaded', function(){
-            // switch tabs
-            const tabs = document.querySelectorAll('.auth-tab');
-            const forms = document.querySelectorAll('.auth-form');
-            tabs.forEach(tab => tab.addEventListener('click', function(){
-                tabs.forEach(t=>t.classList.remove('active'));
-                forms.forEach(f=>f.classList.remove('active'));
-                tab.classList.add('active');
-                const id = tab.dataset.tab + '-form';
-                document.getElementById(id).classList.add('active');
-            }));
-            // role selection logic
-            const roleInput = document.querySelector('input[name=role]');
-            const roleCards = document.querySelectorAll('.role-card');
-            roleCards.forEach(card=>{
-                card.addEventListener('click', function(){
-                    roleCards.forEach(c=>c.classList.remove('active'));
-                    card.classList.add('active');
-                    if(roleInput) roleInput.value = card.dataset.role;
-                });
-            });
 
+            // ===== ATTACH FORM HANDLERS =====
             KelActions.attachLoginForm('#login-form form');
             KelActions.attachRegisterForm('#register-form form');
         });
     </script>
-</html>

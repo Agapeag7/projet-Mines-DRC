@@ -24,24 +24,91 @@ if (!$action) {
 }
 
 if ($action === 'login') {
-    $email = $input['email'] ?? null;
-    $password = $input['password'] ?? null;
-    if (!$email || !$password) Utils::jsonResponse(['error' => 'missing_credentials'], 400);
+    $email = trim($input['email'] ?? '');
+    $password = $input['password'] ?? '';
+    
+    if (!$email || !$password) {
+        Utils::jsonResponse(['error' => 'missing_credentials', 'message' => 'Email et mot de passe requis'], 400);
+    }
+    
     $user = $um->verifyCredentials($email, $password);
-    if (!$user) Utils::jsonResponse(['error' => 'invalid_credentials'], 401);
+    if (!$user) {
+        Utils::jsonResponse(['error' => 'invalid_credentials', 'message' => 'Email ou mot de passe incorrect'], 401);
+    }
+    
     // set session
     $_SESSION['user_id'] = $user['id'];
     $_SESSION['email'] = $user['email'];
-    Utils::jsonResponse(['ok' => true, 'user' => ['id' => $user['id'], 'email' => $user['email'], 'display_name' => $user['display_name']]]);
+    $_SESSION['role'] = $user['role'];
+    
+    Utils::jsonResponse([
+        'ok' => true,
+        'message' => 'Connexion réussie',
+        'user' => [
+            'id' => $user['id'],
+            'email' => $user['email'],
+            'display_name' => $user['display_name'],
+            'role' => $user['role']
+        ]
+    ], 200);
 }
 
 if ($action === 'register') {
-    $email = $input['email'] ?? null;
-    $password = $input['password'] ?? null;
-    if (!$email || !$password) Utils::jsonResponse(['error' => 'missing_fields'], 400);
-    if ($um->findByEmail($email)) Utils::jsonResponse(['error' => 'email_exists'], 409);
-    $id = $um->create(['email' => $email, 'password' => $password, 'role' => 'proprietaire']);
-    Utils::jsonResponse(['ok' => true, 'id' => $id]);
+    $email = trim($input['email'] ?? '');
+    $password = $input['password'] ?? '';
+    $password_confirm = $input['password_confirm'] ?? '';
+    $display_name = trim($input['display_name'] ?? '');
+    $phone = trim($input['phone'] ?? '');
+    $role = trim($input['role'] ?? 'proprietaire');
+
+    // Validation
+    if (!$email || !$password || !$password_confirm || !$display_name || !$phone) {
+        Utils::jsonResponse(['error' => 'missing_fields', 'message' => 'Tous les champs sont obligatoires'], 400);
+    }
+    
+    if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+        Utils::jsonResponse(['error' => 'invalid_email', 'message' => 'Email invalide'], 400);
+    }
+    
+    if ($password !== $password_confirm) {
+        Utils::jsonResponse(['error' => 'password_mismatch', 'message' => 'Les mots de passe ne correspondent pas'], 400);
+    }
+    
+    if (strlen($password) < 8) {
+        Utils::jsonResponse(['error' => 'password_weak', 'message' => 'Le mot de passe doit contenir au moins 8 caractères'], 400);
+    }
+    
+    $valid_roles = ['proprietaire', 'promoteur', 'investisseur'];
+    if (!in_array($role, $valid_roles)) {
+        Utils::jsonResponse(['error' => 'invalid_role', 'message' => 'Rôle invalide'], 400);
+    }
+    
+    if ($um->findByEmail($email)) {
+        Utils::jsonResponse(['error' => 'email_exists', 'message' => 'Cet email est déjà utilisé'], 409);
+    }
+
+    try {
+        $id = $um->create([
+            'email' => $email,
+            'password' => $password,
+            'role' => $role,
+            'display_name' => $display_name,
+            'phone' => $phone
+        ]);
+        
+        // Auto-login after registration
+        $_SESSION['user_id'] = $id;
+        $_SESSION['email'] = $email;
+        
+        Utils::jsonResponse([
+            'ok' => true,
+            'id' => $id,
+            'message' => 'Inscription réussie',
+            'user' => ['id' => $id, 'email' => $email, 'display_name' => $display_name, 'role' => $role]
+        ], 201);
+    } catch (Exception $e) {
+        Utils::jsonResponse(['error' => 'register_failed', 'message' => $e->getMessage()], 500);
+    }
 }
 
 Utils::jsonResponse(['error' => 'unknown_action'], 400);

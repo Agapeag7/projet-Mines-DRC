@@ -226,9 +226,15 @@
         <script src="js/animations.js"></script>
         <script src="js/provinces-data.js"></script>
         <script src="js/api.js"></script>
-                <script>
-            // ===== GESTION DES SÉLECTIONS EN CASCADE =====
-                document.addEventListener('DOMContentLoaded', function() {
+        <script src="js/actions.js"></script>
+        <script>
+            // Check if user is logged in
+            document.addEventListener('DOMContentLoaded', function() {
+                <?php if (!$logged): ?>
+                    KelActions.showToast('Vous devez être connecté pour publier une annonce', 'error');
+                    setTimeout(() => window.location.href = 'connexion.php', 1500);
+                <?php endif; ?>
+
                 const provinceSelect = document.getElementById('province-select');
                 const villeSelect = document.getElementById('ville-select');
                 const communeSelect = document.getElementById('commune-select');
@@ -309,7 +315,6 @@
                     
                     // Remplir les communes
                     const communes = getCommunesByVille(selectedProvince, selectedVille);
-                    console.log('Commune count for', selectedProvince, selectedVille, communes.length);
                     communes.forEach(commune => {
                         const option = document.createElement('option');
                         option.value = commune;
@@ -345,25 +350,25 @@
                     }
                 });
 
-                        // Initialisation
-                        initProvinces();
+                // Initialisation
+                initProvinces();
 
-                        // wire upload areas
-                        document.querySelectorAll('.upload-area').forEach(area => {
-                            const fileInput = area.querySelector('input[type=file]');
-                            if (!fileInput) return;
-                            area.addEventListener('click', () => fileInput.click());
-                            fileInput.addEventListener('change', () => {
-                                const cnt = fileInput.files.length;
-                                area.querySelector('p').textContent = cnt + ' fichier(s) sélectionné(s)';
-                            });
-                        });
-
-                        // attach create listing
-                        KelActions.attachCreateListingForm('.publier-form');
+                // Wire upload areas
+                document.querySelectorAll('.upload-area').forEach(area => {
+                    const fileInput = area.querySelector('input[type=file]');
+                    if (!fileInput) return;
+                    area.addEventListener('click', () => fileInput.click());
+                    fileInput.addEventListener('change', () => {
+                        const cnt = fileInput.files.length;
+                        const text = cnt > 1 ? cnt + ' fichiers sélectionnés' : (cnt === 1 ? '1 fichier sélectionné' : 'Ajouter des fichiers');
+                        area.querySelector('p').textContent = text;
+                        area.style.borderColor = cnt > 0 ? 'var(--or)' : '#e0e6ed';
                     });
-                </script>
-                <script src="js/actions.js"></script>
+                });
+
+                // Attach create listing form
+                KelActions.attachCreateListingForm('.publier-form');
+            });
         </script>
     </body>
 </html>

@@ -636,8 +636,10 @@
 
         <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
         <script src="js/animations.js"></script>
+        <script src="js/api.js"></script>
+        <script src="js/actions.js"></script>
         <script>
-            // Carte de détail
+            // Map detail
             document.addEventListener('DOMContentLoaded', function() {
                 if (typeof initMap === 'function' && document.getElementById('map-detail')) {
                     initMap('map-detail', -4.3300, 15.3150, 16, [
@@ -646,46 +648,144 @@
                 }
             });
         </script>
-        <script src="js/api.js"></script>
         <script>
         document.addEventListener('DOMContentLoaded', async function(){
             const params = new URLSearchParams(window.location.search);
             const id = params.get('id');
-            if (!id) return;
-            const res = await KelFonciaAPI.get('listings_get', { id });
-            if (!res || !res.ok) return;
-            const l = res.listing;
-            // update title/meta
-            const titleEl = document.querySelector('.detail-title');
-            if (titleEl) titleEl.textContent = l.title || titleEl.textContent;
-            document.title = (l.title ? l.title + ' • KelFoncia RDC' : document.title);
-            // update meta items
-            const metaItems = document.querySelectorAll('.detail-meta .meta-item');
-            if (metaItems && metaItems.length>0) {
-                if (metaItems[0]) metaItems[0].innerHTML = '<i class="fas fa-map-pin"></i> '+(l.ville?l.ville+', ':'')+(l.province||'');
-                if (metaItems[1]) metaItems[1].innerHTML = '<i class="fas fa-calendar"></i> Publié le '+(l.created_at?l.created_at.split(' ')[0]:'');
-                if (metaItems[2]) metaItems[2].innerHTML = '<i class="fas fa-eye"></i> '+(l.view_count||0)+' vues';
+            
+            if (!id) {
+                // No ID provided - show error
+                showDetailError('Annonce introuvable', 'Veuillez sélectionner une annonce depuis la recherche.');
+                return;
             }
-            // gallery
+
+            async function showDetailError(title, msg) {
+                const container = document.querySelector('main section:nth-child(2)');
+                if (container) {
+                    container.innerHTML = `<div class="container" style="text-align: center; padding: 60px 20px;">
+                        <i class="fas fa-exclamation-triangle" style="font-size: 3rem; color: #dc2626; opacity: 0.7; display: block; margin-bottom: 20px;"></i>
+                        <h2 style="color: #dc2626; margin-bottom: 8px;">${title}</h2>
+                        <p style="color: var(--gris-moyen); margin-bottom: 30px;">${msg}</p>
+                        <a href="recherche.php" class="btn btn-primary">← Retour à la recherche</a>
+                    </div>`;
+                }
+            }
+
+            const res = await KelFonciaAPI.get('listings_get', { id });
+            if (!res || !res.ok || !res.listing) {
+                showDetailError('Annonce introuvable', 'L\'annonce que vous recherchez n\'existe pas ou a été supprimée.');
+                return;
+            }
+
+            const l = res.listing;
+
+            // Update page title
+            document.title = (l.title ? l.title + ' • KelFoncia RDC' : document.title);
+
+            // Update detail header
+            const titleEl = document.querySelector('.detail-title');
+            if (titleEl) titleEl.textContent = l.title || 'Terrain';
+
+            // Update meta information
+            const metaItems = document.querySelectorAll('.detail-meta .meta-item');
+            if (metaItems && metaItems.length > 0) {
+                const locText = [l.ville, l.province].filter(x=>x).join(', ');
+                if (metaItems[0]) metaItems[0].innerHTML = '<i class="fas fa-map-pin"></i> ' + (locText || 'Location non spécifiée');
+                if (metaItems[1]) metaItems[1].innerHTML = '<i class="fas fa-calendar"></i> Publié le ' + (l.created_at ? l.created_at.split(' ')[0] : 'N/A');
+                if (metaItems[2]) metaItems[2].innerHTML = '<i class="fas fa-eye"></i> ' + (l.view_count || 0) + ' vues';
+            }
+
+            // Update gallery main image
             const mainImg = document.querySelector('.gallery-main img');
-            if (mainImg && l.thumbnail_id) mainImg.src = '/KelFoncia-DRC/uploads/'+l.thumbnail_id;
-            // description
-            const desc = document.querySelector('.detail-section p');
-            if (desc && l.description) desc.textContent = l.description;
-            // characteristics
-            document.querySelectorAll('.carac-value').forEach(node=>{
-                // map known labels
-                const label = node.previousElementSibling ? node.previousElementSibling.textContent.toLowerCase() : '';
+            if (mainImg && l.thumbnail_id) {
+                mainImg.src = '/KelFoncia-DRC/uploads/' + l.thumbnail_id;
+                mainImg.onerror = function() { this.src = 'https://via.placeholder.com/800x450'; };
+            }
+
+            // Update characteristics dynamically
+            const caracItems = document.querySelectorAll('.carac-item');
+            caracItems.forEach(item => {
+                const label = item.querySelector('.carac-label')?.textContent.toLowerCase() || '';
+                const valueEl = item.querySelector('.carac-value');
+                if (!valueEl) return;
+
+                let value = '';
+                if (label.includes('superficie')) value = (l.area_m2 ? l.area_m2 + ' m²' : 'N/A');
+                else if (label.includes('statut') || label.includes('juridique')) value = l.statut || 'N/A';
+                else if (label.includes('usage')) value = l.usage || 'N/A';
+                else if (label.includes('viab')) value = l.viabilisation || 'N/A';
+                else if (label.includes('référence')) value = l.reference_titre || 'N/A';
+                else if (label.includes('année') || label.includes('acquisition')) value = l.annee_acquisition || 'N/A';
+
+                if (value) valueEl.textContent = value;
             });
-            // price
+
+            // Update description
+            const descEl = document.querySelector('.detail-section:nth-child(2) p');
+            if (descEl && l.description) {
+                descEl.textContent = l.description;
+            }
+
+            // Update map coordinates if available
+            if (l.latitude && l.longitude) {
+                const mapContainer = document.getElementById('map-detail');
+                if (mapContainer && typeof initMap === 'function') {
+                    initMap('map-detail', parseFloat(l.latitude), parseFloat(l.longitude), 16, [
+                        { lat: parseFloat(l.latitude), lng: parseFloat(l.longitude), title: l.title }
+                    ]);
+                }
+                // Update coordinate display
+                const latEl = document.querySelector('.localisation-detail').parentElement.querySelector('span:nth-child(1)');
+                const lngEl = document.querySelector('.localisation-detail').parentElement.querySelector('span:nth-child(2)');
+                if (latEl) latEl.innerHTML = `<i class="fas fa-latitude" style="color: var(--or);"></i> Lat: ${l.latitude}`;
+                if (lngEl) lngEl.innerHTML = `<i class="fas fa-longitude" style="color: var(--or);"></i> Lng: ${l.longitude}`;
+            }
+
+            // Update price
             const priceNode = document.querySelector('.prix');
-            if (priceNode) priceNode.textContent = (l.price ? (l.price + ' ' + (l.currency||'')) : priceNode.textContent);
-            // contact button handler
+            if (priceNode) {
+                priceNode.textContent = l.price || 'Prix sur demande';
+            }
+            const deviseNode = document.querySelector('.devise');
+            if (deviseNode) {
+                deviseNode.textContent = l.currency || '';
+            }
+
+            // Wire contact button
             const contactBtn = document.querySelector('.contact-actions .btn-primary');
-            if (contactBtn) contactBtn.addEventListener('click', function(){
-                if (!confirm('Voulez-vous contacter le propriétaire de cette annonce ?')) return;
-                alert('Fonction contact non-implémentée dans la démo.');
-            });
+            if (contactBtn) {
+                contactBtn.addEventListener('click', function(e){
+                    e.preventDefault();
+                    if (!window.__loggedIn && !document.querySelector('[data-user-id]')) {
+                        KelActions.showToast('Vous devez être connecté pour contacter le propriétaire', 'error');
+                        setTimeout(() => window.location.href = 'connexion.php', 1000);
+                    } else {
+                        KelActions.showToast('Fonction de contact bientôt disponible', 'info');
+                    }
+                });
+            }
+
+            // Wire favorite button
+            const favBtn = document.querySelector('.detail-header button:first-child');
+            if (favBtn) {
+                favBtn.addEventListener('click', async function(e){
+                    e.preventDefault();
+                    const res = await KelActions.toggleFavorite(id);
+                    if (res && res.ok) {
+                        const icon = favBtn.querySelector('i');
+                        const action = res.result?.action;
+                        if (action === 'added') {
+                            icon.classList.remove('far');
+                            icon.classList.add('fas');
+                            favBtn.style.color = 'var(--or)';
+                        } else {
+                            icon.classList.remove('fas');
+                            icon.classList.add('far');
+                            favBtn.style.color = 'inherit';
+                        }
+                    }
+                });
+            }
         });
         </script>
     </body>

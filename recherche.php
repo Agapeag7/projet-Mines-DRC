@@ -240,6 +240,9 @@
 
         <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
         <script src="js/provinces-data.js"></script>
+        <script src="js/api.js"></script>
+        <script src="js/actions.js"></script>
+        <script src="js/animations.js"></script>
         <script>
         document.addEventListener('DOMContentLoaded', function () {
             const provinceSelect = document.getElementById('province-select');
@@ -314,49 +317,77 @@
             communeSelect.disabled = true;
             territoireSelect.disabled = true;
         });
-        </script>
-        <script src="js/api.js"></script>
-        <script src="js/actions.js"></script>
-        <script>
-        // Load listings via AJAX and render minimal cards
+
+        // Load listings via AJAX with better UX
         document.addEventListener('DOMContentLoaded', async function(){
             const container = document.querySelector('.liste-terrains');
+            const statsEl = document.querySelector('.resultats-stats h2');
             if (!container) return;
 
             async function renderListings(rows) {
                 container.innerHTML = '';
                 if (!rows || rows.length === 0) {
-                    container.innerHTML = '<p>Aucune annonce trouvée.</p>';
+                    container.innerHTML = `<div style="text-align: center; padding: 60px 20px; color: var(--gris-moyen);">
+                        <i class="fas fa-search" style="font-size: 3rem; opacity: 0.3; display: block; margin-bottom: 20px;"></i>
+                        <p>Aucune annonce ne correspond à votre recherche.</p>
+                        <p style="font-size: 0.9rem;">Essayez un autre critère ou consultez toutes les annonces.</p>
+                    </div>`;
+                    if (statsEl) statsEl.textContent = '0 opportunité foncière';
                     return;
                 }
+                
                 rows.forEach(l => {
                     const div = document.createElement('div');
                     div.className = 'terrain-card';
+                    const imgSrc = l.thumbnail_id ? '/KelFoncia-DRC/uploads/'+l.thumbnail_id : 'https://via.placeholder.com/180x140';
+                    const locText = [l.ville, l.province].filter(x=>x).join(', ');
+                    
                     div.innerHTML = `
-                        <img src="${l.thumbnail_id ? '/KelFoncia-DRC/uploads/'+l.thumbnail_id : 'https://via.placeholder.com/180x140'}" class="terrain-image">
+                        <a href="detail-terrain.php?id=${l.id}" style="text-decoration: none; color: inherit;">
+                            <img src="${imgSrc}" alt="${l.title}" class="terrain-image" onerror="this.src='https://via.placeholder.com/180x140'">
+                        </a>
                         <div class="terrain-infos">
-                            <h3><a href="detail-terrain.php?id=${l.id}">${l.title}</a></h3>
+                            <h3><a href="detail-terrain.php?id=${l.id}" style="color: inherit; text-decoration: none;">${l.title || 'Terrain'}</a></h3>
                             <div class="terrain-details">
-                                <span class="terrain-detail-item"><i class="fas fa-ruler-combined"></i> ${l.area_m2||''} m²</span>
-                                <span class="terrain-detail-item"><i class="fas fa-map-pin"></i> ${l.ville||''}, ${l.province||''}</span>
+                                ${l.area_m2 ? `<span class="terrain-detail-item"><i class="fas fa-ruler-combined"></i> ${l.area_m2} m²</span>` : ''}
+                                ${l.statut ? `<span class="terrain-detail-item"><i class="fas fa-file-signature"></i> ${l.statut}</span>` : ''}
+                                ${locText ? `<span class="terrain-detail-item"><i class="fas fa-map-pin"></i> ${locText}</span>` : ''}
                             </div>
+                            <span class="terrain-statut statut-verifie"><i class="fas fa-check-circle"></i> Vérifié</span>
                         </div>
                         <div class="terrain-prix">
-                            <span class="prix-valeur">${l.price||''}</span>
-                            <span class="prix-devise">${l.currency||''}</span>
+                            <span class="prix-valeur">${l.price || 'N/A'}</span>
+                            <span class="prix-devise">${l.currency || ''}</span>
+                            <button class="fav-btn" data-fav-id="${l.id}" style="margin-top: 16px; background: none; border: none; cursor: pointer; color: var(--or); font-weight: 600;">
+                                <i class="far fa-heart"></i> Favori
+                            </button>
                         </div>`;
                     container.appendChild(div);
                 });
+                
+                if (statsEl) statsEl.textContent = rows.length + ' opportunité' + (rows.length > 1 ? 's' : '') + ' foncière' + (rows.length > 1 ? 's' : '');
                 KelActions.attachFavoriteButtons('.fav-btn');
             }
 
             async function load(filters={}) {
+                container.innerHTML = `<div style="text-align: center; padding: 60px 20px;">
+                    <div style="display: inline-block;">
+                        <i class="fas fa-spinner fa-spin" style="font-size: 3rem; color: var(--or);"></i>
+                        <p style="margin-top: 20px; color: var(--gris-moyen);">Chargement des annonces...</p>
+                    </div>
+                </div>`;
+                
                 const res = await KelFonciaAPI.get('listings_list', filters);
                 if (!res || !res.ok) {
-                    container.innerHTML = '<p>Erreur de chargement des annonces.</p>';
+                    container.innerHTML = `<div style="text-align: center; padding: 60px 20px; color: #dc2626;">
+                        <i class="fas fa-exclamation-triangle" style="font-size: 3rem; opacity: 0.5; display: block; margin-bottom: 20px;"></i>
+                        <p>Erreur lors du chargement des annonces.</p>
+                        <p style="font-size: 0.9rem; margin-top: 10px;">${res?.message || 'Veuillez réessayer.'}</p>
+                    </div>`;
+                    if (statsEl) statsEl.textContent = '0 opportunité foncière';
                     return;
                 }
-                renderListings(res.listings);
+                renderListings(res.listings || []);
             }
 
             // initial load
@@ -365,22 +396,34 @@
             // wire filter buttons
             const applyBtn = document.querySelector('.filtres-actions .btn-primary');
             const resetBtn = document.querySelector('.filtres-actions .btn-outline');
+            
             applyBtn && applyBtn.addEventListener('click', function(e){
                 e.preventDefault();
                 const filters = {};
                 const prov = document.getElementById('province-select').value;
                 const ville = document.getElementById('ville-select').value;
-                if (prov) filters.province_id = prov;
+                const minArea = document.querySelector('input[placeholder="Ex: 500"]').value;
+                const maxArea = document.querySelector('input[placeholder="Ex: 10000"]').value;
+                const budget = document.querySelector('input[placeholder="Ex: 500000"]').value;
+                
+                if (prov) filters.province = prov;
                 if (ville) filters.ville = ville;
+                if (minArea) filters.min_area = minArea;
+                if (maxArea) filters.max_area = maxArea;
+                if (budget) filters.max_price = budget;
+                
                 load(filters);
             });
+            
             resetBtn && resetBtn.addEventListener('click', function(e){
                 e.preventDefault();
-                document.querySelector('form')?.reset();
+                document.querySelectorAll('.filtres-avances select, .filtres-avances input').forEach(el => el.value = '');
+                document.getElementById('ville-select').disabled = true;
+                document.getElementById('commune-select').disabled = true;
+                document.getElementById('territoire-select').disabled = true;
                 load();
             });
         });
         </script>
-        <script src="js/animations.js"></script>
     </body>
 </html>

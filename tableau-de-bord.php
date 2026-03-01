@@ -1650,22 +1650,45 @@
 
         <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
         <script src="js/api.js"></script>
+        <script src="js/actions.js"></script>
         <script>
-        // Toggle favorite buttons in dashboard (delegated)
+        // Check if logged in - redirect if not
         document.addEventListener('DOMContentLoaded', function(){
+            <?php if (!$logged): ?>
+                KelActions.showToast('Vous devez être connecté pour accéder au tableau de bord', 'error');
+                setTimeout(() => window.location.href = 'connexion.php', 1500);
+            <?php endif; ?>
+
+            // Toggle favorite buttons in dashboard (delegated)
             document.body.addEventListener('click', async function(e){
                 const t = e.target.closest('[data-fav-id]');
                 if (!t) return;
                 e.preventDefault();
                 const id = t.dataset.favId;
                 const res = await KelFonciaAPI.postJSON('toggle_favorite', { listing_id: id });
-                if (res && res.ok) alert('Favoris mis à jour'); else alert('Erreur');
+                if (res && res.ok) {
+                    const action = res.result?.action;
+                    const icon = t.querySelector('i');
+                    if (icon) {
+                        if (action === 'added') {
+                            icon.classList.remove('far');
+                            icon.classList.add('fas');
+                        } else {
+                            icon.classList.remove('fas');
+                            icon.classList.add('far');
+                        }
+                    }
+                    const msg = action === 'added' ? '❤ Ajouté aux favoris' : '♡ Retiré des favoris';
+                    KelActions.showToast(msg, 'success');
+                } else {
+                    KelActions.showToast('Erreur lors de la mise à jour des favoris', 'error');
+                }
             });
         });
         </script>
         <script src="js/animations.js"></script>
         <script>
-            // SCRIPT POUR LA NAVIGATION DANS LE TABLEAU DE BORD
+            // Navigation dans le tableau de bord
             document.addEventListener('DOMContentLoaded', function() {
                 const menuLinks = document.querySelectorAll('.dashboard-menu a');
                 const sections = {
