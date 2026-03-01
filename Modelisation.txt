@@ -1,0 +1,199 @@
+Dictionnaire des données — Projet KELFONCIA (RDC)
+
+But
+------
+Ce document décrit le dictionnaire des données (entités, attributs, types, contraintes, relations et exemples) pour l'application web de gestion d'opportunités foncières (liste de terrains, publication, recherche, comptes utilisateurs, KYC, messagerie, favoris, notifications, etc.).
+
+Conventions
+------
+- Types : `string`, `text`, `integer`, `decimal`, `boolean`, `datetime`, `date`, `enum`, `geo` (lat/lon), `uuid`.
+- Cardinalité : 1:1, 1:N, N:M.
+- `required` indique champ obligatoire côté serveur. `unique` indique unicité au niveau DB.
+
+Entités principales
+------
+
+1) User (utilisateur)
+ - id: uuid, required, unique — Identifiant utilisateur.
+ - role: enum [admin, agent, proprietaire, promoteur, visiteur], required — Rôle applicatif.
+ - email: string, required, unique, format email — Adresse de connexion.
+ - phone: string, nullable, unique — Numéro de téléphone (format international recommandé).
+ - password_hash: string, required — Hash sécurisé du mot de passe.
+ - display_name: string, nullable — Nom affiché.
+ - profile_picture_id: uuid, nullable — référence à `Media` (avatar).
+ - kyc_status: enum [none, pending, verified, rejected], default `none` — Statut KYC.
+ - status: enum [active, suspended, deleted], default `active` — État du compte.
+ - created_at: datetime, required — Date de création.
+ - updated_at: datetime — Date de dernière mise à jour.
+
+Relations
+ - 1 User -> N Listing (un utilisateur peut publier plusieurs terrains)
+ - 1 User -> N Message (messages envoyés)
+ - 1 User -> N Notification
+ - N User <-> N Listing via Favorite
+
+Exemple
+ - { "id": "uuid-usr-1", "role": "proprietaire", "email": "owner@example.cd", "kyc_status": "verified" }
+
+2) Listing (terrain / opportunité foncière)
+ - id: uuid, required, unique
+ - owner_id: uuid, required — référence `User` (propriétaire ou agent)
+ - title: string, required — Titre court (ex. "Terrain à Gombe • 4500m²")
+ - description: text, nullable — Description complète.
+ - area_m2: decimal, nullable — Surface en m².
+ - price: decimal, nullable — Prix (monétaire), stocker en unité minimale (ex. FC) ou centimes.
+ - currency: enum [CDF, USD, EUR], default CDF
+ - statut: enum [available, reserved, sold, archived], default `available`
+ - address_text: string, nullable — Texte d'adresse libre.
+ - location: geo (latitude, longitude) nullable — Coordonnées pour la carte.
+ - province: string, nullable — Nom de la province (indexable)
+ - ville: string, nullable
+ - commune: string, nullable
+ - territoire: string, nullable
+ - features: json / key-value, nullable — Caractéristiques (e.g. { "viabilise": true, "eau": true, "electricite": true })
+ - documents: array[uuid] — références à `Media` (titres, copies d'acte)
+ - images: array[uuid] — références à `Media`
+ - thumbnail_id: uuid, nullable — id Media pour vignette
+ - visible: boolean, default true — Publication publique
+ - is_published: boolean, default false — Flag contenu validé
+ - view_count: integer, default 0
+ - fav_count: integer, default 0 (dérivé)
+ - contact_count: integer, default 0 (dérivé)
+ - created_at: datetime
+ - updated_at: datetime
+
+Relations
+ - 1 Listing -> N Media (images, documents)
+ - 1 Listing -> N Message (conversations liées)
+ - N Listing <-> N User via Favorite
+
+Exemple
+ - { "id":"uuid-list-1","title":"Terrain Gombe","area_m2":4500,"price":1200000,"currency":"USD","province":"Kinshasa","location":{lat:-4.3, lng:15.3}} 
+
+3) Media (fichiers : images, documents)
+ - id: uuid, required
+ - owner_id: uuid, nullable — User qui a uploadé
+ - listing_id: uuid, nullable — si le fichier lié à un listing
+ - type: enum [image, document, video, avatar, other]
+ - filename: string
+ - path: string, required — URL ou chemin relatif (ex: uploads/listings/xxx.jpg)
+ - mime_type: string
+ - size_bytes: integer
+ - width: integer nullable (images)
+ - height: integer nullable
+ - caption: string nullable
+ - is_public: boolean default true
+ - created_at: datetime
+
+Notes
+ - Les documents sensibles (acte, identité) doivent avoir accès restreint et marqués `is_public=false`.
+
+4) Province / Ville / Commune / Territoire (Localisation)
+ - source : reprise depuis js/provinces-data.js (liste hiérarchique)
+ - province: { code: string, name: string }
+ - ville: { code: string, name: string, province_code }
+ - commune: { code: string, name: string, ville_code }
+ - territoire: { code: string, name: string, province_code }
+
+Utilisation
+ - Tables de référence : stocker code + libellé pour requêtes et filtrage.
+
+5) Favorite (favoris)
+ - id: uuid
+ - user_id: uuid, required
+ - listing_id: uuid, required
+ - created_at: datetime
+
+Contraintes
+ - unique(user_id, listing_id)
+
+6) Message / Conversation (messagerie)
+ - conversation_id: uuid (regroupe messages entre participants)
+ - id: uuid (message id)
+ - sender_id: uuid, required
+ - receiver_id: uuid nullable (pour messages 1:1) or participants list in conversation
+ - listing_id: uuid nullable — conversation liée à une annonce
+ - content: text, nullable
+ - attachments: array[uuid] (références Media)
+ - is_read: boolean default false
+ - created_at: datetime
+
+Relations
+ - 1 Conversation -> N Message
+ - N Conversation <-> N User (participants)
+
+7) Notification
+ - id: uuid
+ - user_id: uuid (destinataire)
+ - type: enum [new_message, listing_view, listing_favorite, booking_request, kyc_update, system]
+ - payload: json — données contextuelles (ex. { listing_id, message_id })
+ - is_read: boolean default false
+ - created_at: datetime
+
+8) KYCRecord
+ - id: uuid
+ - user_id: uuid
+ - kyc_type: enum [id_scan, facial_recog]
+ - status: enum [pending, approved, rejected]
+ - evidence_media_ids: array[uuid]
+ - review_notes: text nullable
+ - requested_at: datetime
+ - reviewed_at: datetime nullable
+
+9) Testimonial (témoignage)
+ - id: uuid
+ - author_name: string
+ - author_role: string nullable
+ - text: text
+ - rating: integer (1-5) nullable
+ - created_at: datetime
+
+10) Pricing / Subscription (si applicable)
+ - id: uuid
+ - plan_name: string
+ - price: decimal
+ - currency: enum
+ - features: json
+ - billing_cycle: enum [monthly, yearly]
+
+11) Analytics / Stats
+ - listing_views: { listing_id, date, views }
+ - user_logins: { user_id, date, count }
+ - aggregate counters dérivés (views, favorites)
+
+12) PageContent / CMS (contenu statique minimal)
+ - key: string unique (ex. hero_title)
+ - value: text
+ - locale: string nullable
+
+Indexation & Performance
+------
+- Indexer : `users.email`, `users.phone`, `listings.province`, `listings.ville`, `listings.location` (geo), `favorites(user_id, listing_id)`, `media.path`.
+- Pour recherches géographiques : utiliser index spatial (PostGIS / Mongo geo indexes) sur `location`.
+
+Sécurité & confidentialité
+------
+- Stocker `password_hash` uniquement (bcrypt/argon2). Ne jamais stocker mots de passe en clair.
+- Documents KYC : accès restreint, chiffrement au repos recommandé.
+- Champs personnels (phone, email) protégés et pas exposés publiquement sans consentement.
+
+API / Contrats Front-end (champs fréquemment utilisés)
+------
+- Listing summary (pour liste): { id, title, thumbnail_url, price, currency, area_m2, province, ville, statut, created_at }
+- Listing detail: toutes les propriétés de `Listing` + `images[]` (objet Media simplifié) + `documents[]` (si accès)
+- User profile (public): { id, display_name, profile_picture_url, role }
+- Auth responses : token JWT, `user` objet (sans `password_hash`)
+
+Migration vers schéma relationnel (exemple simplifié)
+------
+- users(id PK), listings(id PK, owner_id FK users.id), media(id PK, listing_id FK listings.id, owner_id FK users.id), favorites(id PK, user_id FK, listing_id FK), messages(id PK, conversation_id FK, sender_id FK), conversations(id PK), notifications(id PK, user_id FK), kyc_records(id PK, user_id FK).
+
+Notes finales
+------
+- Les champs `features` et `payload` sont gardés en JSON pour flexibilité; envisager tables normalisées si besoin d'interrogations fréquentes.
+- Penser à la gestion des devises (conversion et affichage).
+- Prévoir mécanisme d'audit (who/when) pour actions critiques (publication, suppression, validation KYC).
+
+---
+Fichier associé : voir structure front-end (pages HTML et `js/provinces-data.js`) pour champs de formulaire et modèles JSON attendus.
+
