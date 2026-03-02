@@ -24,7 +24,13 @@
         const fd = new FormData(form);
         try {
             const res = await fetch(url, { method: 'POST', body: fd, credentials: 'same-origin' });
-            return await res.json();
+            try {
+                return await res.json();
+            } catch(jsonErr) {
+                const text = await res.text();
+                console.error('JSON parse failed', jsonErr, text);
+                return { error: jsonErr.message, raw: text };
+            }
         } catch (e) { return { error: e.message }; }
     }
 
@@ -32,7 +38,13 @@
         const url = endpointFor(action);
         try {
             const res = await fetch(url, { method: 'POST', body: JSON.stringify(obj), headers: { 'Content-Type': 'application/json' }, credentials: 'same-origin' });
-            return await res.json();
+            try {
+                return await res.json();
+            } catch(jsonErr) {
+                const text = await res.text();
+                console.error('JSON parse failed', jsonErr, text);
+                return { error: jsonErr.message, raw: text };
+            }
         } catch (e) { return { error: e.message }; }
     }
 
@@ -42,7 +54,13 @@
         Object.keys(params).forEach(k => u.searchParams.set(k, params[k]));
         try {
             const res = await fetch(u.toString(), { credentials: 'same-origin' });
-            return await res.json();
+            try {
+                return await res.json();
+            } catch(jsonErr) {
+                const text = await res.text();
+                console.error('JSON parse failed', jsonErr, text);
+                return { error: jsonErr.message, raw: text };
+            }
         } catch(e) { return { error: e.message }; }
     }
 

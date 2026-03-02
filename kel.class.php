@@ -17,6 +17,7 @@
         }
         public function create(array $data) { return $this->um->create($data); }
         public function findByEmail($email) { return $this->um->findByEmail($email); }
+        public function findByPhone($phone) { return $this->um->findByPhone($phone); }
         public function findById($id) { return $this->um->findById($id); }
         public function verifyCredentials($email, $password) { return $this->um->verifyCredentials($email, $password); }
     }
@@ -103,6 +104,14 @@
             public function findByEmail($email) {
                 $stmt = $this->pdo->prepare('SELECT * FROM users WHERE email = ? LIMIT 1');
                 $stmt->execute([$email]);
+                return $stmt->fetch();
+            }
+
+            // lookup by phone for uniqueness checks
+            public function findByPhone($phone) {
+                if (!$phone) return false;
+                $stmt = $this->pdo->prepare('SELECT * FROM users WHERE phone = ? LIMIT 1');
+                $stmt->execute([$phone]);
                 return $stmt->fetch();
             }
 

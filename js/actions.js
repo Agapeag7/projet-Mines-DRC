@@ -64,37 +64,47 @@
             return { error: 'missing_fields' };
         }
         const res = await window.KelFonciaAPI.postJSON('login', { email, password });
+        // if backend indicates 2FA is needed, prompt user for code
+        if (res && res.need_2fa) {
+            const code = prompt('Entrez le code de vérification envoyé');
+            if (code) {
+                return await verify2fa(code);
+            } else {
+                return { error: '2fa_cancelled' };
+            }
+        }
         return res;
     }
 
     async function register(obj){
         console.debug('register payload', obj);
-        // Validate on client side first
-        if (!obj.email || !obj.password) {
-            showToast('Email et mot de passe obligatoires', 'error');
+        // basic required
+        if (!obj.email || !obj.password || !obj.display_name) {
+            showToast('Email, mot de passe et nom sont obligatoires', 'error');
             return { error: 'missing_fields' };
         }
-        
+        // RFC‑like email validation
+        const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2}$/;
+        if (!emailRegex.test(obj.email)) {
+            showToast('Adresse e‑mail invalide', 'error');
+            return { error: 'invalid_email' };
+        }
         if (obj.password !== obj.password_confirm) {
             showToast('Les mots de passe ne correspondent pas', 'error');
             return { error: 'password_mismatch' };
         }
-        
         if (obj.password.length < 8) {
             showToast('Le mot de passe doit contenir au moins 8 caractères', 'error');
             return { error: 'password_weak' };
         }
-
-        if (!obj.display_name || !obj.phone) {
-            showToast('Tous les champs sont obligatoires', 'error');
-            return { error: 'missing_fields' };
+        // phone optional but if provided must match RDC patterns
+        if (obj.phone) {
+            const phoneRegex = /^(?:(?:099|097|081|082|086)\d{7}|(?:\+243|243|0)(?:99|97|81|82|86)\d{7})$/;
+            if (!phoneRegex.test(obj.phone)) {
+                showToast('Numéro de téléphone invalide', 'error');
+                return { error: 'invalid_phone' };
+            }
         }
-
-        if (!/^\+?[\d\s\-()]+$/.test(obj.phone)) {
-            showToast('Numéro de téléphone invalide', 'error');
-            return { error: 'invalid_phone' };
-        }
-
         const res = await window.KelFonciaAPI.postJSON('register', obj);
         // after registration attempt, if we have accumulated KYC evidence send it
         if (res && res.ok && window._kycEvidence && window._kycEvidence.length) {
@@ -181,6 +191,11 @@
         });
     }
 
+    async function verify2fa(code){
+        if (!code) return { error: 'missing_code' };
+        return await window.KelFonciaAPI.postJSON('verify_2fa', { code });
+    }
+
     async function createListingFromForm(form){
         const res = await window.KelFonciaAPI.postForm('listings_create', form);
         return res;
@@ -258,6 +273,7 @@
     // expose API
     window.KelActions = {
         login,
+        verify2fa,
         attachLoginForm,
         createListingFromForm,
         attachCreateListingForm,

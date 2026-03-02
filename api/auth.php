@@ -26,31 +26,31 @@ if (!$action) {
 if ($action === 'login') {
     $email = trim($input['email'] ?? '');
     $password = $input['password'] ?? '';
-    
+
     if (!$email || !$password) {
         Utils::jsonResponse(['error' => 'missing_credentials', 'message' => 'Email et mot de passe requis'], 400);
     }
-    
+
     $user = $um->verifyCredentials($email, $password);
     if (!$user) {
         Utils::jsonResponse(['error' => 'invalid_credentials', 'message' => 'Email ou mot de passe incorrect'], 401);
     }
-    
-    // set session
-    $_SESSION['user_id'] = $user['id'];
-    $_SESSION['email'] = $user['email'];
-    $_SESSION['role'] = $user['role'];
-    
+
+    // generate 2FA code and store temporarily in session
+    $code = rand(100000, 999999);
+    $_SESSION['pending_2fa_user'] = $user['id'];
+    $_SESSION['pending_2fa_code'] = $code;
+    $_SESSION['pending_2fa_expires'] = time() + 300; // valid 5 minutes
+
+    // in real application you would dispatch the code by email/SMS
+    // for development we return it in response (do NOT do this in prod)
     Utils::jsonResponse([
         'ok' => true,
-        'message' => 'Connexion réussie',
-        'user' => [
-            'id' => $user['id'],
-            'email' => $user['email'],
-            'display_name' => $user['display_name'],
-            'role' => $user['role']
-        ]
-    ], 200);
+        'need_2fa' => true,
+        'message' => 'Code de vérification envoyé',
+        'code' => $code
+    ]);
+    return;
 }
 
 if ($action === 'register') {
@@ -70,41 +70,48 @@ if ($action === 'register') {
     if (!empty($missing)) {
         Utils::jsonResponse(['error' => 'missing_fields', 'message' => 'Champs manquants: '.implode(', ', $missing), 'missing' => $missing], 400);
     }
-    
-    if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+
+    // email regex stricter
+    if (!preg_match('/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2}$/', $email)) {
         Utils::jsonResponse(['error' => 'invalid_email', 'message' => 'Email invalide'], 400);
     }
-    
+
     if ($password !== $password_confirm) {
         Utils::jsonResponse(['error' => 'password_mismatch', 'message' => 'Les mots de passe ne correspondent pas'], 400);
     }
-    
+
     if (strlen($password) < 8) {
         Utils::jsonResponse(['error' => 'password_weak', 'message' => 'Le mot de passe doit contenir au moins 8 caractères'], 400);
     }
-    
+
     $valid_roles = ['proprietaire', 'promoteur', 'investisseur'];
     if (!in_array($role, $valid_roles)) {
         Utils::jsonResponse(['error' => 'invalid_role', 'message' => 'Rôle invalide'], 400);
     }
-    
+
     if ($um->findByEmail($email)) {
         Utils::jsonResponse(['error' => 'email_exists', 'message' => 'Cet email est déjà utilisé'], 409);
+    }
+
+    // phone validation / uniqueness
+    if ($phone) {
+        $phone_regex = '/^(?:(?:099|097|081|082|086)\d{7}|(?:\+243|243|0)(?:99|97|81|82|86)\d{7})$/';
+        if (!preg_match($phone_regex, $phone)) {
+            Utils::jsonResponse(['error' => 'invalid_phone', 'message' => 'Numéro de téléphone invalide'], 400);
+        }
+        if ($um->findByPhone($phone)) {
+            Utils::jsonResponse(['error' => 'phone_exists', 'message' => 'Ce numéro est déjà utilisé'], 409);
+        }
     }
 
     try {
         $id = $um->create([
             'email' => $email,
+            'phone' => $phone ?: null,
             'password' => $password,
-            'role' => $role,
             'display_name' => $display_name,
-            'phone' => $phone
+            'role' => $role,
         ]);
-        
-        // Auto-login after registration
-        $_SESSION['user_id'] = $id;
-        $_SESSION['email'] = $email;
-        
         Utils::jsonResponse([
             'ok' => true,
             'id' => $id,
@@ -114,6 +121,32 @@ if ($action === 'register') {
     } catch (Exception $e) {
         Utils::jsonResponse(['error' => 'register_failed', 'message' => $e->getMessage()], 500);
     }
+}
+
+
+if ($action === 'verify_2fa') {
+    $code = trim($input['code'] ?? '');
+    if (!$code || !isset($_SESSION['pending_2fa_user'])) {
+        Utils::jsonResponse(['error' => 'missing_2fa', 'message' => 'Code requis'], 400);
+    }
+    if (time() > ($_SESSION['pending_2fa_expires'] ?? 0)) {
+        Utils::jsonResponse(['error' => 'code_expired', 'message' => 'Le code a expiré'], 400);
+    }
+    if ($code != $_SESSION['pending_2fa_code']) {
+        Utils::jsonResponse(['error' => 'invalid_code', 'message' => 'Code incorrect'], 401);
+    }
+    // complete login
+    $user = $um->findById($_SESSION['pending_2fa_user']);
+    if (!$user) {
+        Utils::jsonResponse(['error' => 'user_not_found'], 404);
+    }
+    // set session permanently
+    $_SESSION['user_id'] = $user['id'];
+    $_SESSION['email'] = $user['email'];
+    $_SESSION['role'] = $user['role'];
+    // cleanup
+    unset($_SESSION['pending_2fa_user'], $_SESSION['pending_2fa_code'], $_SESSION['pending_2fa_expires']);
+    Utils::jsonResponse(['ok' => true, 'message' => 'Connexion 2FA réussie']);
 }
 
 Utils::jsonResponse(['error' => 'unknown_action'], 400);
