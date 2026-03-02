@@ -85,7 +85,8 @@
 
             public function create(array $data) {
                 $id = Utils::uuidv4();
-                $sql = 'INSERT INTO users (id, role, email, phone, password_hash, display_name, profile_picture_id, kyc_status, status, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, NOW())';
+                // note: make sure your users table has a 'face_descriptor' TEXT column
+                $sql = 'INSERT INTO users (id, role, email, phone, password_hash, display_name, profile_picture_id, kyc_status, status, face_descriptor, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW())';
                 $stmt = $this->pdo->prepare($sql);
                 $stmt->execute([
                     $id,
@@ -96,7 +97,8 @@
                     $data['display_name'] ?? null,
                     $data['profile_picture_id'] ?? null,
                     $data['kyc_status'] ?? 'none',
-                    $data['status'] ?? 'active'
+                    $data['status'] ?? 'active',
+                    isset($data['face_descriptor']) ? json_encode($data['face_descriptor']) : null
                 ]);
                 return $id;
             }
@@ -119,6 +121,20 @@
                 $stmt = $this->pdo->prepare('SELECT * FROM users WHERE id = ? LIMIT 1');
                 $stmt->execute([$id]);
                 return $stmt->fetch();
+            }
+
+            /**
+             * Return all users with non-null face_descriptor
+             * each row contains ['id'=>..., 'face_descriptor'=>json-string]
+             */
+            public function allFaceDescriptors() {
+                $stmt = $this->pdo->query('SELECT id, face_descriptor FROM users WHERE face_descriptor IS NOT NULL AND face_descriptor != ""');
+                return $stmt->fetchAll();
+            }
+
+            public function updateFaceDescriptor($id, $descriptor) {
+                $stmt = $this->pdo->prepare('UPDATE users SET face_descriptor = ? WHERE id = ?');
+                return $stmt->execute([json_encode($descriptor), $id]);
             }
 
             public function verifyCredentials($email, $password) {

@@ -66,7 +66,8 @@
         const res = await window.KelFonciaAPI.postJSON('login', { email, password });
         // if backend indicates 2FA is needed, prompt user for code
         if (res && res.need_2fa) {
-            const code = prompt('Entrez le code de vérification envoyé');
+            showToast('Un code a été envoyé à votre adresse email. Vérifiez votre boîte.', 'info');
+            const code = prompt('Entrez le code de vérification reçu par email');
             if (code) {
                 return await verify2fa(code);
             } else {
@@ -104,6 +105,10 @@
                 showToast('Numéro de téléphone invalide', 'error');
                 return { error: 'invalid_phone' };
             }
+        }
+        // attach descriptor if available; server will perform the comparison
+        if (window._kycDescriptor) {
+            obj.face_descriptor = window._kycDescriptor;
         }
         const res = await window.KelFonciaAPI.postJSON('register', obj);
         // after registration attempt, if we have accumulated KYC evidence send it

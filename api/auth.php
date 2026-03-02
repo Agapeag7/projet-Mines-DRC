@@ -42,13 +42,18 @@ if ($action === 'login') {
     $_SESSION['pending_2fa_code'] = $code;
     $_SESSION['pending_2fa_expires'] = time() + 300; // valid 5 minutes
 
-    // in real application you would dispatch the code by email/SMS
-    // for development we return it in response (do NOT do this in prod)
+    // dispatch by email or SMS - simple mail stub for now
+    $to = $user['email'];
+    $subject = 'Votre code de vérification KelFoncia';
+    $body = "Bonjour,\n\nVotre code de vérification est : $code\nIl expire dans 5 minutes.\n\nCordialement,\nKelFoncia";
+    // @phpstan-ignore-next-line
+    @mail($to, $subject, $body);
+    // if you have a gateway, send SMS to $user['phone'] instead/also
+
     Utils::jsonResponse([
         'ok' => true,
         'need_2fa' => true,
-        'message' => 'Code de vérification envoyé',
-        'code' => $code
+        'message' => 'Code de vérification envoyé par email.'
     ]);
     return;
 }
@@ -93,6 +98,26 @@ if ($action === 'register') {
         Utils::jsonResponse(['error' => 'email_exists', 'message' => 'Cet email est déjà utilisé'], 409);
     }
 
+    // face descriptor duplicate check
+    $descriptor = $input['face_descriptor'] ?? null;
+    if ($descriptor && is_array($descriptor)) {
+        // compare with existing descriptors
+        $threshold = 0.6;
+        foreach ($um->allFaceDescriptors() as $row) {
+            $existing = json_decode($row['face_descriptor'], true);
+            if (!is_array($existing)) continue;
+            $sum = 0;
+            for ($i = 0; $i < count($existing); $i++) {
+                $diff = ($existing[$i] ?? 0) - ($descriptor[$i] ?? 0);
+                $sum += $diff * $diff;
+            }
+            $dist = sqrt($sum);
+            if ($dist < $threshold) {
+                Utils::jsonResponse(['error' => 'face_exists', 'message' => 'Un compte avec ce visage existe déjà', 'match_id' => $row['id'], 'distance' => $dist], 409);
+            }
+        }
+    }
+
     // phone validation / uniqueness
     if ($phone) {
         $phone_regex = '/^(?:(?:099|097|081|082|086)\d{7}|(?:\+243|243|0)(?:99|97|81|82|86)\d{7})$/';
@@ -111,6 +136,7 @@ if ($action === 'register') {
             'password' => $password,
             'display_name' => $display_name,
             'role' => $role,
+            'face_descriptor' => $descriptor ?? null,
         ]);
         Utils::jsonResponse([
             'ok' => true,

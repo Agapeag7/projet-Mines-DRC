@@ -538,7 +538,7 @@
                             <div class="kyc-section">
                                 <h3 style="font-size: 1.1rem; color: var(--bleu-pro); margin-bottom: 16px; text-align: center;">
                                     <i class="fas fa-shield-alt" style="color: var(--or); margin-right: 8px;"></i>
-                                    Vérification KYC Obligatoire
+                                    Vérification KYC (facultative)
                                 </h3>
                                 <p style="font-size: 0.9rem; color: var(--gris-moyen); text-align: center; margin-bottom: 20px;">
                                     Pour sécuriser votre compte professionnel, choisissez une méthode de vérification d'identité.
@@ -704,10 +704,14 @@
                 openModal('Scanner Carte d\'Électeur', 'Positionnez votre carte d\'électeur dans le cadre et capturez la photo.');
             });
             
-            document.getElementById('facial-recog').addEventListener('click', function(e){
+            document.getElementById('facial-recog').addEventListener('click', async function(e){
                 e.preventDefault();
                 currentMode = 'facial';
                 openModal('Reconnaissance Faciale', 'Positionnez-vous face à la caméra et capturez votre photo.');
+                // preload models to shorten wait after capture
+                if (window.faceapi) {
+                    ensureFaceModel().catch(console.warn);
+                }
             });
             
             closeBtn.addEventListener('click', closeModal);
@@ -728,15 +732,40 @@
                 resetCamera();
             }
             
+            // IMPORTANT: to avoid CDN dependency, download the model files
+            // (tiny_face_detector_model-weights_manifest.json, etc.) from the
+            // face-api.js repo and place them in `public/models` or the root of
+            // this project. The path below (/KelFoncia-DRC/models) should point to
+            // that directory.  Example CLI:
+            //   mkdir -p C:/xampp/htdocs/KelFoncia-DRC/models
+            //   # copy files from https://github.com/justadudewhohacks/face-api.js/tree/master/weights
+            //
             async function ensureFaceModel() {
                 if (window.faceModelLoaded) return;
+                const localPath = '/KelFoncia-DRC/models';
+                const cdnPath = 'https://cdn.jsdelivr.net/gh/justadudewhohacks/face-api.js/models';
                 try {
-                    // load tiny face detector from github CDN
-                    await faceapi.nets.tinyFaceDetector.loadFromUri('https://cdn.jsdelivr.net/gh/justadudewhohacks/face-api.js/models');
-                    window.faceModelLoaded = true;
-                } catch(e){
-                    console.warn('face-api model load failed', e);
+                    // try local directory first (copy pretrained *.json files there)
+                    await Promise.all([
+                        faceapi.nets.tinyFaceDetector.loadFromUri(localPath),
+                        faceapi.nets.faceLandmark68Net.loadFromUri(localPath),
+                        faceapi.nets.faceRecognitionNet.loadFromUri(localPath)
+                    ]);
+                    console.debug('loaded face models from local path', localPath);
+                } catch(err) {
+                    console.warn('loading local face models failed, falling back to CDN', err);
+                    try {
+                        await Promise.all([
+                            faceapi.nets.tinyFaceDetector.loadFromUri(cdnPath),
+                            faceapi.nets.faceLandmark68Net.loadFromUri(cdnPath),
+                            faceapi.nets.faceRecognitionNet.loadFromUri(cdnPath)
+                        ]);
+                        console.debug('loaded face models from CDN');
+                    } catch(e2) {
+                        console.error('face-api model load failed completely', e2);
+                    }
                 }
+                window.faceModelLoaded = true;
             }
 
             function startCamera() {
@@ -793,14 +822,22 @@
 
                 // run actual face-api detection if facial mode
                 if (currentMode === 'facial' && window.faceapi) {
-                    await ensureFaceModel();
-                    const detection = await faceapi.detectSingleFace(canvas, new faceapi.TinyFaceDetectorOptions());
-                    if (!detection) {
-                        status.textContent = 'Aucun visage détecté. Réessayez.';
+                    try {
+                        await ensureFaceModel();
+                        const det = await faceapi.detectSingleFace(canvas, new faceapi.TinyFaceDetectorOptions()).withFaceLandmarks().withFaceDescriptor();
+                        console.debug('face detection result', det);
+                        if (!det) {
+                            status.textContent = 'Aucun visage détecté. Réessayez.';
+                            status.style.color = '#dc2626';
+                        } else {
+                            status.textContent = 'Visage détecté avec succès.';
+                            status.style.color = 'green';
+                            window._kycDescriptor = det.descriptor; // save for recognition
+                        }
+                    } catch(err) {
+                        console.error('face-api detection error', err);
+                        status.textContent = 'Erreur lors de l\'analyse faciale.';
                         status.style.color = '#dc2626';
-                    } else {
-                        status.textContent = 'Visage détecté avec succès.';
-                        status.style.color = 'green';
                     }
                 } else {
                     // simple id_card placeholder
@@ -815,6 +852,9 @@
                         status.style.color = ok ? 'green' : '#dc2626';
                     }, 1200);
                 }
+
+                // make canvas responsive
+                canvas.style.maxWidth = '100%';
 
                 // save evidence for later KYC submission
                 const dataUrl = canvas.toDataURL('image/jpeg');
