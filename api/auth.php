@@ -101,7 +101,7 @@ if ($action === 'register') {
     // face descriptor duplicate check
     $descriptor = $input['face_descriptor'] ?? null;
     if ($descriptor && is_array($descriptor)) {
-        // compare with existing descriptors
+        // compare with existing descriptors (only photos already saved in DB)
         $threshold = 0.6;
         foreach ($um->allFaceDescriptors() as $row) {
             $existing = json_decode($row['face_descriptor'], true);
@@ -115,6 +115,29 @@ if ($action === 'register') {
             if ($dist < $threshold) {
                 Utils::jsonResponse(['error' => 'face_exists', 'message' => 'Un compte avec ce visage existe déjà', 'match_id' => $row['id'], 'distance' => $dist], 409);
             }
+        }
+    }
+
+    // if a photo was sent alongside the descriptor, keep it for storage
+    $photoData = $input['face_photo'] ?? null;
+    $savedPhotoPath = null;
+    if ($photoData && is_string($photoData)) {
+        // if the string looks like a data URI, decode and write to /img
+        if (preg_match('#^data:image\/([a-zA-Z]+);base64,#', $photoData, $m)) {
+            $ext = strtolower($m[1]) === 'jpeg' ? 'jpg' : strtolower($m[1]);
+            $base64 = substr($photoData, strpos($photoData, ',') + 1);
+            $bin = base64_decode($base64);
+            if ($bin !== false) {
+                // generate temporary filename; we will rename to use user id when known
+                $tempName = uniqid('face_', true) . ".{$ext}";
+                $filePath = __DIR__ . '/../img/' . $tempName;
+                if (@file_put_contents($filePath, $bin) !== false) {
+                    $savedPhotoPath = 'img/' . $tempName;
+                }
+            }
+        } else {
+            // treat as plain text (maybe user wants to store base64 directly)
+            $savedPhotoPath = $photoData;
         }
     }
 
@@ -137,7 +160,22 @@ if ($action === 'register') {
             'display_name' => $display_name,
             'role' => $role,
             'face_descriptor' => $descriptor ?? null,
+            // if we decoded an image earlier, temporarily stored in $savedPhotoPath
+            // it will be updated/renamed after creation below
+            'face_photo' => $savedPhotoPath
         ]);
+        // if we wrote a temporary file and the id is known we can rename it to
+        // include the user id for clarity and update the record again.
+        if ($savedPhotoPath && strpos($savedPhotoPath, 'img/face_') === 0) {
+            $ext = pathinfo($savedPhotoPath, PATHINFO_EXTENSION);
+            $newName = "img/{$id}.{$ext}";
+            $oldFs = __DIR__ . '/../' . $savedPhotoPath;
+            $newFs = __DIR__ . '/../' . $newName;
+            if (@rename($oldFs, $newFs)) {
+                $savedPhotoPath = $newName;
+                $um->updateFacePhoto($id, $newName);
+            }
+        }
         Utils::jsonResponse([
             'ok' => true,
             'id' => $id,

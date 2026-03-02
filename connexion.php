@@ -534,6 +534,9 @@
                                 </label>
                             </div>
                             
+                            <!-- preview of the captured facial photo -->
+                            <div id="face-preview-container" style="text-align:center; margin-bottom:16px;"></div>
+
                             <!-- SECTION KYC -->
                             <div class="kyc-section">
                                 <h3 style="font-size: 1.1rem; color: var(--bleu-pro); margin-bottom: 16px; text-align: center;">
@@ -733,16 +736,28 @@
             }
             
             // IMPORTANT: to avoid CDN dependency, download the model files
-            // (tiny_face_detector_model-weights_manifest.json, etc.) from the
-            // face-api.js repo and place them in `public/models` or the root of
-            // this project. The path below (/KelFoncia-DRC/models) should point to
-            // that directory.  Example CLI:
-            //   mkdir -p C:/xampp/htdocs/KelFoncia-DRC/models
-            //   # copy files from https://github.com/justadudewhohacks/face-api.js/tree/master/weights
+            // (tiny_face_detector_model-weights_manifest.json, face_landmark_68_model-weights_manifest.json, etc.)
+            // from the face-api.js repo and place them in a directory named
+            // `models` at the web root of this project.  The client code builds a
+            // path at runtime so the URI becomes something like
+            // `/KelFoncia-DRC/models/<filename>`.  If the directory is missing the
+            // browser will log 404s and the page will fall back to the CDN.
             //
+            // The PHP below ensures the directory exists so you can copy the
+            // files without having to manually create the folder.
+            <?php
+            $modelsPath = __DIR__ . '/../models';
+            if (!is_dir($modelsPath)) {
+                mkdir($modelsPath, 0755, true);
+            }
+            ?>
             async function ensureFaceModel() {
                 if (window.faceModelLoaded) return;
-                const localPath = '/KelFoncia-DRC/models';
+                // build an absolute URI pointing to the `models` directory next to
+                // the current page; keep things working if the app is served from a
+                // sub‑folder or the filename changes.
+                const basePath = location.pathname.replace(/\/[^/]+$/, '');
+                const localPath = `${location.origin}${basePath}/models`;
                 const cdnPath = 'https://cdn.jsdelivr.net/gh/justadudewhohacks/face-api.js/models';
                 try {
                     // try local directory first (copy pretrained *.json files there)
@@ -833,6 +848,29 @@
                             status.textContent = 'Visage détecté avec succès.';
                             status.style.color = 'green';
                             window._kycDescriptor = det.descriptor; // save for recognition
+                            // store the actual photo (base64) so it can later be sent to
+                            // the registration endpoint and persisted in the users table
+                            window._kycFacePhoto = canvas.toDataURL('image/jpeg');
+                            // perform a quick duplicate check and inform user
+                            try {
+                                const chk = await fetch('/KelFoncia-DRC/api/face.php?action=recognize', {
+                                    method: 'POST',
+                                    headers: {'Content-Type': 'application/json'},
+                                    credentials: 'same-origin',
+                                    body: JSON.stringify({ descriptor: window._kycDescriptor })
+                                });
+                                const chkJson = await chk.json();
+                                if (chkJson && chkJson.match) {
+                                    status.textContent = 'Ce visage est déjà associé à un utilisateur.';
+                                    status.style.color = '#dc2626';
+                                    window._faceExists = true;
+                                    if (window.KelActions && typeof window.KelActions.showToast === 'function') {
+                                        window.KelActions.showToast('Ce visage existe déjà dans notre base ; l\'inscription peut être refusée.', 'error');
+                                    }
+                                }
+                            } catch(e) {
+                                console.warn('quick face check failed', e);
+                            }
                         }
                     } catch(err) {
                         console.error('face-api detection error', err);
@@ -861,9 +899,26 @@
                 if (!window._kycEvidence) window._kycEvidence = [];
                 window._kycEvidence.push(dataUrl);
                 window._kycType = currentMode; // 'id_card' or 'facial'
+
+                // update preview area if we captured a facial photo
+                if (window._kycFacePhoto) {
+                    const prev = document.getElementById('face-preview-container');
+                    if (prev) {
+                        prev.innerHTML = `<img src="${window._kycFacePhoto}" style="max-width:120px;border-radius:8px;">`;
+                    }
+                }
+
+                // close the modal now that we have a photo (and maybe descriptor)
+                closeModal();
             });
             
-            retakeBtn.addEventListener('click', resetCamera);
+            retakeBtn.addEventListener('click', function(){
+                // clear stored photo and preview when retaking
+                window._kycFacePhoto = null;
+                const prev = document.getElementById('face-preview-container');
+                if (prev) prev.innerHTML = '';
+                resetCamera();
+            });
 
             // ===== ATTACH FORM HANDLERS =====
             KelActions.attachLoginForm('#login-form form');

@@ -85,8 +85,10 @@
 
             public function create(array $data) {
                 $id = Utils::uuidv4();
-                // note: make sure your users table has a 'face_descriptor' TEXT column
-                $sql = 'INSERT INTO users (id, role, email, phone, password_hash, display_name, profile_picture_id, kyc_status, status, face_descriptor, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW())';
+                // note: make sure your users table has both 'face_descriptor' and
+                // 'face_photo' TEXT columns (face_photo may hold a base64 string or
+                // a relative filename such as 'img/abc.jpg').
+                $sql = 'INSERT INTO users (id, role, email, phone, password_hash, display_name, profile_picture_id, kyc_status, status, face_descriptor, face_photo, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW())';
                 $stmt = $this->pdo->prepare($sql);
                 $stmt->execute([
                     $id,
@@ -98,7 +100,8 @@
                     $data['profile_picture_id'] ?? null,
                     $data['kyc_status'] ?? 'none',
                     $data['status'] ?? 'active',
-                    isset($data['face_descriptor']) ? json_encode($data['face_descriptor']) : null
+                    isset($data['face_descriptor']) ? json_encode($data['face_descriptor']) : null,
+                    $data['face_photo'] ?? null
                 ]);
                 return $id;
             }
@@ -135,6 +138,11 @@
             public function updateFaceDescriptor($id, $descriptor) {
                 $stmt = $this->pdo->prepare('UPDATE users SET face_descriptor = ? WHERE id = ?');
                 return $stmt->execute([json_encode($descriptor), $id]);
+            }
+
+            public function updateFacePhoto($id, $photo) {
+                $stmt = $this->pdo->prepare('UPDATE users SET face_photo = ? WHERE id = ?');
+                return $stmt->execute([$photo, $id]);
             }
 
             public function verifyCredentials($email, $password) {

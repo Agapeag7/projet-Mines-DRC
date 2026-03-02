@@ -79,6 +79,9 @@
 
     async function register(obj){
         console.debug('register payload', obj);
+        // clear preview at beginning of registration attempt (user may have re‑submitted)
+        const prevEl = document.getElementById('face-preview-container');
+        if (prevEl) prevEl.innerHTML = '';
         // basic required
         if (!obj.email || !obj.password || !obj.display_name) {
             showToast('Email, mot de passe et nom sont obligatoires', 'error');
@@ -106,11 +109,42 @@
                 return { error: 'invalid_phone' };
             }
         }
-        // attach descriptor if available; server will perform the comparison
+        // attach descriptor if available; we can optionally pre-check duplicates
         if (window._kycDescriptor) {
             obj.face_descriptor = window._kycDescriptor;
+            // quick server-side check before actually submitting registration
+            try {
+                const chk = await fetch('/KelFoncia-DRC/api/face.php?action=recognize', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    credentials: 'same-origin',
+                    body: JSON.stringify({ descriptor: window._kycDescriptor })
+                });
+                const chkJson = await chk.json();
+                if (chkJson && chkJson.match) {
+                    const idMsg = chkJson.user_id ? ' (ID '+chkJson.user_id+')' : '';
+                    showToast('Un compte avec ce visage existe déjà' + idMsg + '. Impossible de créer un nouveau compte.', 'error');
+                    return { error: 'face_exists' };
+                }
+            } catch(e) {
+                console.warn('face pre-check failed', e);
+                // fallback to server validation during register
+            }
+        }
+        // send the captured photo (base64) if available
+        if (window._kycFacePhoto) {
+            obj.face_photo = window._kycFacePhoto;
         }
         const res = await window.KelFonciaAPI.postJSON('register', obj);
+        // clear any cached face/kyc data whether registration succeeded or not;
+        // if the call failed the user can retake a new photo later
+        window._kycDescriptor = null;
+        window._kycFacePhoto = null;
+        window._faceExists = false;
+        if (window._kycEvidence) {
+            window._kycEvidence = [];
+            window._kycType = null;
+        }
         // after registration attempt, if we have accumulated KYC evidence send it
         if (res && res.ok && window._kycEvidence && window._kycEvidence.length) {
             const payload = { type: window._kycType || 'id_card', evidence: window._kycEvidence };

@@ -558,7 +558,10 @@ function main() {
         resetFilters();
     }
 
-    initFeed();
+    // only run feed initializer on pages that actually have the container
+    if (document.getElementById('feed-list')) {
+        initFeed();
+    }
 
     // 🔟 ACTIVE NAVIGATION
     const currentPage = window.location.pathname.split('/').pop();

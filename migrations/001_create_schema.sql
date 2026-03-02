@@ -13,6 +13,10 @@ CREATE TABLE IF NOT EXISTS `users` (
     `profile_picture_id` CHAR(36) DEFAULT NULL,
     `kyc_status` ENUM('none','pending','verified','rejected') NOT NULL DEFAULT 'none',
     `status` ENUM('active','suspended','deleted') NOT NULL DEFAULT 'active',
+    -- descriptors produced by face‑api.js, used to compare faces
+    `face_descriptor` TEXT DEFAULT NULL,
+    -- optional user photo (base64 or relative path) captured during registration
+    `face_photo` TEXT DEFAULT NULL,
     `created_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     `updated_at` DATETIME DEFAULT NULL,
     FOREIGN KEY (`profile_picture_id`) REFERENCES `media`(`id`) ON DELETE SET NULL
