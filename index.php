@@ -15,6 +15,7 @@
             :root {
                 --bleu-pro: #0a3143;
                 --bleu-clair: #1e4b5e;
+                --or-fonce: #b6862e;
                 --or: #c79a3e;
                 --gris-fonce: #2d3e4f;
                 --gris-moyen: #5a6b7a;
@@ -35,6 +36,19 @@
                 line-height: 1.5;
                 background-color: var(--blanc);
                 overflow-x: hidden;
+            }
+            ::-webkit-scrollbar {
+                width: .6rem;
+                background: var(--bleu-pro);
+            }
+
+            ::-webkit-scrollbar-thumb {
+                background: var(--or-fonce);
+                border-radius: 5px;
+            }
+
+            ::-webkit-scrollbar-thumb:hover {
+                background: var(--or);
             }
             a {
                 text-decoration: none;
