@@ -832,83 +832,37 @@
                 captureBtn.style.display = 'none';
                 retakeBtn.style.display = 'inline-block';
                 
-                status.textContent = 'Photo capturée. Analyse en cours...';
-                status.style.color = 'var(--gris-moyen)';
-
-                // run actual face-api detection if facial mode
+                // immediately close the modal and keep the captured image ready.
+                window._kycFacePhoto = canvas.toDataURL('image/jpeg');
                 if (currentMode === 'facial' && window.faceapi) {
                     try {
                         await ensureFaceModel();
                         const det = await faceapi.detectSingleFace(canvas, new faceapi.TinyFaceDetectorOptions()).withFaceLandmarks().withFaceDescriptor();
                         console.debug('face detection result', det);
-                        if (!det) {
-                            status.textContent = 'Aucun visage détecté. Réessayez.';
-                            status.style.color = '#dc2626';
-                        } else {
-                            status.textContent = 'Visage détecté avec succès.';
-                            status.style.color = 'green';
-                            window._kycDescriptor = det.descriptor; // save for recognition
-                            // store the actual photo (base64) so it can later be sent to
-                            // the registration endpoint and persisted in the users table
-                            window._kycFacePhoto = canvas.toDataURL('image/jpeg');
-                            // perform a quick duplicate check and inform user
-                            try {
-                                const chk = await fetch('/KelFoncia-DRC/api/face.php?action=recognize', {
-                                    method: 'POST',
-                                    headers: {'Content-Type': 'application/json'},
-                                    credentials: 'same-origin',
-                                    body: JSON.stringify({ descriptor: window._kycDescriptor })
-                                });
-                                const chkJson = await chk.json();
-                                if (chkJson && chkJson.match) {
-                                    status.textContent = 'Ce visage est déjà associé à un utilisateur.';
-                                    status.style.color = '#dc2626';
-                                    window._faceExists = true;
-                                    if (window.KelActions && typeof window.KelActions.showToast === 'function') {
-                                        window.KelActions.showToast('Ce visage existe déjà dans notre base ; l\'inscription peut être refusée.', 'error');
-                                    }
-                                }
-                            } catch(e) {
-                                console.warn('quick face check failed', e);
-                            }
+                        if (det) {
+                            window._kycDescriptor = det.descriptor; // save descriptor
                         }
                     } catch(err) {
                         console.error('face-api detection error', err);
-                        status.textContent = 'Erreur lors de l\'analyse faciale.';
-                        status.style.color = '#dc2626';
                     }
-                } else {
-                    // simple id_card placeholder
-                    setTimeout(() => {
-                        let ok = true;
-                        if (Math.random() < 0.1) ok = false;
-                        if (currentMode === 'id_card') {
-                            status.textContent = ok ? 'Carte d\'électeur reconnue.' : 'Erreur: carte invalide ou floue. Réessayez.';
-                        } else {
-                            status.textContent = ok ? 'Analyse terminée.' : 'Analyse échouée.';
-                        }
-                        status.style.color = ok ? 'green' : '#dc2626';
-                    }, 1200);
                 }
 
-                // make canvas responsive
+                // make canvas responsive (still useful for preview)
                 canvas.style.maxWidth = '100%';
 
-                // save evidence for later KYC submission
+                // store evidence for later KYC submission
                 const dataUrl = canvas.toDataURL('image/jpeg');
                 if (!window._kycEvidence) window._kycEvidence = [];
                 window._kycEvidence.push(dataUrl);
                 window._kycType = currentMode; // 'id_card' or 'facial'
 
-                // update preview area if we captured a facial photo
-                if (window._kycFacePhoto) {
-                    const prev = document.getElementById('face-preview-container');
-                    if (prev) {
-                        prev.innerHTML = `<img src="${window._kycFacePhoto}" style="max-width:120px;border-radius:8px;">`;
-                    }
+                // update preview area with the captured photo
+                const prev = document.getElementById('face-preview-container');
+                if (prev) {
+                    prev.innerHTML = `<img src="${window._kycFacePhoto}" style="max-width:120px;border-radius:8px;">`;
                 }
 
-                // close the modal now that we have a photo (and maybe descriptor)
+                // close the modal right away
                 closeModal();
             });
             

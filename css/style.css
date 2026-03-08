@@ -33,6 +33,21 @@ body {
     background-color: var(--blanc);
 }
 
+/* ====== CSS Scrollbar ======== */
+::-webkit-scrollbar {
+    width: .6rem;
+    background: var(--bleu-pro);
+}
+
+::-webkit-scrollbar-thumb {
+    background: var(--or-fonce);
+    border-radius: 5px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: var(--or);
+}
+
 /* ===== CONTAINER ===== */
 .container {
     width: 100%;

@@ -88,7 +88,8 @@
             return { error: 'missing_fields' };
         }
         // RFC‑like email validation
-        const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2}$/;
+        // const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2}$/;
+        const emailRegex = /^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$/;
         if (!emailRegex.test(obj.email)) {
             showToast('Adresse e‑mail invalide', 'error');
             return { error: 'invalid_email' };
@@ -103,33 +104,16 @@
         }
         // phone optional but if provided must match RDC patterns
         if (obj.phone) {
-            const phoneRegex = /^(?:(?:099|097|081|082|086)\d{7}|(?:\+243|243|0)(?:99|97|81|82|86)\d{7})$/;
+            // allow 0 or +243/243 prefix and then 9 digits starting with 8 or 9
+            const phoneRegex = /^(?:\+243|243|0)(?:[89]\d{8})$/;
             if (!phoneRegex.test(obj.phone)) {
                 showToast('Numéro de téléphone invalide', 'error');
                 return { error: 'invalid_phone' };
             }
         }
-        // attach descriptor if available; we can optionally pre-check duplicates
+        // attach descriptor if available; server will perform the duplicate check
         if (window._kycDescriptor) {
             obj.face_descriptor = window._kycDescriptor;
-            // quick server-side check before actually submitting registration
-            try {
-                const chk = await fetch('/KelFoncia-DRC/api/face.php?action=recognize', {
-                    method: 'POST',
-                    headers: {'Content-Type': 'application/json'},
-                    credentials: 'same-origin',
-                    body: JSON.stringify({ descriptor: window._kycDescriptor })
-                });
-                const chkJson = await chk.json();
-                if (chkJson && chkJson.match) {
-                    const idMsg = chkJson.user_id ? ' (ID '+chkJson.user_id+')' : '';
-                    showToast('Un compte avec ce visage existe déjà' + idMsg + '. Impossible de créer un nouveau compte.', 'error');
-                    return { error: 'face_exists' };
-                }
-            } catch(e) {
-                console.warn('face pre-check failed', e);
-                // fallback to server validation during register
-            }
         }
         // send the captured photo (base64) if available
         if (window._kycFacePhoto) {

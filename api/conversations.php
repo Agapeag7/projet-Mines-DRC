@@ -1,5 +1,5 @@
 <?php
-require_once __DIR__ . '/../kel.class.php';
+require_once __DIR__ . '../kel.class.php';
 use KelFoncia\Database;
 use KelFoncia\ConversationModel;
 use KelFoncia\MessageModel;

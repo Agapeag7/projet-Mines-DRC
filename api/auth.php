@@ -76,8 +76,8 @@ if ($action === 'register') {
         Utils::jsonResponse(['error' => 'missing_fields', 'message' => 'Champs manquants: '.implode(', ', $missing), 'missing' => $missing], 400);
     }
 
-    // email regex stricter
-    if (!preg_match('/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2}$/', $email)) {
+    // email regex stricter (allow any TLD length >=2)
+    if (!preg_match('/^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$/', $email)) {
         Utils::jsonResponse(['error' => 'invalid_email', 'message' => 'Email invalide'], 400);
     }
 
@@ -143,7 +143,8 @@ if ($action === 'register') {
 
     // phone validation / uniqueness
     if ($phone) {
-        $phone_regex = '/^(?:(?:099|097|081|082|086)\d{7}|(?:\+243|243|0)(?:99|97|81|82|86)\d{7})$/';
+        // DR Congo numbers: start with 0 or +243/243 then 9 digits beginning with 8 or 9
+        $phone_regex = '/^(?:\+243|243|0)(?:[89]\d{8})$/';
         if (!preg_match($phone_regex, $phone)) {
             Utils::jsonResponse(['error' => 'invalid_phone', 'message' => 'Numéro de téléphone invalide'], 400);
         }
