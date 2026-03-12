@@ -24,10 +24,14 @@
         const fd = new FormData(form);
         try {
             const res = await fetch(url, { method: 'POST', body: fd, credentials: 'same-origin' });
+            const text = await res.text();
+            if (text.trim().startsWith('<')) {
+                console.error('Non-JSON response received', text);
+                return { error: 'non_json_response', raw: text };
+            }
             try {
-                return await res.json();
+                return JSON.parse(text);
             } catch(jsonErr) {
-                const text = await res.text();
                 console.error('JSON parse failed', jsonErr, text);
                 return { error: jsonErr.message, raw: text };
             }
@@ -38,10 +42,14 @@
         const url = endpointFor(action);
         try {
             const res = await fetch(url, { method: 'POST', body: JSON.stringify(obj), headers: { 'Content-Type': 'application/json' }, credentials: 'same-origin' });
+            const text = await res.text();
+            if (text.trim().startsWith('<')) {
+                console.error('Non-JSON response received', text);
+                return { error: 'non_json_response', raw: text };
+            }
             try {
-                return await res.json();
+                return JSON.parse(text);
             } catch(jsonErr) {
-                const text = await res.text();
                 console.error('JSON parse failed', jsonErr, text);
                 return { error: jsonErr.message, raw: text };
             }
@@ -54,10 +62,14 @@
         Object.keys(params).forEach(k => u.searchParams.set(k, params[k]));
         try {
             const res = await fetch(u.toString(), { credentials: 'same-origin' });
+            const text = await res.text();
+            if (text.trim().startsWith('<')) {
+                console.error('Non-JSON response received', text);
+                return { error: 'non_json_response', raw: text };
+            }
             try {
-                return await res.json();
+                return JSON.parse(text);
             } catch(jsonErr) {
-                const text = await res.text();
                 console.error('JSON parse failed', jsonErr, text);
                 return { error: jsonErr.message, raw: text };
             }
