@@ -768,8 +768,24 @@ if (!empty($_SESSION['user_id'])) {
                 // build an absolute URI pointing to the `models` directory next to
                 // the current page; keep things working if the app is served from a
                 // sub‑folder or the filename changes.
-                const basePath = location.pathname.replace(/\/[^/]+$/, '');
-                const localPath = `${location.origin}${basePath}/models`;
+                // determine the base URL of the app using PHP; this guarantees we
+                // include the correct sub‑folder (e.g. "/KelFoncia-DRC") even when
+                // the page is accessed as "http://localhost/connexion.php" or via a
+                // virtual host.  dirname() returns "/" for root, so strip trailing
+                // slash if present.
+                const basePath = '<?php echo rtrim(dirname($_SERVER["REQUEST_URI"]), "\\/"); ?>';
+                // figure out project directory relative to document root so we can
+                // fall back if the request URI is at root but files actually live
+                // in a subfolder.  e.g. basePath=='' while projBase=='/KelFoncia-DRC'.
+                const projBase = '<?php
+                    $webroot = str_replace('\\','/', realpath($_SERVER['DOCUMENT_ROOT']));
+                    $projdir = str_replace('\\','/', realpath(__DIR__ . '/..'));
+                    $base = preg_replace('#^' . preg_quote($webroot, '#') . '#', '', $projdir);
+                    echo rtrim($base, '/');
+                ?>';
+                let effectiveBase = basePath || projBase;
+                const localPath = `${location.origin}${effectiveBase}/models`;
+                console.debug('ensureFaceModel basePath', basePath, 'projBase', projBase, 'effectiveBase', effectiveBase, 'localPath', localPath);
                 // Words of warning: you must copy the pretrained model files from
                 // the face-api.js repo into the `models` folder at your web root.
                 // See https://github.com/justadudewhohacks/face-api.js/tree/master/weights
@@ -779,6 +795,7 @@ if (!empty($_SESSION['user_id'])) {
                 const cdnPath = 'https://cdn.jsdelivr.net/npm/face-api.js@0.22.2/weights';
                 try {
                     // try local directory first (copy pretrained *.json files there)
+                    console.debug('attempt loading models from local path', localPath);
                     await Promise.all([
                         faceapi.nets.tinyFaceDetector.loadFromUri(localPath),
                         faceapi.nets.faceLandmark68Net.loadFromUri(localPath),
@@ -786,7 +803,8 @@ if (!empty($_SESSION['user_id'])) {
                     ]);
                     console.debug('loaded face models from local path', localPath);
                 } catch(err) {
-                    console.warn('loading local face models failed, falling back to CDN', err);
+                    console.warn('loading local face models failed – check that files exist at', localPath, err);
+                    console.warn('you can paste this URL in the browser to verify:', localPath + '/tiny_face_detector_model-weights_manifest.json');
                     try {
                         await Promise.all([
                             faceapi.nets.tinyFaceDetector.loadFromUri(cdnPath),
