@@ -434,8 +434,10 @@
         }
 
         // If this file is called directly and an 'action' parameter is present, handle it.
-        if (php_sapi_name() !== 'cli') {
-            // Allow AJAX calls: include and call Router
+        if (php_sapi_name() !== 'cli' && !defined('KEL_NO_AUTO_ROUTER')) {
+            // Allow AJAX calls: include and call Router when no higher-level
+            // script has already taken responsibility (auth.php defines the
+            // `KEL_NO_AUTO_ROUTER` constant to suppress this behaviour).
             if (isset($_REQUEST['action'])) {
                 $r = new Router();
                 $r->handle();

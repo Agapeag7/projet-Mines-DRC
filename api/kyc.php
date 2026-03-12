@@ -1,5 +1,6 @@
 <?php
-require_once __DIR__ . '../kel.class.php';
+if (!defined('KEL_NO_AUTO_ROUTER')) define('KEL_NO_AUTO_ROUTER', true);
+require_once __DIR__ . '/../kel.class.php';
 use KelFoncia\Database;
 use KelFoncia\KycModel;
 use KelFoncia\Utils;

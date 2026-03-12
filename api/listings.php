@@ -1,5 +1,7 @@
 <?php
-require_once __DIR__ . '../kel.class.php';
+// disable auto-router from kel.class.php; this script handles its own actions
+if (!defined('KEL_NO_AUTO_ROUTER')) define('KEL_NO_AUTO_ROUTER', true);
+require_once __DIR__ . '/../kel.class.php';
 use KelFoncia\Database;
 use KelFoncia\ListingModel;
 use KelFoncia\FavoriteModel;

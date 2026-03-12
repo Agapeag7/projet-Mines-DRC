@@ -1,8 +1,15 @@
 <?php
+// when we include the core library we usually want to run its Router class
+// automatically, but auth.php implements its own handlers and must not be
+// intercepted. define a flag before including so kel.class.php skips the
+// auto-router logic.
+if (!defined('KEL_NO_AUTO_ROUTER')) {
+    define('KEL_NO_AUTO_ROUTER', true);
+}
+
+// (debug marker removed) — normal execution continues
 require_once __DIR__ . '/../kel.class.php';
-use KelFoncia\Database;
-use KelFoncia\UserModel;
-use KelFoncia\Utils;
+// core classes are defined in the global namespace; no `use` needed
 
 header('Content-Type: application/json; charset=utf-8');
 if (session_status() === PHP_SESSION_NONE) session_start();
@@ -10,13 +17,23 @@ if (session_status() === PHP_SESSION_NONE) session_start();
 $db = (new Database())->pdo();
 $um = new UserModel($db);
 
+// ensure log folder exist for debug output
+$logDir = __DIR__ . '/../logs';
+if (!is_dir($logDir)) {
+    @mkdir($logDir, 0755, true);
+}
+
 // accept form POST or JSON body
 $input = $_POST;
 if (empty($input)) {
     $raw = file_get_contents('php://input');
+    // write debugging info to local file (apache may not show error_log output)
+    @file_put_contents(__DIR__ . '/../logs/auth_debug.log', "raw body: $raw\n", FILE_APPEND);
     $json = json_decode($raw, true);
     if (is_array($json)) $input = $json;
 }
+// log parsed input as well
+@file_put_contents(__DIR__ . '/../logs/auth_debug.log', "parsed input: " . json_encode($input) . "\n", FILE_APPEND);
 
 $action = $_GET['action'] ?? $input['action'] ?? null;
 if (!$action) {
@@ -42,23 +59,65 @@ if ($action === 'login') {
     $_SESSION['pending_2fa_code'] = $code;
     $_SESSION['pending_2fa_expires'] = time() + 300; // valid 5 minutes
 
-    // dispatch by email or SMS - simple mail stub for now
+    // prepare message; user may configure php.ini SMTP settings or
+    // use an external library (PHPMailer) to send via Gmail/another provider.
     $to = $user['email'];
     $subject = 'Votre code de vérification KelFoncia';
     $body = "Bonjour,\n\nVotre code de vérification est : $code\nIl expire dans 5 minutes.\n\nCordialement,\nKelFoncia";
-    // @phpstan-ignore-next-line
-    @mail($to, $subject, $body);
-    // if you have a gateway, send SMS to $user['phone'] instead/also
 
-    Utils::jsonResponse([
+    // attempt to send via built-in mail().  On XAMPP this requires proper SMTP
+    // settings in php.ini (SMTP, smtp_port, sendmail_from).
+    @mail($to, $subject, $body);
+
+    // if PHPMailer is installed (via composer require phpmailer/phpmailer),
+    // you can send using Gmail or another SMTP provider.  Define constants in
+    // a config file or at the top of this script:
+    //   define('SMTP_HOST', 'smtp.gmail.com');
+    //   define('SMTP_PORT', 587);
+    //   define('SMTP_USER', 'your@gmail.com');
+    //   define('SMTP_PASS', 'app-specific-password');
+    //   define('MAIL_FROM', 'no-reply@yourdomain.com');
+    //   define('MAIL_FROM_NAME', 'KelFoncia');
+    if (class_exists('PHPMailer\PHPMailer\PHPMailer') && defined('SMTP_HOST') && defined('SMTP_USER') && defined('SMTP_PASS')) {
+        try {
+            $pm = new PHPMailer\PHPMailer\PHPMailer(true);
+            $pm->isSMTP();
+            $pm->Host = SMTP_HOST;
+            $pm->SMTPAuth = true;
+            $pm->Username = SMTP_USER;
+            $pm->Password = SMTP_PASS;
+            $pm->SMTPSecure = defined('SMTP_SECURE') ? SMTP_SECURE : 'tls';
+            $pm->Port = defined('SMTP_PORT') ? SMTP_PORT : 587;
+            $pm->setFrom(defined('MAIL_FROM') ? MAIL_FROM : SMTP_USER, defined('MAIL_FROM_NAME') ? MAIL_FROM_NAME : 'KelFoncia');
+            $pm->addAddress($to);
+            $pm->Subject = $subject;
+            $pm->Body = $body;
+            $pm->send();
+        } catch (Exception $e) {
+            @file_put_contents(__DIR__ . '/../logs/auth_debug.log', "PHPMailer error: {$e->getMessage()}\n", FILE_APPEND);
+        }
+    }
+
+    // always log code to project log for testing
+    @file_put_contents(__DIR__ . '/../logs/auth_debug.log', "sent 2fa code to $to: $code\n", FILE_APPEND);
+
+    // reply to client.  during development you can add &debug to the URL or
+    // check the debug field below to obtain the code directly.
+    $response = [
         'ok' => true,
         'need_2fa' => true,
         'message' => 'Code de vérification envoyé par email.'
-    ]);
+    ];
+    if (!empty($_GET['debug']) || !empty($input['debug'])) {
+        // convenient when testing on devices without email setup
+        $response['debug_code'] = $code;
+    }
+    Utils::jsonResponse($response);
     return;
 }
 
 if ($action === 'register') {
+    @file_put_contents(__DIR__ . '/../logs/auth_debug.log', "handling register action\n", FILE_APPEND);
     // disallow registration while already logged in; client should redirect
     if (!empty($_SESSION['user_id'])) {
         Utils::jsonResponse(['error' => 'already_authenticated', 'message' => 'Vous êtes déjà connecté'], 403);
@@ -78,6 +137,8 @@ if ($action === 'register') {
     if (!$password_confirm) $missing[] = 'password_confirm';
     if (!$display_name) $missing[] = 'display_name';
     if (!empty($missing)) {
+        // helpful server-side debug when the client thinks it sent every field
+        error_log("[auth] register missing fields: " . implode(', ', $missing));
         Utils::jsonResponse(['error' => 'missing_fields', 'message' => 'Champs manquants: '.implode(', ', $missing), 'missing' => $missing], 400);
     }
 

@@ -555,10 +555,12 @@ if (!empty($_SESSION['user_id'])) {
                                     Pour sécuriser votre compte professionnel, choisissez une méthode de vérification d'identité.
                                 </p>
                                 <div class="kyc-options">
-                                    <button type="button" class="btn-kyc" id="scan-id">
+                                    <!--
+                                <button type="button" class="btn-kyc" id="scan-id">
                                         <i class="fas fa-id-card"></i>
                                         Scanner Carte d'Électeur
-                                    </button>
+                                </button>
+                                -->
                                     <button type="button" class="btn-kyc" id="facial-recog">
                                         <i class="fas fa-camera"></i>
                                         Reconnaissance Faciale
@@ -713,11 +715,12 @@ if (!empty($_SESSION['user_id'])) {
             let stream;
             let currentMode = ''; // 'id_card' or 'facial'
             
-            document.getElementById('scan-id').addEventListener('click', function(e){
-                e.preventDefault();
-                currentMode = 'id_card';
-                openModal('Scanner Carte d\'Électeur', 'Positionnez votre carte d\'électeur dans le cadre et capturez la photo.');
-            });
+            // the ID card scanner feature is not ready yet; disabling for now
+            // document.getElementById('scan-id').addEventListener('click', function(e){
+            //     e.preventDefault();
+            //     currentMode = 'id_card';
+            //     openModal('Scanner Carte d\'Électeur', 'Positionnez votre carte d\'electeur dans le cadre et capturez la photo.');
+            // });
             
             document.getElementById('facial-recog').addEventListener('click', async function(e){
                 e.preventDefault();

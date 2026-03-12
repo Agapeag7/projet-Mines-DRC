@@ -64,9 +64,22 @@
             showToast(msg, 'error');
             return { error: 'missing_fields', message: msg };
         }
-        const res = await window.KelFonciaAPI.postJSON('login', { email, password });
-        // if backend indicates 2FA is needed, prompt user for code
+        const payload = { email, password };
+        // when debugging locally it can be handy to receive the 2FA code
+        if (location.search.includes('debug')) {
+            payload.debug = 1;
+        }
+        const res = await window.KelFonciaAPI.postJSON('login', payload);
+        // if backend indicates 2FA is needed, handle code entry or debug flow
         if (res && res.need_2fa) {
+            if (res.debug_code) {
+                // development mode: server returned the code directly
+                console.debug('2FA debug code received from server', res.debug_code);
+                showToast('Code de vérification (debug) : ' + res.debug_code, 'info');
+                // skip prompt and automatically verify
+                return await verify2fa(res.debug_code);
+            }
+
             showToast('Un code a été envoyé à votre adresse email. Vérifiez votre boîte.', 'info');
             const code = prompt('Entrez le code de vérification reçu par email');
             if (code) {
@@ -92,8 +105,8 @@
         const prevEl = document.getElementById('face-preview-container');
         if (prevEl) prevEl.innerHTML = '';
         // basic required
-        if (!obj.email || !obj.password || !obj.display_name) {
-            const msg = 'Email, mot de passe et nom sont obligatoires';
+        if (!obj.email || !obj.password || !obj.display_name || !obj.password_confirm) {
+            const msg = 'Email, mot de passe, confirmation et nom sont obligatoires';
             showToast(msg, 'error');
             return { error: 'missing_fields', message: msg };
         }
@@ -206,6 +219,11 @@
             formData.forEach((v,k) => {
                 if (k !== 'accept-terms') obj[k] = v;
             });
+            // trim string values to avoid sending only spaces
+            Object.keys(obj).forEach(k => {
+                if (typeof obj[k] === 'string') obj[k] = obj[k].trim();
+            });
+            console.debug('register payload', obj);
             
             const res = await register(obj);
             if (btn) {
@@ -218,13 +236,19 @@
                     window.location.href = 'tableau-de-bord.php';
                 }, 1500);
             } else {
+                console.debug('register response', res);
                 let errMsg = res?.message || res?.error || 'Erreur d\'inscription';
                 // server sometimes returns a list of missing fields
-                if (res?.error === 'missing_fields' && res.missing) {
-                    errMsg = res.message || 'Champs manquants : ' + res.missing.join(', ');
+                if (res?.error === 'missing_fields') {
+                    if (res.missing && res.missing.length) {
+                        errMsg = res.message || 'Champs manquants : ' + res.missing.join(', ');
+                    } else if (res.message) {
+                        errMsg = res.message;
+                    }
                 }
                 if (res?.error === 'non_json_response') {
                     errMsg = 'Réponse serveur inattendue (voir console)';
+                    console.debug('raw server response', res.raw);
                 }
                 showToast(errMsg, 'error');
             }
