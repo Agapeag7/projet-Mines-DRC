@@ -1,3 +1,11 @@
+<?php
+if (session_status() === PHP_SESSION_NONE) session_start();
+if (!empty($_SESSION['user_id'])) {
+    // already logged in; send them to dashboard instead of showing auth forms
+    header('Location: tableau-de-bord.php');
+    exit;
+}
+?>
 <!DOCTYPE html>
 <html lang="fr">
     <head>
@@ -616,6 +624,10 @@
     <script src="js/api.js"></script>
     <script src="js/actions.js"></script>
     <script>
+        // expose login state to JavaScript (page normally redirects if true)
+        window.__loggedIn = <?php echo !empty($_SESSION['user_id']) ? 'true' : 'false'; ?>;
+    </script>
+    <script>
         document.addEventListener('DOMContentLoaded', function(){
             // ===== TAB SWITCHING =====
             const tabs = document.querySelectorAll('.auth-tab');
@@ -822,48 +834,53 @@
             }
             
             captureBtn.addEventListener('click', async function() {
-                const context = canvas.getContext('2d');
-                canvas.width = video.videoWidth;
-                canvas.height = video.videoHeight;
-                context.drawImage(video, 0, 0, canvas.width, canvas.height);
-                
-                video.style.display = 'none';
-                canvas.style.display = 'block';
-                captureBtn.style.display = 'none';
-                retakeBtn.style.display = 'inline-block';
-                
-                // immediately close the modal and keep the captured image ready.
-                window._kycFacePhoto = canvas.toDataURL('image/jpeg');
-                if (currentMode === 'facial' && window.faceapi) {
-                    try {
-                        await ensureFaceModel();
-                        const det = await faceapi.detectSingleFace(canvas, new faceapi.TinyFaceDetectorOptions()).withFaceLandmarks().withFaceDescriptor();
-                        console.debug('face detection result', det);
-                        if (det) {
-                            window._kycDescriptor = det.descriptor; // save descriptor
+                // wrap in try/finally so modal always closes even on unexpected error
+                try {
+                    const context = canvas.getContext('2d');
+                    canvas.width = video.videoWidth;
+                    canvas.height = video.videoHeight;
+                    context.drawImage(video, 0, 0, canvas.width, canvas.height);
+                    
+                    video.style.display = 'none';
+                    canvas.style.display = 'block';
+                    captureBtn.style.display = 'none';
+                    retakeBtn.style.display = 'inline-block';
+                    
+                    // immediately close the modal and keep the captured image ready.
+                    window._kycFacePhoto = canvas.toDataURL('image/jpeg');
+                    if (currentMode === 'facial' && window.faceapi) {
+                        try {
+                            await ensureFaceModel();
+                            const det = await faceapi.detectSingleFace(canvas, new faceapi.TinyFaceDetectorOptions()).withFaceLandmarks().withFaceDescriptor();
+                            console.debug('face detection result', det);
+                            if (det) {
+                                window._kycDescriptor = det.descriptor; // save descriptor
+                            }
+                        } catch(err) {
+                            console.error('face-api detection error', err);
                         }
-                    } catch(err) {
-                        console.error('face-api detection error', err);
                     }
+
+                    // make canvas responsive (still useful for preview)
+                    canvas.style.maxWidth = '100%';
+
+                    // store evidence for later KYC submission
+                    const dataUrl = canvas.toDataURL('image/jpeg');
+                    if (!window._kycEvidence) window._kycEvidence = [];
+                    window._kycEvidence.push(dataUrl);
+                    window._kycType = currentMode; // 'id_card' or 'facial'
+
+                    // update preview area with the captured photo
+                    const prev = document.getElementById('face-preview-container');
+                    if (prev) {
+                        prev.innerHTML = `<img src="${window._kycFacePhoto}" style="max-width:120px;border-radius:8px;">`;
+                    }
+                } catch(e) {
+                    console.error('error while capturing photo', e);
+                } finally {
+                    // ensure we always hide the modal and stop camera
+                    closeModal();
                 }
-
-                // make canvas responsive (still useful for preview)
-                canvas.style.maxWidth = '100%';
-
-                // store evidence for later KYC submission
-                const dataUrl = canvas.toDataURL('image/jpeg');
-                if (!window._kycEvidence) window._kycEvidence = [];
-                window._kycEvidence.push(dataUrl);
-                window._kycType = currentMode; // 'id_card' or 'facial'
-
-                // update preview area with the captured photo
-                const prev = document.getElementById('face-preview-container');
-                if (prev) {
-                    prev.innerHTML = `<img src="${window._kycFacePhoto}" style="max-width:120px;border-radius:8px;">`;
-                }
-
-                // close the modal right away
-                closeModal();
             });
             
             retakeBtn.addEventListener('click', function(){

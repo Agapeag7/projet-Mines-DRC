@@ -59,6 +59,11 @@ if ($action === 'login') {
 }
 
 if ($action === 'register') {
+    // disallow registration while already logged in; client should redirect
+    if (!empty($_SESSION['user_id'])) {
+        Utils::jsonResponse(['error' => 'already_authenticated', 'message' => 'Vous êtes déjà connecté'], 403);
+    }
+
     $email = trim($input['email'] ?? '');
     $password = $input['password'] ?? '';
     $password_confirm = $input['password_confirm'] ?? '';

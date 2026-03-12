@@ -78,6 +78,14 @@
     }
 
     async function register(obj){
+        // if the page somehow allows a logged-in user to submit the form we
+        // should bail out early and avoid sending a request that will likely
+        // redirect or trigger backend warnings (which lead to non_json_response).
+        if (window.__loggedIn) {
+            showToast('Vous êtes déjà connecté. Déconnectez-vous pour créer un compte.', 'error');
+            return { error: 'already_logged_in' };
+        }
+
         console.debug('register payload', obj);
         // clear preview at beginning of registration attempt (user may have re‑submitted)
         const prevEl = document.getElementById('face-preview-container');
@@ -208,7 +216,10 @@
                     window.location.href = 'tableau-de-bord.php';
                 }, 1500);
             } else {
-                const errMsg = res?.message || res?.error || 'Erreur d\'inscription';
+                let errMsg = res?.message || res?.error || 'Erreur d\'inscription';
+                if (res?.error === 'non_json_response') {
+                    errMsg = 'Réponse serveur inattendue (voir console)';
+                }
                 showToast(errMsg, 'error');
             }
         });
