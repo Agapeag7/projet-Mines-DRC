@@ -1,7 +1,10 @@
 // API helper for KelFoncia AJAX calls
 (function(){
-    // Map actions to endpoint files in /api
-    const BASE_API = '/KelFoncia-DRC/api';
+    // Map actions to endpoint files in /api.  Compute the base path relative to
+    // the current page so the code works even if the project folder name or
+    // URL changes (avoids hardcoding '/KelFoncia-DRC').
+    const basePath = location.pathname.replace(/\/[^/]*$/, '');
+    const BASE_API = basePath + '/api';
 
     function endpointFor(action) {
         const auth = ['login','register'];

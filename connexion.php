@@ -770,7 +770,13 @@ if (!empty($_SESSION['user_id'])) {
                 // sub‑folder or the filename changes.
                 const basePath = location.pathname.replace(/\/[^/]+$/, '');
                 const localPath = `${location.origin}${basePath}/models`;
-                const cdnPath = 'https://cdn.jsdelivr.net/gh/justadudewhohacks/face-api.js/models';
+                // Words of warning: you must copy the pretrained model files from
+                // the face-api.js repo into the `models` folder at your web root.
+                // See https://github.com/justadudewhohacks/face-api.js/tree/master/weights
+                // for the filenames.  If you don't want to host them locally you can
+                // rely on jsDelivr; the old GH path above stopped working in 2025 and
+                // now the files are served from the `weights` subdirectory.
+                const cdnPath = 'https://cdn.jsdelivr.net/npm/face-api.js@0.22.2/weights';
                 try {
                     // try local directory first (copy pretrained *.json files there)
                     await Promise.all([
