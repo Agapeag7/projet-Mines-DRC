@@ -15,15 +15,14 @@
 // weights folder), so grab the files directly from the Github repo's raw
 // contents instead.  This may be slower but it works reliably.
 $baseUrl = 'https://raw.githubusercontent.com/justadudewhohacks/face-api.js/master/weights';
+// initially request the three manifest files; shards will be discovered
+// dynamically below.
 $files = [
     'tiny_face_detector_model-weights_manifest.json',
-    'tiny_face_detector_model-shard1',
     'face_landmark_68_model-weights_manifest.json',
-    'face_landmark_68_model-shard1',
     'face_recognition_model-weights_manifest.json',
-    'face_recognition_model-shard1',
-    // add more filenames here if you need other models (e.g. ssd_mobilenetv1)
 ];
+
 
 $modelsDir = __DIR__ . '/../models';
 if (!is_dir($modelsDir)) {
@@ -32,6 +31,8 @@ if (!is_dir($modelsDir)) {
         exit(1);
     }
 }
+
+$downloadedManifests = [];
 
 foreach ($files as $file) {
     $url = $baseUrl . '/' . $file;
@@ -50,6 +51,7 @@ foreach ($files as $file) {
         }
     }
     if (! $needDownload) {
+        $downloadedManifests[] = $file;
         continue;
     }
 
@@ -83,6 +85,50 @@ foreach ($files as $file) {
         continue;
     }
     fwrite(STDOUT, "done\n");
+    $downloadedManifests[] = $file;
 }
+
+// now parse any downloaded manifests and fetch their referenced shards
+foreach ($downloadedManifests as $manifest) {
+    $path = $modelsDir . '/' . $manifest;
+    $json = @file_get_contents($path);
+    if ($json === false) continue;
+    $arr = json_decode($json, true);
+    if (!is_array($arr)) continue;
+    foreach ($arr as $entry) {
+        if (isset($entry['paths']) && is_array($entry['paths'])) {
+            foreach ($entry['paths'] as $p) {
+                // if not already in $files, queue for download
+                if (!in_array($p, $files)) {
+                    $files[] = $p;
+                    // simple immediate download
+                    $url = $baseUrl . '/' . $p;
+                    $dest = $modelsDir . '/' . $p;
+                    if (file_exists($dest)) continue;
+                    fwrite(STDOUT, "Downloading shard $p... ");
+                    $data = false;
+                    if (ini_get('allow_url_fopen')) {
+                        $data = @file_get_contents($url);
+                    }
+                    if ($data === false && function_exists('curl_version')) {
+                        $ch = curl_init($url);
+                        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+                        curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
+                        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+                        $data = curl_exec($ch);
+                        curl_close($ch);
+                    }
+                    if ($data === false) {
+                        fwrite(STDERR, "failed\n");
+                    } else {
+                        file_put_contents($dest, $data);
+                        fwrite(STDOUT, "done\n");
+                    }
+                }
+            }
+        }
+    }
+}
+
 
 fwrite(STDOUT, "All done. Check the models/ directory.\n");

@@ -773,15 +773,13 @@ if (!empty($_SESSION['user_id'])) {
                 // directory containing the currently running script (e.g.
                 // "/KelFoncia-DRC" when accessing
                 // "http://localhost/KelFoncia-DRC/connexion.php").
-                // strip trailing slash except keep root as '/'.
+                // strip trailing slash; if result is just '/', treat as empty.
                 let basePath = '<?php echo rtrim(dirname($_SERVER["SCRIPT_NAME"]), "/\\"); ?>';
-                if (basePath === '') basePath = '/';
-                // fallback base is simply the name of this project folder
-                const projBase = '/<?php echo basename(realpath(__DIR__)); ?>';
-                // choose basePath unless it's root; if root, use projBase
-                const effectiveBase = (basePath === '/') ? projBase : basePath;
+                if (basePath === '/') basePath = '';
+                // effectiveBase is whatever basePath produced; no special fallback
+                const effectiveBase = basePath;
                 const localPath = `${location.origin}${effectiveBase}/models`;
-                console.debug('ensureFaceModel basePath', basePath, 'projBase', projBase, 'effectiveBase', effectiveBase, 'localPath', localPath);
+                console.debug('ensureFaceModel basePath', basePath, 'effectiveBase', effectiveBase, 'localPath', localPath);
                 // Words of warning: you must copy the pretrained model files from
                 // the face-api.js repo into the `models` folder at your web root.
                 // See https://github.com/justadudewhohacks/face-api.js/tree/master/weights
