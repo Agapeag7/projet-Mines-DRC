@@ -768,22 +768,18 @@ if (!empty($_SESSION['user_id'])) {
                 // build an absolute URI pointing to the `models` directory next to
                 // the current page; keep things working if the app is served from a
                 // sub‑folder or the filename changes.
-                // determine the base URL of the app using PHP; this guarantees we
-                // include the correct sub‑folder (e.g. "/KelFoncia-DRC") even when
-                // the page is accessed as "http://localhost/connexion.php" or via a
-                // virtual host.  dirname() returns "/" for root, so strip trailing
-                // slash if present.
-                const basePath = '<?php echo rtrim(dirname($_SERVER["REQUEST_URI"]), "\\/"); ?>';
-                // figure out project directory relative to document root so we can
-                // fall back if the request URI is at root but files actually live
-                // in a subfolder.  e.g. basePath=='' while projBase=='/KelFoncia-DRC'.
-                const projBase = '<?php
-                    $webroot = str_replace('\\','/', realpath($_SERVER['DOCUMENT_ROOT']));
-                    $projdir = str_replace('\\','/', realpath(__DIR__ . '/..'));
-                    $base = preg_replace('#^' . preg_quote($webroot, '#') . '#', '', $projdir);
-                    echo rtrim($base, '/');
-                ?>';
-                let effectiveBase = basePath || projBase;
+                // determine the base URL of the app using PHP via SCRIPT_NAME.
+                // dirname($_SERVER['SCRIPT_NAME']) gives the URL path to the
+                // directory containing the currently running script (e.g.
+                // "/KelFoncia-DRC" when accessing
+                // "http://localhost/KelFoncia-DRC/connexion.php").
+                // strip trailing slash except keep root as '/'.
+                let basePath = '<?php echo rtrim(dirname($_SERVER["SCRIPT_NAME"]), "/\\"); ?>';
+                if (basePath === '') basePath = '/';
+                // fallback base is simply the name of this project folder
+                const projBase = '/<?php echo basename(realpath(__DIR__)); ?>';
+                // choose basePath unless it's root; if root, use projBase
+                const effectiveBase = (basePath === '/') ? projBase : basePath;
                 const localPath = `${location.origin}${effectiveBase}/models`;
                 console.debug('ensureFaceModel basePath', basePath, 'projBase', projBase, 'effectiveBase', effectiveBase, 'localPath', localPath);
                 // Words of warning: you must copy the pretrained model files from
