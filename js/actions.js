@@ -60,8 +60,9 @@
 
     async function login(email, password){
         if (!email || !password) {
-            showToast('Email et mot de passe requis', 'error');
-            return { error: 'missing_fields' };
+            const msg = 'Email et mot de passe requis';
+            showToast(msg, 'error');
+            return { error: 'missing_fields', message: msg };
         }
         const res = await window.KelFonciaAPI.postJSON('login', { email, password });
         // if backend indicates 2FA is needed, prompt user for code
@@ -92,8 +93,9 @@
         if (prevEl) prevEl.innerHTML = '';
         // basic required
         if (!obj.email || !obj.password || !obj.display_name) {
-            showToast('Email, mot de passe et nom sont obligatoires', 'error');
-            return { error: 'missing_fields' };
+            const msg = 'Email, mot de passe et nom sont obligatoires';
+            showToast(msg, 'error');
+            return { error: 'missing_fields', message: msg };
         }
         // RFC‑like email validation
         // const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2}$/;
@@ -217,6 +219,10 @@
                 }, 1500);
             } else {
                 let errMsg = res?.message || res?.error || 'Erreur d\'inscription';
+                // server sometimes returns a list of missing fields
+                if (res?.error === 'missing_fields' && res.missing) {
+                    errMsg = res.message || 'Champs manquants : ' + res.missing.join(', ');
+                }
                 if (res?.error === 'non_json_response') {
                     errMsg = 'Réponse serveur inattendue (voir console)';
                 }

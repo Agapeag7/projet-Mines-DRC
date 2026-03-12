@@ -765,6 +765,32 @@ if (!empty($_SESSION['user_id'])) {
             ?>
             async function ensureFaceModel() {
                 if (window.faceModelLoaded) return;
+
+                /*
+                 * Choose TensorFlow.js backend before loading any weights.  The
+                 * library tries to initialise `webgl` by default which fails on
+                 * some devices/virtual machines and prints the long stack trace you
+                 * saw in the console.  A CPU backend works everywhere (at reduced
+                 * performance) and is plenty fast for the tiny detector used here.
+                 */
+                if (faceapi && faceapi.tf && faceapi.tf.setBackend) {
+                    // skip WebGL entirely; CPU works reliably and avoids the
+                    // "Initialization of backend webgl failed" warning seen on
+                    // some machines/virtual environments.  We also inform the
+                    // user since CPU mode is slower but necessary on older
+                    // hardware or some phones.
+                    try {
+                        await faceapi.tf.setBackend('cpu');
+                        console.debug('tfjs backend set to cpu');
+                    } catch(e) {
+                        console.warn('could not set cpu backend', e);
+                    }
+                    // show a toast where appropriate (helper defined later)
+                    if (typeof showToast === 'function') {
+                        showToast('Détection faciale en mode CPU (WebGL non disponible)', 'info');
+                    }
+                }
+
                 // build an absolute URI pointing to the `models` directory next to
                 // the current page; keep things working if the app is served from a
                 // sub‑folder or the filename changes.
