@@ -11,7 +11,10 @@
 // Note: this script requires PHP with allow_url_fopen enabled, or you can
 // adjust it to use curl.
 
-$baseUrl = 'https://cdn.jsdelivr.net/npm/face-api.js@0.22.2/weights';
+// the jsDelivr CDN path was returning 404s (package doesn't expose
+// weights folder), so grab the files directly from the Github repo's raw
+// contents instead.  This may be slower but it works reliably.
+$baseUrl = 'https://raw.githubusercontent.com/justadudewhohacks/face-api.js/master/weights';
 $files = [
     'tiny_face_detector_model-weights_manifest.json',
     'tiny_face_detector_model-shard1',
@@ -34,8 +37,19 @@ foreach ($files as $file) {
     $url = $baseUrl . '/' . $file;
     $dest = $modelsDir . '/' . $file;
 
+    $needDownload = true;
     if (file_exists($dest)) {
-        fwrite(STDOUT, "Skipping existing $file\n");
+        // check for error placeholder text from previous bad download
+        $contents = file_get_contents($dest);
+        if ($contents !== false && strpos($contents, "Couldn't find the requested file") === false && strpos($contents, '<!DOCTYPE') === false) {
+            fwrite(STDOUT, "Skipping existing $file\n");
+            $needDownload = false;
+        } else {
+            fwrite(STDOUT, "Re-downloading $file (previous copy invalid)\n");
+            $needDownload = true;
+        }
+    }
+    if (! $needDownload) {
         continue;
     }
 
