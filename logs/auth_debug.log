@@ -9,3 +9,22 @@ parsed input: {"role":"investisseur","display_name":"Agape","email":"agapekyb@gm
 handling register action
 raw body: {"email":"agapekyb@gmail.com","password":"123456789"}
 parsed input: {"email":"agapekyb@gmail.com","password":"123456789"}
+raw body: 
+parsed input: []
+raw body: {"email":"cli1@example.com","password":"secret123","password_confirm":"secret123","display_name":"CLI Tester 9003"}
+parsed input: {"email":"cli1@example.com","password":"secret123","password_confirm":"secret123","display_name":"CLI Tester 9003"}
+handling register action
+raw body: {"email":"cli1@example.com","password":"secret123"}
+parsed input: {"email":"cli1@example.com","password":"secret123"}
+sent 2fa code to cli1@example.com: 327347
+raw body: {"code":327347}
+parsed input: {"code":327347}
+raw body: {"email":"agapekyb@gmail.com","password":"123456789"}
+parsed input: {"email":"agapekyb@gmail.com","password":"123456789"}
+sent 2fa code to agapekyb@gmail.com: 979687
+raw body: {"email":"agapeag7@gmail.com","password":"123456789"}
+parsed input: {"email":"agapeag7@gmail.com","password":"123456789"}
+raw body: {"email":"cli1@example.com","password":"secret123"}
+parsed input: {"email":"cli1@example.com","password":"secret123"}
+raw body: {"email":"agapekyb@gmail.com","password":"123456789"}
+parsed input: {"email":"agapekyb@gmail.com","password":"123456789"}

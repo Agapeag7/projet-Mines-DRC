@@ -8,6 +8,11 @@ if (!defined('KEL_NO_AUTO_ROUTER')) {
 }
 
 // (debug marker removed) — normal execution continues
+// load optional config (SMTP credentials, etc.)
+$configPath = __DIR__ . '/../config.php';
+if (file_exists($configPath)) {
+    require_once $configPath;
+}
 require_once __DIR__ . '/../kel.class.php';
 // core classes are defined in the global namespace; no `use` needed
 
@@ -51,6 +56,16 @@ if ($action === 'login') {
     $user = $um->verifyCredentials($email, $password);
     if (!$user) {
         Utils::jsonResponse(['error' => 'invalid_credentials', 'message' => 'Email ou mot de passe incorrect'], 401);
+    }
+
+    // if 2FA is globally disabled we simply establish the session and
+    // return success immediately; this makes it easier to test the basic
+    // login flow without dealing with codes.
+    if (defined('DISABLE_2FA') && DISABLE_2FA) {
+        $_SESSION['user_id'] = $user['id'];
+        $_SESSION['email'] = $user['email'];
+        $_SESSION['role'] = $user['role'];
+        Utils::jsonResponse(['ok' => true, 'message' => 'Connexion réussie']);
     }
 
     // generate 2FA code and store temporarily in session
@@ -256,6 +271,13 @@ if ($action === 'register') {
 
 
 if ($action === 'verify_2fa') {
+    // if we've globally disabled 2FA then there's nothing to verify; just
+    // respond with success (or an error if you prefer).  This keeps the
+    // endpoint safe to call but effectively idle.
+    if (defined('DISABLE_2FA') && DISABLE_2FA) {
+        Utils::jsonResponse(['ok' => true, 'message' => '2FA désactivé']);
+    }
+
     $code = trim($input['code'] ?? '');
     if (!$code || !isset($_SESSION['pending_2fa_user'])) {
         Utils::jsonResponse(['error' => 'missing_2fa', 'message' => 'Code requis'], 400);

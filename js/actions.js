@@ -80,7 +80,7 @@
                 return await verify2fa(res.debug_code);
             }
 
-            showToast('Un code a été envoyé à votre adresse email. Vérifiez votre boîte.', 'info');
+            showToast('Un code a été envoyé à votre adresse email. Vérifiez votre boîte (ou ajoutez ?debug à l\'URL pour voir le code).', 'info');
             const code = prompt('Entrez le code de vérification reçu par email');
             if (code) {
                 return await verify2fa(code);
