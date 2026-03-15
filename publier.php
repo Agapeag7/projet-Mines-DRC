@@ -139,8 +139,8 @@
                         <div class="upload-area">
                             <i class="fas fa-cloud-upload-alt"></i>
                             <p style="font-weight: 600; margin-bottom: 8px;">Cliquez pour télécharger des photos</p>
-                            <p style="color: var(--gris-moyen); font-size: 0.9rem;">JPG, PNG jusqu'à 10 Mo</p>
-                            <input type="file" name="photos[]" accept="image/*" multiple style="display:none;">
+                            <p style="color: var(--gris-moyen); font-size: 0.9rem;">jpg, jpeg, png, webp, svg, gif, tiff, raw, jfif jusqu'à 10 Mo</p>
+                            <input type="file" name="photos[]" accept=".jpg,.jpeg,.png,.webp,.svg,.gif,.tiff,.raw,.jfif" multiple style="display:none;">
                         </div>
                             <div style="margin-top: 20px;">
                             <label style="display: block; margin-bottom: 12px; font-weight: 600;">Documents juridiques (optionnel)</label>
@@ -148,7 +148,7 @@
                                 <i class="fas fa-file-pdf" style="font-size: 1.8rem;"></i>
                                 <p style="font-weight: 600; margin-bottom: 4px;">Ajouter des documents</p>
                                 <p style="color: var(--gris-moyen); font-size: 0.8rem;">Titre foncier, certificat, plans...</p>
-                                    <input type="file" name="documents[]" accept="application/pdf,image/*" multiple style="display:none;">
+                                    <input type="file" name="documents[]" accept=".pdf,.docx,.doc,.odt,.rtf,.legal" multiple style="display:none;">
                             </div>
                         </div>
                     </div>
@@ -168,7 +168,7 @@
                             </div>
                         </div>
                         <div style="display: flex; align-items: center; gap: 12px;">
-                            <input type="checkbox" id="certify" style="width: 18px; height: 18px;">
+                            <input type="checkbox" id="certify" name="certify" style="width: 18px; height: 18px;">
                             <label for="certify" style="font-weight: normal;">Je certifie que les informations fournies sont exactes et que je dispose des droits de publication sur ce terrain.</label>
                         </div>
                     </div>

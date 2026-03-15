@@ -2,11 +2,8 @@
 // disable auto-router from kel.class.php; this script handles its own actions
 if (!defined('KEL_NO_AUTO_ROUTER')) define('KEL_NO_AUTO_ROUTER', true);
 require_once __DIR__ . '/../kel.class.php';
-use KelFoncia\Database;
-use KelFoncia\ListingModel;
-use KelFoncia\FavoriteModel;
-use KelFoncia\MediaModel;
-use KelFoncia\Utils;
+
+// les classes sont définies dans l'espace global par kel.class.php
 
 header('Content-Type: application/json; charset=utf-8');
 if (session_status() === PHP_SESSION_NONE) session_start();
@@ -50,6 +47,37 @@ if ($action === 'listings_create' || $action === 'create') {
         Utils::jsonResponse(['error' => 'missing_fields', 'missing' => $missing, 'message' => 'Champs manquants: ' . implode(', ', $missing)], 400);
     }
 
+    if (empty($input['certify']) || $input['certify'] != 'on') {
+        Utils::jsonResponse(['error' => 'consent_required', 'message' => 'Vous devez certifier l’exactitude des informations.'], 400);
+    }
+
+    $allowedImageExts = ['jpg', 'jpeg', 'png', 'webp', 'svg', 'gif', 'tiff', 'raw', 'jfif'];
+    $allowedDocumentExts = ['pdf', 'docx', 'doc', 'odt', 'rtf', 'legal'];
+
+    $fileErrors = [];
+    $validateFiles = function($fieldName, $allowedExts, &$fileErrors) {
+        if (empty($_FILES[$fieldName]) || empty($_FILES[$fieldName]['name'])) return;
+        $files = $_FILES[$fieldName];
+        $count = is_array($files['name']) ? count($files['name']) : 1;
+        for ($i = 0; $i < $count; $i++) {
+            $name = is_array($files['name']) ? $files['name'][$i] : $files['name'];
+            $ext = strtolower(pathinfo($name, PATHINFO_EXTENSION));
+            if ($ext === '') {
+                $fileErrors[] = "$fieldName : nom de fichier invalide ($name)";
+                continue;
+            }
+            if (!in_array($ext, $allowedExts, true)) {
+                $fileErrors[] = "$fieldName : extension non autorisée ($name)";
+            }
+        }
+    };
+
+    $validateFiles('photos', $allowedImageExts, $fileErrors);
+    $validateFiles('documents', $allowedDocumentExts, $fileErrors);
+    if (!empty($fileErrors)) {
+        Utils::jsonResponse(['error' => 'invalid_file_type', 'message' => 'Extension de fichier invalide', 'details' => $fileErrors], 400);
+    }
+
     // Build feature map
     $features = [];
     if (!empty($input['usage'])) $features['usage'] = $input['usage'];
@@ -64,6 +92,17 @@ if ($action === 'listings_create' || $action === 'create') {
 
     $isPublished = isset($input['is_published']) ? (int)$input['is_published'] : 1;
 
+    // Résoudre province_id à partir du nom de province (backend) si possible
+    $provinceId = null;
+    if (!empty($input['province'])) {
+        $stmt = $db->prepare('SELECT id FROM provinces WHERE nom = ? LIMIT 1');
+        $stmt->execute([trim($input['province'])]);
+        $row = $stmt->fetch();
+        if ($row) {
+            $provinceId = $row['id'];
+        }
+    }
+
     $data = [
         'owner_id' => $_SESSION['user_id'],
         'title' => $title,
@@ -75,7 +114,7 @@ if ($action === 'listings_create' || $action === 'create') {
         'address_text' => $input['address_text'],
         'latitude' => $input['latitude'] ?? null,
         'longitude' => $input['longitude'] ?? null,
-        'province_id' => $input['province_id'] ?? null,
+        'province_id' => $provinceId,
         'province' => $input['province'],
         'ville' => $input['ville'],
         'commune' => $input['commune'],
