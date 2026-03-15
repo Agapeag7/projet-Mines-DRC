@@ -397,20 +397,55 @@
             private function createListing() {
                 if (empty($_SESSION['user_id'])) Utils::jsonResponse(['error' => 'not_authenticated'], 401);
                 $lm = new ListingModel($this->db);
+
+                $required = ['province', 'ville', 'commune', 'address_text', 'area_m2', 'price', 'description'];
+                $missing = [];
+                foreach ($required as $field) {
+                    if (empty(trim((string)($_POST[$field] ?? '')))) {
+                        $missing[] = $field;
+                    }
+                }
+                if (!empty($missing)) {
+                    Utils::jsonResponse(['error' => 'missing_fields', 'missing' => $missing, 'message' => 'Champs manquants: ' . implode(', ', $missing)], 400);
+                }
+
+                $features = [];
+                if (!empty($_POST['usage'])) $features['usage'] = $_POST['usage'];
+                if (!empty($_POST['statut'])) $features['statut_juridique'] = $_POST['statut'];
+                if (!empty($_POST['reference_titre'])) $features['reference_titre'] = $_POST['reference_titre'];
+                if (!empty($_POST['annee_acquisition'])) $features['annee_acquisition'] = $_POST['annee_acquisition'];
+
+                $title = trim($_POST['title'] ?? '');
+                if (!$title) {
+                    $title = 'Terrain à vendre - ' . trim($_POST['address_text'] ?? '');
+                }
+
+                $isPublished = isset($_POST['is_published']) ? (int)$_POST['is_published'] : 1;
+
                 $data = [
                     'owner_id' => $_SESSION['user_id'],
-                    'title' => $_POST['title'] ?? 'Sans titre',
-                    'description' => $_POST['description'] ?? null,
-                    'area_m2' => $_POST['area_m2'] ?? null,
-                    'price' => $_POST['price'] ?? null,
+                    'title' => $title,
+                    'description' => $_POST['description'],
+                    'area_m2' => $_POST['area_m2'],
+                    'price' => $_POST['price'],
                     'currency' => $_POST['currency'] ?? 'CDF',
+                    'statut' => 'available',
+                    'address_text' => $_POST['address_text'],
+                    'latitude' => $_POST['latitude'] ?? null,
+                    'longitude' => $_POST['longitude'] ?? null,
                     'province_id' => $_POST['province_id'] ?? null,
-                    'province' => $_POST['province'] ?? null,
-                    'ville' => $_POST['ville'] ?? null,
-                    'commune' => $_POST['commune'] ?? null,
-                    'features' => isset($_POST['features']) ? json_decode($_POST['features'], true) : null,
+                    'province' => $_POST['province'],
+                    'ville' => $_POST['ville'],
+                    'commune' => $_POST['commune'],
+                    'territoire' => $_POST['territoire'] ?? null,
+                    'features' => !empty($features) ? $features : null,
+                    'is_published' => $isPublished,
+                    'visible' => 1
                 ];
+
                 $id = $lm->create($data);
+                // file upload has to be managed in api/listings.php since this router route does not handle multipart input reliably
+
                 Utils::jsonResponse(['ok' => true, 'id' => $id]);
             }
 

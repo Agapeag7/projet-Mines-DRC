@@ -39,32 +39,33 @@
                     </p>
                 </div>
 
-                <form class="publier-form fade-in">
+                <form class="publier-form fade-in" method="post" enctype="multipart/form-data">
+                    <input type="hidden" name="is_published" id="is_published" value="1">
                     <!-- SECTION 1 : LOCALISATION -->
                     <div class="form-section">
                         <h3><i class="fas fa-map-marker-alt" style="color: var(--or); margin-right: 12px;"></i> Localisation</h3>
                         <div class="form-grid">
                             <div class="form-group">
                                 <label>Province *</label>
-                                <select id="province-select" required>
+                                <select id="province-select" name="province" required>
                                     <option value="">Sélectionnez une province</option>
                                 </select>
                             </div>
                             <div class="form-group">
                                 <label>Ville *</label>
-                                <select id="ville-select" required>
+                                <select id="ville-select" name="ville" required>
                                     <option value="">Sélectionnez d'abord une province</option>
                                 </select>
                             </div>
                             <div class="form-group">
                                 <label>Commune / Quartier *</label>
-                                <select id="commune-select" required>
+                                <select id="commune-select" name="commune" required>
                                     <option value="">Sélectionnez d'abord une ville</option>
                                 </select>
                             </div>
                             <div class="form-group">
                                 <label>Territoire (optionnel)</label>
-                                <select id="territoire-select">
+                                <select id="territoire-select" name="territoire">
                                     <option value="">Aucun territoire</option>
                                 </select>
                             </div>
@@ -174,7 +175,7 @@
 
                     <!-- BOUTONS DE SOUMISSION -->
                     <div style="display: flex; justify-content: flex-end; gap: 20px; margin-top: 40px;">
-                        <button type="button" class="btn btn-outline">Enregistrer comme brouillon</button>
+                        <button id="save-draft-btn" type="button" class="btn btn-outline">Enregistrer comme brouillon</button>
                         <button type="submit" class="btn btn-primary" style="background: var(--or); color: var(--bleu-pro);">Publier l'opportunité</button>
                     </div>
                 </form>
@@ -365,6 +366,17 @@
                         area.style.borderColor = cnt > 0 ? 'var(--or)' : '#e0e6ed';
                     });
                 });
+
+                // Draft handling
+                const publishForm = document.querySelector('.publier-form');
+                const publishInput = document.getElementById('is_published');
+                const draftBtn = document.getElementById('save-draft-btn');
+                if (draftBtn && publishForm && publishInput) {
+                    draftBtn.addEventListener('click', () => {
+                        publishInput.value = '0';
+                        publishForm.requestSubmit();
+                    });
+                }
 
                 // Attach create listing form
                 KelActions.attachCreateListingForm('.publier-form');

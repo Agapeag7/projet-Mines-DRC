@@ -28,3 +28,5 @@ raw body: {"email":"cli1@example.com","password":"secret123"}
 parsed input: {"email":"cli1@example.com","password":"secret123"}
 raw body: {"email":"agapekyb@gmail.com","password":"123456789"}
 parsed input: {"email":"agapekyb@gmail.com","password":"123456789"}
+raw body: {"email":"agapekyb@gmail.com","password":"123456789"}
+parsed input: {"email":"agapekyb@gmail.com","password":"123456789"}

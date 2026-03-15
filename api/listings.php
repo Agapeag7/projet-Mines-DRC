@@ -5,6 +5,7 @@ require_once __DIR__ . '/../kel.class.php';
 use KelFoncia\Database;
 use KelFoncia\ListingModel;
 use KelFoncia\FavoriteModel;
+use KelFoncia\MediaModel;
 use KelFoncia\Utils;
 
 header('Content-Type: application/json; charset=utf-8');
@@ -13,6 +14,7 @@ if (session_status() === PHP_SESSION_NONE) session_start();
 $db = (new Database())->pdo();
 $lm = new ListingModel($db);
 $fm = new FavoriteModel($db);
+$mm = new MediaModel($db);
 
 // accept GET/POST or JSON
 $input = $_REQUEST;
@@ -35,21 +37,110 @@ if ($action === 'listings_list' || $action === 'list') {
 
 if ($action === 'listings_create' || $action === 'create') {
     if (empty($_SESSION['user_id'])) Utils::jsonResponse(['error' => 'not_authenticated'], 401);
+
+    // Required fields
+    $required = ['province', 'ville', 'commune', 'address_text', 'area_m2', 'price', 'description'];
+    $missing = [];
+    foreach ($required as $field) {
+        if (empty(trim((string)($input[$field] ?? '')))) {
+            $missing[] = $field;
+        }
+    }
+    if (!empty($missing)) {
+        Utils::jsonResponse(['error' => 'missing_fields', 'missing' => $missing, 'message' => 'Champs manquants: ' . implode(', ', $missing)], 400);
+    }
+
+    // Build feature map
+    $features = [];
+    if (!empty($input['usage'])) $features['usage'] = $input['usage'];
+    if (!empty($input['statut'])) $features['statut_juridique'] = $input['statut'];
+    if (!empty($input['reference_titre'])) $features['reference_titre'] = $input['reference_titre'];
+    if (!empty($input['annee_acquisition'])) $features['annee_acquisition'] = $input['annee_acquisition'];
+
+    $title = trim($input['title'] ?? '');
+    if (!$title) {
+        $title = 'Terrain à vendre - ' . trim($input['address_text']);
+    }
+
+    $isPublished = isset($input['is_published']) ? (int)$input['is_published'] : 1;
+
     $data = [
         'owner_id' => $_SESSION['user_id'],
-        'title' => $input['title'] ?? 'Sans titre',
-        'description' => $input['description'] ?? null,
-        'area_m2' => $input['area_m2'] ?? null,
-        'price' => $input['price'] ?? null,
+        'title' => $title,
+        'description' => $input['description'],
+        'area_m2' => $input['area_m2'],
+        'price' => $input['price'],
         'currency' => $input['currency'] ?? 'CDF',
+        'statut' => 'available',
+        'address_text' => $input['address_text'],
+        'latitude' => $input['latitude'] ?? null,
+        'longitude' => $input['longitude'] ?? null,
         'province_id' => $input['province_id'] ?? null,
-        'province' => $input['province'] ?? null,
-        'ville' => $input['ville'] ?? null,
-        'commune' => $input['commune'] ?? null,
-        'features' => isset($input['features']) ? (is_array($input['features']) ? $input['features'] : json_decode($input['features'], true)) : null,
+        'province' => $input['province'],
+        'ville' => $input['ville'],
+        'commune' => $input['commune'],
+        'territoire' => $input['territoire'] ?? null,
+        'features' => !empty($features) ? $features : null,
+        'is_published' => $isPublished,
+        'visible' => 1,
     ];
+
     $id = $lm->create($data);
-    Utils::jsonResponse(['ok' => true, 'id' => $id]);
+
+    // Handle file uploads (photos + documents)
+    $uploadsDir = __DIR__ . '/../uploads';
+    if (!is_dir($uploadsDir)) mkdir($uploadsDir, 0755, true);
+
+    $uploadedMedia = [];
+    $firstImageId = null;
+
+    $processFiles = function($fieldName, $type) use (&$firstImageId, &$uploadedMedia, $uploadsDir, $mm, $id) {
+        if (empty($_FILES[$fieldName]) || empty($_FILES[$fieldName]['name'])) return;
+        $files = &$_FILES[$fieldName];
+        $count = is_array($files['name']) ? count($files['name']) : 1;
+        for ($i = 0; $i < $count; $i++) {
+            $error = is_array($files['error']) ? $files['error'][$i] : $files['error'];
+            if ($error !== UPLOAD_ERR_OK) continue;
+            $name = is_array($files['name']) ? $files['name'][$i] : $files['name'];
+            $tmp = is_array($files['tmp_name']) ? $files['tmp_name'][$i] : $files['tmp_name'];
+
+            $ext = pathinfo($name, PATHINFO_EXTENSION);
+            $mediaId = Utils::uuidv4();
+            $filename = $mediaId . ($ext ? '.' . strtolower($ext) : '');
+            $dest = $uploadsDir . '/' . $filename;
+            if (!move_uploaded_file($tmp, $dest)) continue;
+
+            $mimeType = is_array($files['type']) ? ($files['type'][$i] ?? null) : $files['type'];
+            $sizeBytes = is_array($files['size']) ? ($files['size'][$i] ?? null) : $files['size'];
+
+            $meta = [
+                'owner_id' => $_SESSION['user_id'],
+                'listing_id' => $id,
+                'type' => $type,
+                'filename' => $name,
+                'path' => 'uploads/' . $filename,
+                'mime_type' => $mimeType,
+                'size_bytes' => $sizeBytes,
+                'is_public' => 1,
+            ];
+
+            $mid = $mm->create($meta);
+            $uploadedMedia[] = $mid;
+
+            if ($type === 'image' && !$firstImageId) {
+                $firstImageId = $mid;
+            }
+        }
+    };
+
+    $processFiles('photos', 'image');
+    $processFiles('documents', 'document');
+
+    if ($firstImageId) {
+        $lm->update($id, ['thumbnail_id' => $firstImageId]);
+    }
+
+    Utils::jsonResponse(['ok' => true, 'id' => $id, 'media_ids' => $uploadedMedia]);
 }
 
 if ($action === 'listings_get' || $action === 'get') {
