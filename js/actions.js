@@ -270,11 +270,29 @@
         if (!form) return;
         form.addEventListener('submit', async function(e){
             e.preventDefault();
+            const isDraft = form.querySelector('#is_published') && form.querySelector('#is_published').value === '0';
+            const certify = form.querySelector('#certify');
+            if (!isDraft && (!certify || !certify.checked)) {
+                KelActions.showToast('Vous devez certifier que les informations sont exactes.', 'error');
+                return;
+            }
             const btn = form.querySelector('button[type=submit]');
             if (btn) {
                 btn.disabled = true;
                 btn.textContent = 'Création en cours...';
             }
+            const invalidDocument = Array.from(form.querySelectorAll('input[name="documents[]"]'))
+                .flatMap(input => Array.from(input.files || []))
+                .find(file => !/[.](pdf|docx|doc|odt|rtf)$/i.test(file.name));
+            if (invalidDocument) {
+                KelActions.showToast('Document détecté non autorisé : ' + invalidDocument.name, 'error');
+                if (btn) {
+                    btn.disabled = false;
+                    btn.textContent = 'Publier mon annonce';
+                }
+                return;
+            }
+
             const res = await createListingFromForm(form);
             if (btn) {
                 btn.disabled = false;

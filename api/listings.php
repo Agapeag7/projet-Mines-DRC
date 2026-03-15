@@ -47,8 +47,9 @@ if ($action === 'listings_create' || $action === 'create') {
         Utils::jsonResponse(['error' => 'missing_fields', 'missing' => $missing, 'message' => 'Champs manquants: ' . implode(', ', $missing)], 400);
     }
 
-    if (empty($input['certify']) || $input['certify'] != 'on') {
-        Utils::jsonResponse(['error' => 'consent_required', 'message' => 'Vous devez certifier l’exactitude des informations.'], 400);
+    $isPublished = isset($input['is_published']) ? (int)$input['is_published'] : 1;
+    if ($isPublished === 1 && (empty($input['certify']) || $input['certify'] != 'on')) {
+        Utils::jsonResponse(['error' => 'consent_required', 'message' => 'Vous devez certifier l’exactitude des informations avant publication.'], 400);
     }
 
     $allowedImageExts = ['jpg', 'jpeg', 'png', 'webp', 'svg', 'gif', 'tiff', 'raw', 'jfif'];
@@ -127,13 +128,19 @@ if ($action === 'listings_create' || $action === 'create') {
     $id = $lm->create($data);
 
     // Handle file uploads (photos + documents)
-    $uploadsDir = __DIR__ . '/../uploads';
-    if (!is_dir($uploadsDir)) mkdir($uploadsDir, 0755, true);
+    $uploadsRoot = __DIR__ . '/../doc';
+    $photosDir = $uploadsRoot . '/photos';
+    $jurDir = $uploadsRoot . '/jur';
+    foreach ([$uploadsRoot, $photosDir, $jurDir] as $dir) {
+        if (!is_dir($dir)) {
+            mkdir($dir, 0755, true);
+        }
+    }
 
     $uploadedMedia = [];
     $firstImageId = null;
 
-    $processFiles = function($fieldName, $type) use (&$firstImageId, &$uploadedMedia, $uploadsDir, $mm, $id) {
+    $processFiles = function($fieldName, $type) use (&$firstImageId, &$uploadedMedia, $photosDir, $jurDir, $mm, $id) {
         if (empty($_FILES[$fieldName]) || empty($_FILES[$fieldName]['name'])) return;
         $files = &$_FILES[$fieldName];
         $count = is_array($files['name']) ? count($files['name']) : 1;
@@ -146,7 +153,9 @@ if ($action === 'listings_create' || $action === 'create') {
             $ext = pathinfo($name, PATHINFO_EXTENSION);
             $mediaId = Utils::uuidv4();
             $filename = $mediaId . ($ext ? '.' . strtolower($ext) : '');
-            $dest = $uploadsDir . '/' . $filename;
+
+            $destDir = ($type === 'image') ? $photosDir : $jurDir;
+            $dest = $destDir . '/' . $filename;
             if (!move_uploaded_file($tmp, $dest)) continue;
 
             $mimeType = is_array($files['type']) ? ($files['type'][$i] ?? null) : $files['type'];
@@ -157,7 +166,7 @@ if ($action === 'listings_create' || $action === 'create') {
                 'listing_id' => $id,
                 'type' => $type,
                 'filename' => $name,
-                'path' => 'uploads/' . $filename,
+                'path' => ($type === 'image' ? 'doc/photos/' : 'doc/jur/') . $filename,
                 'mime_type' => $mimeType,
                 'size_bytes' => $sizeBytes,
                 'is_public' => 1,

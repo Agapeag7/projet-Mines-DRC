@@ -135,7 +135,7 @@
 
                     <!-- SECTION 3 : DOCUMENTS ET PHOTOS -->
                     <div class="form-section">
-                        <h3><i class="fas fa-images" style="color: var(--or); margin-right: 12px;"></i> Photos et documents</h3>
+                        <h3><i class="fas fa-images" style="color: var(--or); margin-right: 12px;"></i> Photos</h3>
                         <div class="upload-area">
                             <i class="fas fa-cloud-upload-alt"></i>
                             <p style="font-weight: 600; margin-bottom: 8px;">Cliquez pour télécharger des photos</p>
@@ -148,7 +148,7 @@
                                 <i class="fas fa-file-pdf" style="font-size: 1.8rem;"></i>
                                 <p style="font-weight: 600; margin-bottom: 4px;">Ajouter des documents</p>
                                 <p style="color: var(--gris-moyen); font-size: 0.8rem;">Titre foncier, certificat, plans...</p>
-                                    <input type="file" name="documents[]" accept=".pdf,.docx,.doc,.odt,.rtf" multiple style="display:none;">
+                                    <input type="file" name="documents[]" accept=".pdf,.docx,.doc,.odt,.rtf,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/vnd.oasis.opendocument.text,application/rtf" multiple style="display:none;">
                             </div>
                         </div>
                     </div>
