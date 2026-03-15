@@ -148,7 +148,7 @@
                                 <i class="fas fa-file-pdf" style="font-size: 1.8rem;"></i>
                                 <p style="font-weight: 600; margin-bottom: 4px;">Ajouter des documents</p>
                                 <p style="color: var(--gris-moyen); font-size: 0.8rem;">Titre foncier, certificat, plans...</p>
-                                    <input type="file" name="documents[]" accept=".pdf,.docx,.doc,.odt,.rtf,.legal" multiple style="display:none;">
+                                    <input type="file" name="documents[]" accept=".pdf,.docx,.doc,.odt,.rtf" multiple style="display:none;">
                             </div>
                         </div>
                     </div>

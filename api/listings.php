@@ -52,7 +52,7 @@ if ($action === 'listings_create' || $action === 'create') {
     }
 
     $allowedImageExts = ['jpg', 'jpeg', 'png', 'webp', 'svg', 'gif', 'tiff', 'raw', 'jfif'];
-    $allowedDocumentExts = ['pdf', 'docx', 'doc', 'odt', 'rtf', 'legal'];
+    $allowedDocumentExts = ['pdf', 'docx', 'doc', 'odt', 'rtf'];
 
     $fileErrors = [];
     $validateFiles = function($fieldName, $allowedExts, &$fileErrors) {
