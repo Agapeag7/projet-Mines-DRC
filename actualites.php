@@ -81,10 +81,18 @@
                 res.listings.forEach(l => {
                     const card = document.createElement('div');
                     card.className = 'terrain-card';
-                    const imgSrc = l.thumbnail_id ? '/KelFoncia-DRC/uploads/'+l.thumbnail_id : 'https://via.placeholder.com/180x140';
+                    const localPlaceholder = 'img/placeholder.png';
+                    let imgSrc = localPlaceholder;
+                    if (l.thumbnail_full_url) {
+                        imgSrc = l.thumbnail_full_url;
+                    } else if (l.thumbnail_path) {
+                        imgSrc = '/KelFoncia-DRC/' + l.thumbnail_path.replace(/^\/+/, '');
+                    } else if (l.thumbnail_id) {
+                        imgSrc = '/KelFoncia-DRC/doc/photos/' + l.thumbnail_id;
+                    }
                     const loc = [l.ville, l.province].filter(x=>x).join(', ');
                     card.innerHTML = `
-                        <img src="${imgSrc}" class="terrain-image" onerror="this.src='https://via.placeholder.com/180x140'">
+                        <img src="${imgSrc}" class="terrain-image" onerror="this.src='${localPlaceholder}'">
                         <div class="terrain-infos">
                             <h3><a href="detail-terrain.php?id=${l.id}" style="color:inherit;text-decoration:none;">${l.title || 'Actualité'}</a></h3>
                             <p>${l.description?l.description.substring(0,150):''}</p>

@@ -12,7 +12,14 @@ $db = (new Database())->pdo();
 $lm = new ListingModel($db);
 $fm = new FavoriteModel($db);
 $mm = new MediaModel($db);
-
+function getBaseUrl() {
+    $scheme = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') || ($_SERVER['SERVER_PORT'] ?? '') == 443 ? 'https' : 'http';
+    $host = $_SERVER['HTTP_HOST'] ?? 'localhost';
+    $scriptDir = dirname($_SERVER['SCRIPT_NAME'] ?? '');
+    // strip /api from script dir to get project root
+    $root = rtrim(str_replace('/api', '', $scriptDir), '/');
+    return $scheme . '://' . $host . $root;
+}
 // accept GET/POST or JSON
 $input = $_REQUEST;
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -29,6 +36,16 @@ if ($action === 'listings_list' || $action === 'list') {
     if (!empty($input['province_id'])) $filters['province_id'] = (int)$input['province_id'];
     if (!empty($input['ville'])) $filters['ville'] = $input['ville'];
     $rows = $lm->list($filters, 100, 0);
+    $baseUrl = getBaseUrl();
+    foreach ($rows as &$row) {
+        if (!empty($row['thumbnail_id'])) {
+            $media = $mm->getById($row['thumbnail_id']);
+            if ($media && !empty($media['path'])) {
+                $row['thumbnail_path'] = $media['path'];
+                $row['thumbnail_full_url'] = rtrim($baseUrl, '/') . '/' . ltrim($media['path'], '/');
+            }
+        }
+    }
     Utils::jsonResponse(['ok' => true, 'listings' => $rows]);
 }
 
@@ -184,11 +201,20 @@ if ($action === 'listings_create' || $action === 'create') {
     $processFiles('photos', 'image');
     $processFiles('documents', 'document');
 
+    $response = ['ok' => true, 'id' => $id, 'media_ids' => $uploadedMedia];
+
     if ($firstImageId) {
         $lm->update($id, ['thumbnail_id' => $firstImageId]);
+        $media = $mm->getById($firstImageId);
+        if ($media && !empty($media['path'])) {
+            $baseUrl = getBaseUrl();
+            $response['thumbnail_id'] = $firstImageId;
+            $response['thumbnail_path'] = $media['path'];
+            $response['thumbnail_full_url'] = rtrim($baseUrl, '/') . '/' . ltrim($media['path'], '/');
+        }
     }
 
-    Utils::jsonResponse(['ok' => true, 'id' => $id, 'media_ids' => $uploadedMedia]);
+    Utils::jsonResponse($response);
 }
 
 if ($action === 'listings_get' || $action === 'get') {
@@ -196,6 +222,16 @@ if ($action === 'listings_get' || $action === 'get') {
     if (!$id) Utils::jsonResponse(['error' => 'missing_id'], 400);
     $listing = $lm->getById($id);
     if (!$listing) Utils::jsonResponse(['error' => 'not_found'], 404);
+
+    if (!empty($listing['thumbnail_id'])) {
+        $media = $mm->getById($listing['thumbnail_id']);
+        if ($media && !empty($media['path'])) {
+            $baseUrl = getBaseUrl();
+            $listing['thumbnail_path'] = $media['path'];
+            $listing['thumbnail_full_url'] = rtrim($baseUrl, '/') . '/' . ltrim($media['path'], '/');
+        }
+    }
+
     Utils::jsonResponse(['ok' => true, 'listing' => $listing]);
 }
 

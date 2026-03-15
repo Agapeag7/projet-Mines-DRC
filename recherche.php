@@ -339,12 +339,20 @@
                 rows.forEach(l => {
                     const div = document.createElement('div');
                     div.className = 'terrain-card';
-                    const imgSrc = l.thumbnail_id ? '/KelFoncia-DRC/uploads/'+l.thumbnail_id : 'https://via.placeholder.com/180x140';
+                    const localPlaceholder = 'img/placeholder.png';
+                    let imgSrc = localPlaceholder;
+                    if (l.thumbnail_full_url) {
+                        imgSrc = l.thumbnail_full_url;
+                    } else if (l.thumbnail_path) {
+                        imgSrc = '/KelFoncia-DRC/' + l.thumbnail_path.replace(/^\/+/, '');
+                    } else if (l.thumbnail_id) {
+                        imgSrc = '/KelFoncia-DRC/doc/photos/' + l.thumbnail_id;
+                    }
                     const locText = [l.ville, l.province].filter(x=>x).join(', ');
                     
                     div.innerHTML = `
                         <a href="detail-terrain.php?id=${l.id}" style="text-decoration: none; color: inherit;">
-                            <img src="${imgSrc}" alt="${l.title}" class="terrain-image" onerror="this.src='https://via.placeholder.com/180x140'">
+                            <img src="${imgSrc}" alt="${l.title}" class="terrain-image" onerror="this.src='${localPlaceholder}'">
                         </a>
                         <div class="terrain-infos">
                             <h3><a href="detail-terrain.php?id=${l.id}" style="color: inherit; text-decoration: none;">${l.title || 'Terrain'}</a></h3>
