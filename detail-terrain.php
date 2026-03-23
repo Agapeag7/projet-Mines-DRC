@@ -324,7 +324,7 @@
                         <nav style="display: flex; gap: 10px; color: var(--gris-moyen);">
                             <a href="recherche.php" style="color: var(--gris-moyen);">Recherche</a>
                             <span><i class="fas fa-chevron-right" style="font-size: 0.8rem;"></i></span>
-                            <span style="color: var(--bleu-pro); font-weight: 500;">Terrain à Gombe</span>
+                            <span style="color: var(--bleu-pro); font-weight: 500;" id="breadcrumb-title">Terrain</span>
                         </nav>
                         <div style="display: flex; gap: 16px;">
                             <button class="btn btn-outline" style="padding: 10px 20px;">
@@ -355,22 +355,7 @@
                             <span class="badge">Opportunité certifiée</span>
                             <img src="https://images.unsplash.com/photo-1500382017468-9049fed747ef?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80" alt="Terrain vue aérienne">
                         </div>
-                        <div class="gallery-thumbs">
-                            <div class="gallery-thumb">
-                                <img src="https://images.unsplash.com/photo-1572120360610-d971b9d7767c?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80" alt="Terrain vue 2">
-                            </div>
-                            <div class="gallery-thumb">
-                                <img src="https://images.unsplash.com/photo-1582407947304-fd86f028f716?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80" alt="Terrain vue 3">
-                            </div>
-                            <div class="gallery-thumb">
-                                <img src="https://images.unsplash.com/photo-1542889601-399c4f3a8402?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80" alt="Document titre foncier">
-                            </div>
-                            <div class="gallery-thumb">
-                                <div style="width: 100%; height: 100%; background: var(--bleu-pro); color: white; display: flex; align-items: center; justify-content: center; font-weight: 700;">
-                                    +6
-                                </div>
-                            </div>
-                        </div>
+                        <div class="gallery-thumbs"></div>
                     </div>
 
                     <!-- GRILLE INFOS PRINCIPALES -->
@@ -463,32 +448,7 @@
                             <!-- SECTION DOCUMENTS -->
                             <div class="detail-section fade-in">
                                 <h3><i class="fas fa-file-pdf"></i> Documents juridiques</h3>
-                                <ul class="documents-list">
-                                    <li>
-                                        <i class="fas fa-file-pdf" style="color: #e74c3c;"></i>
-                                        <div style="flex: 1;">
-                                            <a href="#">Titre foncier TF-45678/KIN/2025</a>
-                                            <span style="display: block; color: var(--gris-moyen); font-size: 0.85rem;">Document officiel - 2.3 Mo</span>
-                                        </div>
-                                        <i class="fas fa-download" style="color: var(--gris-moyen); cursor: pointer;"></i>
-                                    </li>
-                                    <li>
-                                        <i class="fas fa-file-image" style="color: #3498db;"></i>
-                                        <div style="flex: 1;">
-                                            <a href="#">Plan cadastral - Parcelle 4567</a>
-                                            <span style="display: block; color: var(--gris-moyen); font-size: 0.85rem;">Plan détaillé - 1.8 Mo</span>
-                                        </div>
-                                        <i class="fas fa-download" style="color: var(--gris-moyen); cursor: pointer;"></i>
-                                    </li>
-                                    <li>
-                                        <i class="fas fa-file-certificate" style="color: var(--or);"></i>
-                                        <div style="flex: 1;">
-                                            <a href="#">Certificat de vérification KelFoncia</a>
-                                            <span style="display: block; color: var(--gris-moyen); font-size: 0.85rem;">Document de conformité - 0.5 Mo</span>
-                                        </div>
-                                        <i class="fas fa-download" style="color: var(--gris-moyen); cursor: pointer;"></i>
-                                    </li>
-                                </ul>
+                                <ul class="documents-list"></ul>
                             </div>
                         </div>
 
@@ -525,26 +485,7 @@
                                     </button>
                                 </div>
 
-                                <div class="proprio-info">
-                                    <div style="display: flex; align-items: center; gap: 16px; margin-bottom: 20px;">
-                                        <div style="width: 60px; height: 60px; background: var(--bleu-clair); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-weight: 700; font-size: 1.3rem;">
-                                            JP
-                                        </div>
-                                        <div>
-                                            <h4 style="color: var(--bleu-pro); margin-bottom: 4px;">Jean-Pierre M.</h4>
-                                            <span style="color: var(--gris-moyen); font-size: 0.9rem;">Membre depuis 2025</span>
-                                            <span style="display: flex; align-items: center; gap: 4px; color: #27ae60; font-size: 0.85rem; margin-top: 4px;">
-                                                <i class="fas fa-check-circle"></i> Identité vérifiée
-                                            </span>
-                                        </div>
-                                    </div>
-                                    <div style="background: rgba(199, 154, 62, 0.05); padding: 16px; border-radius: 12px;">
-                                        <p style="color: var(--gris-moyen); font-size: 0.95rem;">
-                                            <i class="fas fa-shield-alt" style="color: var(--or); margin-right: 8px;"></i>
-                                            Toutes les discussions sont sécurisées et tracées. Ne communiquez jamais hors plateforme.
-                                        </p>
-                                    </div>
-                                </div>
+                                <div class="proprio-info"></div>
                             </div>
                         </div>
                     </div>
@@ -554,42 +495,8 @@
             <!-- SECTION PROPOSITIONS SIMILAIRES -->
             <section style="padding: 60px 0; background: var(--gris-clair);">
                 <div class="container">
-                    <h2 style="font-size: 1.8rem; color: var(--bleu-pro); margin-bottom: 40px;">Opportunités similaires à Kinshasa</h2>
-                    <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 30px;">
-                        <div class="terrain-card fade-in" style="display: block; background: white;">
-                            <img src="https://images.unsplash.com/photo-1582407947304-fd86f028f716?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80" style="width: 100%; height: 180px; object-fit: cover; border-radius: 8px; margin-bottom: 16px;">
-                            <div style="padding: 0 16px 16px;">
-                                <h3 style="font-size: 1.2rem; margin-bottom: 8px;">Terrain - Ngaliema</h3>
-                                <div style="display: flex; gap: 16px; margin-bottom: 12px;">
-                                    <span style="display: flex; align-items: center; gap: 4px; font-size: 0.9rem;"><i class="fas fa-ruler-combined" style="color: var(--or);"></i> 2 500 m²</span>
-                                    <span style="display: flex; align-items: center; gap: 4px; font-size: 0.9rem;"><i class="fas fa-tag" style="color: var(--or);"></i> $280 000</span>
-                                </div>
-                                <a href="#" style="color: var(--or); font-weight: 600;">Voir le détail <i class="fas fa-arrow-right"></i></a>
-                            </div>
-                        </div>
-                        <div class="terrain-card fade-in" style="display: block; background: white;">
-                            <img src="https://images.unsplash.com/photo-1572120360610-d971b9d7767c?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80" style="width: 100%; height: 180px; object-fit: cover; border-radius: 8px; margin-bottom: 16px;">
-                            <div style="padding: 0 16px 16px;">
-                                <h3 style="font-size: 1.2rem; margin-bottom: 8px;">Terrain - Limete</h3>
-                                <div style="display: flex; gap: 16px; margin-bottom: 12px;">
-                                    <span style="display: flex; align-items: center; gap: 4px; font-size: 0.9rem;"><i class="fas fa-ruler-combined" style="color: var(--or);"></i> 8 200 m²</span>
-                                    <span style="display: flex; align-items: center; gap: 4px; font-size: 0.9rem;"><i class="fas fa-tag" style="color: var(--or);"></i> $720 000</span>
-                                </div>
-                                <a href="#" style="color: var(--or); font-weight: 600;">Voir le détail <i class="fas fa-arrow-right"></i></a>
-                            </div>
-                        </div>
-                        <div class="terrain-card fade-in" style="display: block; background: white;">
-                            <img src="https://images.unsplash.com/photo-1542889601-399c4f3a8402?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80" style="width: 100%; height: 180px; object-fit: cover; border-radius: 8px; margin-bottom: 16px;">
-                            <div style="padding: 0 16px 16px;">
-                                <h3 style="font-size: 1.2rem; margin-bottom: 8px;">Terrain - Mont Ngafula</h3>
-                                <div style="display: flex; gap: 16px; margin-bottom: 12px;">
-                                    <span style="display: flex; align-items: center; gap: 4px; font-size: 0.9rem;"><i class="fas fa-ruler-combined" style="color: var(--or);"></i> 12 500 m²</span>
-                                    <span style="display: flex; align-items: center; gap: 4px; font-size: 0.9rem;"><i class="fas fa-tag" style="color: var(--or);"></i> $950 000</span>
-                                </div>
-                                <a href="#" style="color: var(--or); font-weight: 600;">Voir le détail <i class="fas fa-arrow-right"></i></a>
-                            </div>
-                        </div>
-                    </div>
+                    <h2 style="font-size: 1.8rem; color: var(--bleu-pro); margin-bottom: 40px;">Opportunités similaires</h2>
+                    <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 30px;"></div>
                 </div>
             </section>
         </main>
@@ -644,12 +551,11 @@
             const id = params.get('id');
             
             if (!id) {
-                // No ID provided - show error
                 showDetailError('Annonce introuvable', 'Veuillez sélectionner une annonce depuis la recherche.');
                 return;
             }
 
-            async function showDetailError(title, msg) {
+            function showDetailError(title, msg) {
                 const container = document.querySelector('main section:nth-child(2)');
                 if (container) {
                     container.innerHTML = `<div class="container" style="text-align: center; padding: 60px 20px;">
@@ -661,6 +567,7 @@
                 }
             }
 
+            // Charger les détails du listing
             const res = await KelFonciaAPI.get('listings_get', { id });
             if (!res || !res.ok || !res.listing) {
                 showDetailError('Annonce introuvable', 'L\'annonce que vous recherchez n\'existe pas ou a été supprimée.');
@@ -669,14 +576,15 @@
 
             const l = res.listing;
 
-            // Update page title
+            // ===== UPDATE PAGE TITLE & HEADER =====
             document.title = (l.title ? l.title + ' • KelFoncia RDC' : document.title);
 
-            // Update detail header
             const titleEl = document.querySelector('.detail-title');
             if (titleEl) titleEl.textContent = l.title || 'Terrain';
 
-            // Update meta information
+            const breadcrumbTitle = document.getElementById('breadcrumb-title');
+            if (breadcrumbTitle) breadcrumbTitle.textContent = l.title || 'Terrain';
+
             const metaItems = document.querySelectorAll('.detail-meta .meta-item');
             if (metaItems && metaItems.length > 0) {
                 const locText = [l.ville, l.province].filter(x=>x).join(', ');
@@ -685,7 +593,7 @@
                 if (metaItems[2]) metaItems[2].innerHTML = '<i class="fas fa-eye"></i> ' + (l.view_count || 0) + ' vues';
             }
 
-            // Update gallery main image
+            // ===== UPDATE GALLERY =====
             const mainImg = document.querySelector('.gallery-main img');
             if (mainImg) {
                 let imgSrc = '';
@@ -700,15 +608,34 @@
                 if (imgSrc) {
                     mainImg.src = imgSrc;
                     mainImg.onerror = function() { 
-                        // Use a data URI SVG to prevent infinite loop
                         this.src = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="400" height="300"%3E%3Crect fill="%23f0f4f8" width="400" height="300"/%3E%3Ctext x="50%25" y="50%25" dominant-baseline="middle" text-anchor="middle" font-family="Arial" font-size="16" fill="%23999"%3EImage non disponible%3C/text%3E%3C/svg%3E';
-                        // Remove the onerror handler to prevent loops
                         this.onerror = null;
                     };
                 }
             }
 
-            // Update characteristics dynamically
+            // Charger les medias liés au listing pour les thumbnails
+            const galleryThumbs = document.querySelector('.gallery-thumbs');
+            if (galleryThumbs && res.medias && res.medias.length > 0) {
+                galleryThumbs.innerHTML = '';
+                res.medias.slice(0, 3).forEach((media, idx) => {
+                    const thumb = document.createElement('div');
+                    thumb.className = 'gallery-thumb';
+                    const mediaUrl = media.path ? '/KelFoncia-DRC/' + media.path.replace(/^\/+/, '') : `data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="200" height="150"%3E%3Crect fill="%23f0f4f8" width="200" height="150"/%3E%3C/svg%3E`;
+                    thumb.innerHTML = `<img src="${mediaUrl}" alt="Photo ${idx+1}" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22200%22 height=%22150%22%3E%3Crect fill=%22%23f0f4f8%22 width=%22200%22 height=%22150%22/%3E%3C/svg%3E'">`;
+                    galleryThumbs.appendChild(thumb);
+                });
+
+                // Ajouter compteur si plus de 3 images
+                if (res.medias.length > 3) {
+                    const moreThumb = document.createElement('div');
+                    moreThumb.className = 'gallery-thumb';
+                    moreThumb.innerHTML = `<div style="width: 100%; height: 100%; background: var(--bleu-pro); color: white; display: flex; align-items: center; justify-content: center; font-weight: 700;">+${res.medias.length - 3}</div>`;
+                    galleryThumbs.appendChild(moreThumb);
+                }
+            }
+
+            // ===== UPDATE CHARACTERISTICS =====
             const caracItems = document.querySelectorAll('.carac-item');
             caracItems.forEach(item => {
                 const label = item.querySelector('.carac-label')?.textContent.toLowerCase() || '';
@@ -718,49 +645,132 @@
                 let value = '';
                 if (label.includes('superficie')) value = (l.area_m2 ? l.area_m2 + ' m²' : 'N/A');
                 else if (label.includes('statut') || label.includes('juridique')) value = l.statut || 'N/A';
-                else if (label.includes('usage')) value = l.usage || 'N/A';
-                else if (label.includes('viab')) value = l.viabilisation || 'N/A';
-                else if (label.includes('référence')) value = l.reference_titre || 'N/A';
-                else if (label.includes('année') || label.includes('acquisition')) value = l.annee_acquisition || 'N/A';
+                else if (label.includes('usage')) value = (l.features?.usage || 'N/A');
+                else if (label.includes('viab')) value = (l.features?.viabilisation || 'N/A');
+                else if (label.includes('référence')) value = (l.features?.reference_titre || 'N/A');
+                else if (label.includes('année') || label.includes('acquisition')) value = (l.features?.annee_acquisition || 'N/A');
 
                 if (value) valueEl.textContent = value;
             });
 
-            // Update description
+            // ===== UPDATE DESCRIPTION =====
             const descEl = document.querySelector('.detail-section:nth-child(2) p');
             if (descEl && l.description) {
                 descEl.textContent = l.description;
             }
 
-            // Update map coordinates if available
+            // ===== UPDATE MAP =====
             if (l.latitude && l.longitude) {
                 const mapContainer = document.getElementById('map-detail');
                 if (mapContainer && typeof initMap === 'function') {
-                    // Only initialize if not already initialized
                     if (!mapContainer._leaflet_map) {
                         initMap('map-detail', parseFloat(l.latitude), parseFloat(l.longitude), 16, [
                             { lat: parseFloat(l.latitude), lng: parseFloat(l.longitude), title: l.title }
                         ]);
                     }
                 }
-                // Update coordinate display
                 const latEl = document.querySelector('.localisation-detail').parentElement.querySelector('span:nth-child(1)');
                 const lngEl = document.querySelector('.localisation-detail').parentElement.querySelector('span:nth-child(2)');
                 if (latEl) latEl.innerHTML = `<i class="fas fa-latitude" style="color: var(--or);"></i> Lat: ${l.latitude}`;
                 if (lngEl) lngEl.innerHTML = `<i class="fas fa-longitude" style="color: var(--or);"></i> Lng: ${l.longitude}`;
             }
 
-            // Update price
+            // ===== UPDATE DOCUMENTS =====
+            const docList = document.querySelector('.documents-list');
+            if (docList) {
+                if (res.medias && res.medias.filter(m => m.type === 'document').length > 0) {
+                    docList.innerHTML = '';
+                    res.medias.filter(m => m.type === 'document').forEach(doc => {
+                        const li = document.createElement('li');
+                        const icon = doc.mime_type?.includes('pdf') ? 'fa-file-pdf' : 'fa-file-image';
+                        const color = doc.mime_type?.includes('pdf') ? '#e74c3c' : '#3498db';
+                        li.innerHTML = `
+                            <i class="fas ${icon}" style="color: ${color};"></i>
+                            <div style="flex: 1;">
+                                <a href="#">${doc.caption || doc.filename || 'Document'}</a>
+                                <span style="display: block; color: var(--gris-moyen); font-size: 0.85rem;">${doc.size_bytes ? (Math.round(doc.size_bytes / 1024 / 1024 * 10) / 10) + ' Mo' : 'N/A'}</span>
+                            </div>
+                            <i class="fas fa-download" style="color: var(--gris-moyen); cursor: pointer;"></i>
+                        `;
+                        docList.appendChild(li);
+                    });
+                }
+            }
+
+            // ===== UPDATE PRICE & CURRENCY =====
             const priceNode = document.querySelector('.prix');
             if (priceNode) {
-                priceNode.textContent = l.price || 'Prix sur demande';
+                priceNode.textContent = l.price ? '$' + new Intl.NumberFormat('en-US').format(l.price) : 'Prix sur demande';
             }
             const deviseNode = document.querySelector('.devise');
             if (deviseNode) {
-                deviseNode.textContent = l.currency || '';
+                deviseNode.textContent = l.currency || 'USD';
             }
 
-            // Wire contact button
+            // ===== UPDATE OWNER INFO =====
+            if (res.owner) {
+                const ownerInfo = document.querySelector('.proprio-info');
+                if (ownerInfo) {
+                    const initials = (res.owner.display_name || res.owner.email).split(' ').map(n => n[0]).join('').toUpperCase().substring(0, 2);
+                    ownerInfo.innerHTML = `
+                        <div style="display: flex; align-items: center; gap: 16px; margin-bottom: 20px;">
+                            <div style="width: 60px; height: 60px; background: var(--bleu-clair); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-weight: 700; font-size: 1.3rem;">
+                                ${initials}
+                            </div>
+                            <div>
+                                <h4 style="color: var(--bleu-pro); margin-bottom: 4px;">${res.owner.display_name || res.owner.email}</h4>
+                                <span style="color: var(--gris-moyen); font-size: 0.9rem;">Membre depuis ${new Date(res.owner.created_at).getFullYear()}</span>
+                                ${res.owner.kyc_status === 'verified' ? '<span style="display: flex; align-items: center; gap: 4px; color: #27ae60; font-size: 0.85rem; margin-top: 4px;"><i class="fas fa-check-circle"></i> Identité vérifiée</span>' : ''}
+                            </div>
+                        </div>
+                        <div style="background: rgba(199, 154, 62, 0.05); padding: 16px; border-radius: 12px;">
+                            <p style="color: var(--gris-moyen); font-size: 0.95rem;">
+                                <i class="fas fa-shield-alt" style="color: var(--or); margin-right: 8px;"></i>
+                                Toutes les discussions sont sécurisées et tracées. Ne communiquez jamais hors plateforme.
+                            </p>
+                        </div>
+                    `;
+                }
+            }
+
+            // ===== LOAD SIMILAR LISTINGS =====
+            const similarRes = await KelFonciaAPI.get('listings_list', { 
+                province: l.province, 
+                limit: 3 
+            });
+
+            const similarSection = document.querySelector('section:last-of-type .container div[style*="grid"]');
+            if (similarSection && similarRes && similarRes.listings) {
+                similarSection.innerHTML = '';
+                similarRes.listings.filter(item => item.id !== id).slice(0, 3).forEach(similar => {
+                    const card = document.createElement('div');
+                    card.className = 'terrain-card fade-in';
+                    card.style.display = 'block';
+                    card.style.background = 'white';
+                    
+                    let imgSrc = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="500" height="180"%3E%3Crect fill="%23f0f4f8" width="500" height="180"/%3E%3C/svg%3E';
+                    if (similar.thumbnail_full_url) {
+                        imgSrc = similar.thumbnail_full_url;
+                    } else if (similar.thumbnail_path) {
+                        imgSrc = '/KelFoncia-DRC/' + similar.thumbnail_path.replace(/^\/+/, '');
+                    }
+
+                    card.innerHTML = `
+                        <img src="${imgSrc}" style="width: 100%; height: 180px; object-fit: cover; border-radius: 8px; margin-bottom: 16px; onerror='this.src=&quot;data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22500%22 height=%22180%22%3E%3Crect fill=%22%23f0f4f8%22 width=%22500%22 height=%22180%22/%3E%3C/svg%3E&quot;'">
+                        <div style="padding: 0 16px 16px;">
+                            <h3 style="font-size: 1.2rem; margin-bottom: 8px;">${similar.title || 'Terrain'}</h3>
+                            <div style="display: flex; gap: 16px; margin-bottom: 12px;">
+                                <span style="display: flex; align-items: center; gap: 4px; font-size: 0.9rem;"><i class="fas fa-ruler-combined" style="color: var(--or);"></i> ${similar.area_m2 || 'N/A'} m²</span>
+                                <span style="display: flex; align-items: center; gap: 4px; font-size: 0.9rem;"><i class="fas fa-tag" style="color: var(--or);"></i> $${similar.price ? new Intl.NumberFormat('en-US').format(similar.price) : 'N/A'}</span>
+                            </div>
+                            <a href="detail-terrain.php?id=${similar.id}" style="color: var(--or); font-weight: 600;">Voir le détail <i class="fas fa-arrow-right"></i></a>
+                        </div>
+                    `;
+                    similarSection.appendChild(card);
+                });
+            }
+
+            // ===== WIRE CONTACT BUTTON =====
             const contactBtn = document.querySelector('.contact-actions .btn-primary');
             if (contactBtn) {
                 contactBtn.addEventListener('click', function(e){
@@ -774,7 +784,7 @@
                 });
             }
 
-            // Wire favorite button
+            // ===== WIRE FAVORITE BUTTON =====
             const favBtn = document.querySelector('.detail-header button:first-child');
             if (favBtn) {
                 favBtn.addEventListener('click', async function(e){
