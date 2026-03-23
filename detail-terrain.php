@@ -699,7 +699,12 @@
             const mainImg = document.querySelector('.gallery-main img');
             if (mainImg && l.thumbnail_id) {
                 mainImg.src = '/KelFoncia-DRC/uploads/' + l.thumbnail_id;
-                mainImg.onerror = function() { this.src = 'https://via.placeholder.com/800x450'; };
+                mainImg.onerror = function() { 
+                    // Use a data URI SVG to prevent infinite loop
+                    this.src = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="400" height="300"%3E%3Crect fill="%23f0f4f8" width="400" height="300"/%3E%3Ctext x="50%25" y="50%25" dominant-baseline="middle" text-anchor="middle" font-family="Arial" font-size="16" fill="%23999"%3EImage non disponible%3C/text%3E%3C/svg%3E';
+                    // Remove the onerror handler to prevent loops
+                    this.onerror = null;
+                };
             }
 
             // Update characteristics dynamically

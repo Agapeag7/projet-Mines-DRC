@@ -123,7 +123,13 @@ function main() {
 
     // 5️⃣ CARTES INTERACTIVES (Leaflet)
     window.initMap = function(containerId, lat, lng, zoom = 12, markers = []) {
-        if (!document.getElementById(containerId)) return;
+        const container = document.getElementById(containerId);
+        if (!container) return;
+        
+        // Remove existing map if any
+        if (container._leaflet_map) {
+            container._leaflet_map.remove();
+        }
         
         const map = L.map(containerId).setView([lat, lng], zoom);
         
