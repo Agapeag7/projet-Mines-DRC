@@ -812,6 +812,7 @@
                 <a href="index.php" class="logo">KEL<span>FONCIA</span></a>
                 <div class="nav-links">
                     <a href="recherche.php">Trouver du foncier</a>
+                    <a href="actualites.php">Fil d'actualités</a>
                     <a href="publier.php">Publier</a>
                     <a href="tableau-de-bord.php" class="active">Tableau de bord</a>
                     <?php if($logged): ?>

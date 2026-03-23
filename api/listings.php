@@ -127,7 +127,7 @@ if ($action === 'listings_create' || $action === 'create') {
         'description' => $input['description'],
         'area_m2' => $input['area_m2'],
         'price' => $input['price'],
-        'currency' => $input['currency'] ?? 'CDF',
+        'currency' => $input['currency'] ?? 'USD',
         'statut' => 'available',
         'address_text' => $input['address_text'],
         'latitude' => $input['latitude'] ?? null,

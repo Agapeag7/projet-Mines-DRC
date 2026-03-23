@@ -42,7 +42,7 @@ Exemple
  - description: text, nullable — Description complète.
  - area_m2: decimal, nullable — Surface en m².
  - price: decimal, nullable — Prix (monétaire), stocker en unité minimale (ex. FC) ou centimes.
- - currency: enum [CDF, USD, EUR], default CDF
+ - currency: enum [CDF, USD, EUR], default USD
  - statut: enum [available, reserved, sold, archived], default `available`
  - address_text: string, nullable — Texte d'adresse libre.
  - location: geo (latitude, longitude) nullable — Coordonnées pour la carte.
@@ -68,7 +68,7 @@ Relations
  - N Listing <-> N User via Favorite
 
 Exemple
- - { "id":"uuid-list-1","title":"Terrain Gombe","area_m2":4500,"price":1200000,"currency":"USD","province":"Kinshasa","location":{lat:-4.3, lng:15.3}} 
+ - { "id":"uuid-list-1","title":"Terrain Gombe","area_m2":4500,"price":450000,"currency":"USD","province":"Kinshasa","location":{lat:-4.3, lng:15.3}} 
 
 3) Media (fichiers : images, documents)
  - id: uuid, required

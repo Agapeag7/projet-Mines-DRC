@@ -79,7 +79,7 @@ CREATE TABLE IF NOT EXISTS `listings` (
     `description` TEXT DEFAULT NULL,
     `area_m2` DECIMAL(12,2) DEFAULT NULL,
     `price` DECIMAL(20,2) DEFAULT NULL,
-    `currency` ENUM('CDF','USD','EUR') NOT NULL DEFAULT 'CDF',
+    `currency` ENUM('CDF','USD','EUR') NOT NULL DEFAULT 'USD',
     `statut` ENUM('available','reserved','sold','archived') NOT NULL DEFAULT 'available',
     `address_text` VARCHAR(500) DEFAULT NULL,
     `latitude` DECIMAL(10,7) DEFAULT NULL,
@@ -195,7 +195,7 @@ CREATE TABLE IF NOT EXISTS `pricing_plans` (
     `id` CHAR(36) PRIMARY KEY,
     `plan_name` VARCHAR(200) NOT NULL,
     `price` DECIMAL(20,2) NOT NULL,
-    `currency` ENUM('CDF','USD','EUR') DEFAULT 'CDF',
+    `currency` ENUM('CDF','USD','EUR') DEFAULT 'USD',
     `features` JSON DEFAULT NULL,
     `billing_cycle` ENUM('monthly','yearly') DEFAULT 'monthly'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
