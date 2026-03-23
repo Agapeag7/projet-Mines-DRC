@@ -639,16 +639,6 @@
         <script src="js/api.js"></script>
         <script src="js/actions.js"></script>
         <script>
-            // Map detail
-            document.addEventListener('DOMContentLoaded', function() {
-                if (typeof initMap === 'function' && document.getElementById('map-detail')) {
-                    initMap('map-detail', -4.3300, 15.3150, 16, [
-                        { lat: -4.3300, lng: 15.3150, title: 'Terrain - Gombe, 4500m²' }
-                    ]);
-                }
-            });
-        </script>
-        <script>
         document.addEventListener('DOMContentLoaded', async function(){
             const params = new URLSearchParams(window.location.search);
             const id = params.get('id');
@@ -735,9 +725,12 @@
             if (l.latitude && l.longitude) {
                 const mapContainer = document.getElementById('map-detail');
                 if (mapContainer && typeof initMap === 'function') {
-                    initMap('map-detail', parseFloat(l.latitude), parseFloat(l.longitude), 16, [
-                        { lat: parseFloat(l.latitude), lng: parseFloat(l.longitude), title: l.title }
-                    ]);
+                    // Only initialize if not already initialized
+                    if (!mapContainer._leaflet_map) {
+                        initMap('map-detail', parseFloat(l.latitude), parseFloat(l.longitude), 16, [
+                            { lat: parseFloat(l.latitude), lng: parseFloat(l.longitude), title: l.title }
+                        ]);
+                    }
                 }
                 // Update coordinate display
                 const latEl = document.querySelector('.localisation-detail').parentElement.querySelector('span:nth-child(1)');
