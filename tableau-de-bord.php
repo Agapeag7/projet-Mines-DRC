@@ -48,6 +48,43 @@
                 font-weight: 600;
                 margin-left: 12px;
             }
+
+            .dashboard-stats {
+                display: grid;
+                grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+                gap: 20px;
+                margin-bottom: 40px;
+            }
+
+            .stat-card {
+                background: white;
+                border: 1px solid #e0e6ed;
+                border-radius: var(--border-radius);
+                padding: 24px;
+                text-align: center;
+                transition: var(--transition);
+            }
+
+            .stat-card:hover {
+                border-color: var(--or);
+                box-shadow: 0 4px 12px rgba(199, 154, 62, 0.1);
+                transform: translateY(-2px);
+            }
+
+            .stat-card h4 {
+                color: var(--gris-moyen);
+                font-size: 0.9rem;
+                font-weight: 500;
+                margin-bottom: 12px;
+            }
+
+            .stat-nombre {
+                display: block;
+                font-size: 2.5rem;
+                font-weight: 700;
+                color: var(--or);
+                margin-bottom: 8px;
+            }
             
             .empty-state {
                 text-align: center;
@@ -873,19 +910,24 @@
                             <!-- STATISTIQUES RAPIDES -->
                             <div class="dashboard-stats">
                                 <div class="stat-card fade-in">
-                                    <h4>Opportunités consultées</h4>
-                                    <span class="stat-nombre">+124</span>
-                                    <span style="color: #27ae60; font-size: 0.9rem;"><i class="fas fa-arrow-up"></i> +12%</span>
+                                    <h4>Mes annonces</h4>
+                                    <span class="stat-nombre" id="listings-count">0</span>
+                                    <span style="color: var(--gris-moyen); font-size: 0.9rem;">terrains publiés</span>
                                 </div>
                                 <div class="stat-card fade-in">
-                                    <h4>Demandes envoyées</h4>
-                                    <span class="stat-nombre">18</span>
-                                    <span style="color: #27ae60; font-size: 0.9rem;">3 nouvelles réponses</span>
-                                </div>
-                                <div class="stat-card fade-in">
-                                    <h4>Favoris</h4>
-                                    <span class="stat-nombre">7</span>
+                                    <h4>Mes favoris</h4>
+                                    <span class="stat-nombre" id="favorites-count">0</span>
                                     <span style="color: var(--gris-moyen); font-size: 0.9rem;">terrains suivis</span>
+                                </div>
+                                <div class="stat-card fade-in">
+                                    <h4>Messages</h4>
+                                    <span class="stat-nombre" id="messages-count">0</span>
+                                    <span style="color: var(--gris-moyen); font-size: 0.9rem;">conversations</span>
+                                </div>
+                                <div class="stat-card fade-in">
+                                    <h4>Non lus</h4>
+                                    <span class="stat-nombre" id="unread-count" style="color: #ff6b6b;">0</span>
+                                    <span style="color: var(--gris-moyen); font-size: 0.9rem;">nouveaux messages</span>
                                 </div>
                             </div>
 
@@ -1875,6 +1917,9 @@
                         }
                     });
                 });
+
+                // Charger les données initiales pour la section "Vue d'ensemble"
+                loadOverview();
                 
                 // Gestionnaire pour les boutons "Voir le détail" dans favoris
                 const viewButtons = document.querySelectorAll('.btn-icon .fa-eye');
