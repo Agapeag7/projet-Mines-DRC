@@ -283,9 +283,21 @@
             }
             const invalidDocument = Array.from(form.querySelectorAll('input[name="documents[]"]'))
                 .flatMap(input => Array.from(input.files || []))
-                .find(file => !/[.](pdf|docx|doc|odt|rtf)$/i.test(file.name));
+                .find(file => !/[.](pdf|doc|docx|odt|rtf|txt|xls|xlsx|ppt|pptx|ods|odp)$/i.test(file.name));
             if (invalidDocument) {
                 KelActions.showToast('Document détecté non autorisé : ' + invalidDocument.name, 'error');
+                if (btn) {
+                    btn.disabled = false;
+                    btn.textContent = 'Publier mon annonce';
+                }
+                return;
+            }
+
+            const oversizedFile = Array.from(form.querySelectorAll('input[type="file"]'))
+                .flatMap(input => Array.from(input.files || []))
+                .find(file => file.size > 10 * 1024 * 1024);
+            if (oversizedFile) {
+                KelActions.showToast('Fichier trop volumineux : ' + oversizedFile.name, 'error');
                 if (btn) {
                     btn.disabled = false;
                     btn.textContent = 'Publier mon annonce';
@@ -305,6 +317,9 @@
                 }, 1000);
             } else {
                 const errMsg = res?.message || res?.error || 'Erreur de création';
+                if (res?.details && Array.isArray(res.details)) {
+                    errMsg += ' : ' + res.details.join(', ');
+                }
                 showToast(errMsg, 'error');
             }
         });

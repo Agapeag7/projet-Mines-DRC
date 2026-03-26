@@ -70,7 +70,7 @@ if ($action === 'listings_create' || $action === 'create') {
     }
 
     $allowedImageExts = ['jpg', 'jpeg', 'png', 'webp', 'svg', 'gif', 'tiff', 'raw', 'jfif'];
-    $allowedDocumentExts = ['pdf', 'docx', 'doc', 'odt', 'rtf'];
+    $allowedDocumentExts = ['pdf', 'doc', 'docx', 'odt', 'rtf', 'txt', 'xls', 'xlsx', 'ppt', 'pptx', 'ods', 'odp'];
 
     $fileErrors = [];
     $validateFiles = function($fieldName, $allowedExts, &$fileErrors) {
@@ -79,6 +79,11 @@ if ($action === 'listings_create' || $action === 'create') {
         $count = is_array($files['name']) ? count($files['name']) : 1;
         for ($i = 0; $i < $count; $i++) {
             $name = is_array($files['name']) ? $files['name'][$i] : $files['name'];
+            $size = is_array($files['size']) ? $files['size'][$i] : $files['size'];
+            if ($size > 10 * 1024 * 1024) {
+                $fileErrors[] = "$fieldName : fichier trop volumineux ($name)";
+                continue;
+            }
             $ext = strtolower(pathinfo($name, PATHINFO_EXTENSION));
             if ($ext === '') {
                 $fileErrors[] = "$fieldName : nom de fichier invalide ($name)";

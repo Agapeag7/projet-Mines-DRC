@@ -1701,6 +1701,110 @@
                     'statistiques': document.getElementById('section-statistiques'),
                     'parametres': document.getElementById('section-parametres')
                 };
+
+                // Data loading functions
+                async function loadOverview() {
+                    try {
+                        const res = await window.KelFonciaAPI.postJSON('dashboard_overview', {});
+                        if (res && res.ok) {
+                            document.getElementById('listings-count').textContent = res.stats.listings_count;
+                            document.getElementById('favorites-count').textContent = res.stats.favorites_count;
+                            document.getElementById('messages-count').textContent = res.stats.messages_count;
+                            document.getElementById('unread-count').textContent = res.stats.unread_messages;
+                        }
+                    } catch (e) {
+                        console.error('Failed to load overview', e);
+                    }
+                }
+
+                async function loadFavorites() {
+                    try {
+                        const res = await window.KelFonciaAPI.postJSON('dashboard_favorites', {});
+                        if (res && res.ok) {
+                            const tbody = document.querySelector('#favoris-table tbody');
+                            tbody.innerHTML = '';
+                            res.favorites.forEach(fav => {
+                                const tr = document.createElement('tr');
+                                tr.innerHTML = `
+                                    <td>
+                                        <div class="favoris-terrain">
+                                            <img src="${fav.thumbnail_path || 'img/placeholder.jpg'}" alt="Terrain" class="favoris-image">
+                                            <div class="favoris-info">
+                                                <h4>${fav.title}</h4>
+                                                <p>${fav.address_text}</p>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td>${fav.area_m2} m²</td>
+                                    <td>${fav.price} USD</td>
+                                    <td>${fav.ville}, ${fav.province}</td>
+                                    <td>
+                                        <button class="btn-icon" data-fav-id="${fav.id}" title="Retirer des favoris">
+                                            <i class="fas fa-heart"></i>
+                                        </button>
+                                        <button class="btn-icon" title="Voir le détail">
+                                            <i class="fas fa-eye"></i>
+                                        </button>
+                                    </td>
+                                `;
+                                tbody.appendChild(tr);
+                            });
+                        }
+                    } catch (e) {
+                        console.error('Failed to load favorites', e);
+                    }
+                }
+
+                async function loadOpportunites() {
+                    try {
+                        const res = await window.KelFonciaAPI.postJSON('dashboard_listings', {});
+                        if (res && res.ok) {
+                            const container = document.getElementById('opportunites-list');
+                            container.innerHTML = '';
+                            res.listings.forEach(listing => {
+                                const div = document.createElement('div');
+                                div.className = 'project-card';
+                                div.innerHTML = `
+                                    <div class="project-header">
+                                        <div class="project-title">${listing.title}</div>
+                                        <div class="project-status status-${listing.is_published ? 'termine' : 'attente'}">${listing.is_published ? 'Publié' : 'Brouillon'}</div>
+                                    </div>
+                                    <p>${listing.description}</p>
+                                    <div>Superficie: ${listing.area_m2} m² - Prix: ${listing.price} USD</div>
+                                    <div>${listing.address_text}, ${listing.ville}, ${listing.province}</div>
+                                `;
+                                container.appendChild(div);
+                            });
+                        }
+                    } catch (e) {
+                        console.error('Failed to load listings', e);
+                    }
+                }
+
+                async function loadMessages() {
+                    try {
+                        const res = await window.KelFonciaAPI.postJSON('dashboard_messages', {});
+                        if (res && res.ok) {
+                            const container = document.querySelector('.conversations-list');
+                            container.innerHTML = '<input type="text" class="conversation-search" placeholder="Rechercher des conversations...">';
+                            res.conversations.forEach(conv => {
+                                const item = document.createElement('div');
+                                item.className = 'conversation-item';
+                                item.innerHTML = `
+                                    <div class="conversation-avatar" style="background: #007bff;">${conv.conversation.sujet ? conv.conversation.sujet[0].toUpperCase() : 'C'}</div>
+                                    <div class="conversation-info">
+                                        <div class="conversation-name">${conv.conversation.sujet || 'Conversation'}</div>
+                                        <div class="conversation-preview">${conv.last_message ? conv.last_message.content.substring(0, 50) : 'Aucun message'}</div>
+                                    </div>
+                                    <div class="conversation-time">${new Date(conv.conversation.created_at).toLocaleDateString()}</div>
+                                `;
+                                container.appendChild(item);
+                            });
+                        }
+                    } catch (e) {
+                        console.error('Failed to load messages', e);
+                    }
+                }
                 
                 menuLinks.forEach(link => {
                     link.addEventListener('click', function(e) {
@@ -1721,6 +1825,11 @@
                         const sectionName = this.dataset.section;
                         if (sections[sectionName]) {
                             sections[sectionName].classList.add('active');
+                            // Load data for the section
+                            if (sectionName === 'overview') loadOverview();
+                            else if (sectionName === 'favoris') loadFavorites();
+                            else if (sectionName === 'opportunites') loadOpportunites();
+                            else if (sectionName === 'messages') loadMessages();
                         }
                     });
                 });

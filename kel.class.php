@@ -325,6 +325,11 @@
                 $this->pdo->prepare('INSERT INTO conversations (id, sujet, listing_id, created_at) VALUES (?, ?, ?, NOW())')->execute([$id, $sujet, $listing_id]);
                 return $id;
             }
+            public function listForUser($user_id, $limit = 50, $offset = 0) {
+                $stmt = $this->pdo->prepare('SELECT DISTINCT c.* FROM conversations c JOIN messages m ON c.id = m.conversation_id WHERE m.sender_id = ? ORDER BY c.created_at DESC LIMIT ? OFFSET ?');
+                $stmt->execute([$user_id, $limit, $offset]);
+                return $stmt->fetchAll();
+            }
         }
 
         class MessageModel {
@@ -334,6 +339,17 @@
                 $this->pdo->prepare('INSERT INTO messages (id, conversation_id, sender_id, content, attachments, is_read, created_at) VALUES (?, ?, ?, ?, ?, 0, NOW())')
                     ->execute([$id, $conversation_id, $sender_id, $content, $attachments ? json_encode($attachments) : null]);
                 return $id;
+            }
+            public function listByConversation($conversation_id, $limit = 50, $offset = 0) {
+                $stmt = $this->pdo->prepare('SELECT * FROM messages WHERE conversation_id = ? ORDER BY created_at ASC LIMIT ? OFFSET ?');
+                $stmt->execute([$conversation_id, $limit, $offset]);
+                return $stmt->fetchAll();
+            }
+            public function getUnreadCount($user_id) {
+                $stmt = $this->pdo->prepare('SELECT COUNT(*) as cnt FROM messages m WHERE m.sender_id != ? AND m.is_read = 0 AND m.conversation_id IN (SELECT DISTINCT conversation_id FROM messages WHERE sender_id = ?)');
+                $stmt->execute([$user_id, $user_id]);
+                $row = $stmt->fetch();
+                return $row['cnt'] ?? 0;
             }
         }
 
@@ -366,6 +382,14 @@
                         $this->toggleFavorite(); break;
                     case 'listings_list':
                         $this->listListings(); break;
+                    case 'dashboard_overview':
+                        $this->dashboardOverview(); break;
+                    case 'dashboard_favorites':
+                        $this->dashboardFavorites(); break;
+                    case 'dashboard_listings':
+                        $this->dashboardListings(); break;
+                    case 'dashboard_messages':
+                        $this->dashboardMessages(); break;
                     default:
                         Utils::jsonResponse(['error' => 'unknown_action'], 400);
                 }
@@ -465,6 +489,73 @@
                 $lm = new ListingModel($this->db);
                 $rows = $lm->list($filters, 50, 0);
                 Utils::jsonResponse(['ok' => true, 'listings' => $rows]);
+            }
+
+            private function dashboardOverview() {
+                if (empty($_SESSION['user_id'])) Utils::jsonResponse(['error' => 'not_authenticated'], 401);
+                $user_id = $_SESSION['user_id'];
+                $lm = new ListingModel($this->db);
+                $fm = new FavoriteModel($this->db);
+                $cm = new ConversationModel($this->db);
+                $mm = new MessageModel($this->db);
+                $listings = $lm->list(['owner_id' => $user_id], 1000, 0);
+                $listings_count = count($listings);
+                $favorites = $fm->listForUser($user_id);
+                $favorites_count = count($favorites);
+                $conversations = $cm->listForUser($user_id, 1000, 0);
+                $messages_count = 0;
+                foreach ($conversations as $conv) {
+                    $messages = $mm->listByConversation($conv['id'], 1000, 0);
+                    $messages_count += count($messages);
+                }
+                $unread_count = $mm->getUnreadCount($user_id);
+                Utils::jsonResponse(['ok' => true, 'stats' => [
+                    'listings_count' => $listings_count,
+                    'favorites_count' => $favorites_count,
+                    'messages_count' => $messages_count,
+                    'unread_messages' => $unread_count
+                ]]);
+            }
+
+            private function dashboardFavorites() {
+                if (empty($_SESSION['user_id'])) Utils::jsonResponse(['error' => 'not_authenticated'], 401);
+                $user_id = $_SESSION['user_id'];
+                $fm = new FavoriteModel($this->db);
+                $lm = new ListingModel($this->db);
+                $favorite_ids = $fm->listForUser($user_id);
+                $favorites = [];
+                foreach ($favorite_ids as $id) {
+                    $listing = $lm->getById($id);
+                    if ($listing) $favorites[] = $listing;
+                }
+                Utils::jsonResponse(['ok' => true, 'favorites' => $favorites]);
+            }
+
+            private function dashboardListings() {
+                if (empty($_SESSION['user_id'])) Utils::jsonResponse(['error' => 'not_authenticated'], 401);
+                $user_id = $_SESSION['user_id'];
+                $lm = new ListingModel($this->db);
+                $listings = $lm->list(['owner_id' => $user_id], 50, 0);
+                Utils::jsonResponse(['ok' => true, 'listings' => $listings]);
+            }
+
+            private function dashboardMessages() {
+                if (empty($_SESSION['user_id'])) Utils::jsonResponse(['error' => 'not_authenticated'], 401);
+                $user_id = $_SESSION['user_id'];
+                $cm = new ConversationModel($this->db);
+                $mm = new MessageModel($this->db);
+                $conversations = $cm->listForUser($user_id, 50, 0);
+                $result = [];
+                foreach ($conversations as $conv) {
+                    $messages = $mm->listByConversation($conv['id'], 10, 0);
+                    $last_message = end($messages);
+                    $result[] = [
+                        'conversation' => $conv,
+                        'last_message' => $last_message,
+                        'messages_count' => count($messages)
+                    ];
+                }
+                Utils::jsonResponse(['ok' => true, 'conversations' => $result]);
             }
         }
 

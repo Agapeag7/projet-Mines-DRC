@@ -148,7 +148,7 @@
                                 <i class="fas fa-file-pdf" style="font-size: 1.8rem;"></i>
                                 <p style="font-weight: 600; margin-bottom: 4px;">Ajouter des documents</p>
                                 <p style="color: var(--gris-moyen); font-size: 0.8rem;">Titre foncier, certificat, plans...</p>
-                                    <input type="file" name="documents[]" accept=".pdf,.docx,.doc,.odt,.rtf,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/vnd.oasis.opendocument.text,application/rtf" multiple style="display:none;">
+                                    <input type="file" name="documents[]" accept=".pdf,.docx,.doc,.odt,.rtf,.txt,.xls,.xlsx,.ppt,.pptx,.ods,.odp,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/vnd.oasis.opendocument.text,application/rtf,text/plain,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/vnd.ms-powerpoint,application/vnd.openxmlformats-officedocument.presentationml.presentation,application/vnd.oasis.opendocument.spreadsheet,application/vnd.oasis.opendocument.presentation" style="display:none;">
                             </div>
                         </div>
                     </div>
@@ -364,6 +364,11 @@
                         const text = cnt > 1 ? cnt + ' fichiers sélectionnés' : (cnt === 1 ? '1 fichier sélectionné' : 'Ajouter des fichiers');
                         area.querySelector('p').textContent = text;
                         area.style.borderColor = cnt > 0 ? 'var(--or)' : '#e0e6ed';
+                        // For single file inputs like documents, disable further clicks
+                        if (fileInput.name === 'documents[]' && cnt > 0) {
+                            area.style.pointerEvents = 'none';
+                            area.querySelector('p').textContent = 'Fichier sélectionné';
+                        }
                     });
                 });
 
