@@ -307,9 +307,20 @@ if ($action === 'dashboard_favorites') {
     $user_id = $_SESSION['user_id'];
     $favorite_ids = $fm->listForUser($user_id);
     $favorites = [];
+    $baseUrl = getBaseUrl();
     foreach ($favorite_ids as $id) {
         $listing = $lm->getById($id);
-        if ($listing) $favorites[] = $listing;
+        if ($listing) {
+            // Add thumbnail URLs like in listings_list
+            if (!empty($listing['thumbnail_id'])) {
+                $media = $mm->getById($listing['thumbnail_id']);
+                if ($media && !empty($media['path'])) {
+                    $listing['thumbnail_path'] = $media['path'];
+                    $listing['thumbnail_full_url'] = rtrim($baseUrl, '/') . '/' . ltrim($media['path'], '/');
+                }
+            }
+            $favorites[] = $listing;
+        }
     }
     Utils::jsonResponse(['ok' => true, 'favorites' => $favorites]);
 }
@@ -318,6 +329,16 @@ if ($action === 'dashboard_listings') {
     if (empty($_SESSION['user_id'])) Utils::jsonResponse(['error' => 'not_authenticated'], 401);
     $user_id = $_SESSION['user_id'];
     $listings = $lm->list(['owner_id' => $user_id], 50, 0);
+    $baseUrl = getBaseUrl();
+    foreach ($listings as &$listing) {
+        if (!empty($listing['thumbnail_id'])) {
+            $media = $mm->getById($listing['thumbnail_id']);
+            if ($media && !empty($media['path'])) {
+                $listing['thumbnail_path'] = $media['path'];
+                $listing['thumbnail_full_url'] = rtrim($baseUrl, '/') . '/' . ltrim($media['path'], '/');
+            }
+        }
+    }
     Utils::jsonResponse(['ok' => true, 'listings' => $listings]);
 }
 

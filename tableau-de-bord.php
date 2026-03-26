@@ -881,9 +881,9 @@
                     
                     <ul class="dashboard-menu">
                         <li><a href="#" data-section="overview" class="active"><i class="fas fa-chart-pie"></i> Vue d'ensemble</a></li>
-                        <li><a href="#" data-section="favoris"><i class="fas fa-heart"></i> Mes favoris <span class="badge" style="margin-left: auto; background: var(--or);">7</span></a></li>
+                        <li><a href="#" data-section="favoris"><i class="fas fa-heart"></i> Mes favoris <span class="badge" id="menu-favorites-badge" style="margin-left: auto; background: var(--or);">0</span></a></li>
                         <li><a href="#" data-section="opportunites"><i class="fas fa-list"></i> Mes opportunités</a></li>
-                        <li><a href="#" data-section="messages"><i class="fas fa-message"></i> Messages <span style="background: var(--or); color: white; padding: 2px 8px; border-radius: 20px; margin-left: 8px;">3</span></a></li>
+                        <li><a href="#" data-section="messages"><i class="fas fa-message"></i> Messages <span id="menu-messages-badge" style="background: var(--or); color: white; padding: 2px 8px; border-radius: 20px; margin-left: 8px;">0</span></a></li>
                         <li><a href="#" data-section="projets"><i class="fas fa-file-signature"></i> Projets en cours</a></li>
                         <li><a href="#" data-section="statistiques"><i class="fas fa-chart-line"></i> Statistiques</a></li>
                         <li><a href="#" data-section="parametres"><i class="fas fa-gear"></i> Paramètres</a></li>
@@ -1753,6 +1753,9 @@
                             document.getElementById('favorites-count').textContent = res.stats.favorites_count;
                             document.getElementById('messages-count').textContent = res.stats.messages_count;
                             document.getElementById('unread-count').textContent = res.stats.unread_messages;
+                            // Mettre à jour les badges du menu
+                            document.getElementById('menu-favorites-badge').textContent = res.stats.favorites_count;
+                            document.getElementById('menu-messages-badge').textContent = res.stats.unread_messages;
                         } else {
                             console.error('Error loading overview', res);
                         }
@@ -1767,12 +1770,17 @@
                         if (res && res.ok) {
                             const tbody = document.querySelector('#favoris-table tbody');
                             tbody.innerHTML = '';
+                            const placeholderSvg = 'data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%2260%22 height=%2260%22%3E%3Crect fill=%22%23e0e6ed%22 width=%2260%22 height=%2260%22/%3E%3Ctext x=%2250%25%22 y=%2250%25%22 text-anchor=%22middle%22 dy=%22.3em%22 fill=%22%23999%22 font-size=%2212%22%3ENo Image%3C/text%3E%3C/svg%3E';
+                            // Mettre à jour le badge du menu
+                            document.getElementById('menu-favorites-badge').textContent = res.favorites.length;
                             res.favorites.forEach(fav => {
                                 const tr = document.createElement('tr');
+                                const imgSrc = fav.thumbnail_full_url || (fav.thumbnail_path ? (fav.thumbnail_path.startsWith('http') ? fav.thumbnail_path : '/' + fav.thumbnail_path.replace(/\\\\/g, '/')) : placeholderSvg);
+                                const onErrorSvg = placeholderSvg.replace(/'/g, "\\'");
                                 tr.innerHTML = `
                                     <td>
                                         <div class="favoris-terrain">
-                                            <img src="${fav.thumbnail_path || 'img/placeholder.jpg'}" alt="Terrain" class="favoris-image">
+                                            <img src="${imgSrc}" alt="Terrain" class="favoris-image" onerror="this.src='${onErrorSvg}'">
                                             <div class="favoris-info">
                                                 <h4>${fav.title}</h4>
                                                 <p>${fav.id}</p>
@@ -1869,7 +1877,10 @@
                         if (res && res.ok) {
                             const container = document.querySelector('.conversations-list');
                             container.innerHTML = '<input type="text" class="conversation-search" placeholder="Rechercher des conversations...">';
+                            // Mettre à jour le badge du menu avec le nombre total de conversations
+                            let unreadCount = 0;
                             res.conversations.forEach(conv => {
+                                // Compter les messages non lus (optionnel - si vous avez cette info)
                                 const item = document.createElement('div');
                                 item.className = 'conversation-item';
                                 item.innerHTML = `
@@ -1882,6 +1893,7 @@
                                 `;
                                 container.appendChild(item);
                             });
+                            document.getElementById('menu-messages-badge').textContent = res.conversations.length;
                         } else {
                             console.error('Error loading messages', res);
                         }
