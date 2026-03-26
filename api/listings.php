@@ -12,6 +12,8 @@ $db = (new Database())->pdo();
 $lm = new ListingModel($db);
 $fm = new FavoriteModel($db);
 $mm = new MediaModel($db);
+$cm = new ConversationModel($db);
+$msgm = new MessageModel($db);
 function getBaseUrl() {
     $scheme = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') || ($_SERVER['SERVER_PORT'] ?? '') == 443 ? 'https' : 'http';
     $host = $_SERVER['HTTP_HOST'] ?? 'localhost';
@@ -276,6 +278,64 @@ if ($action === 'favorite_list' || $action === 'list_favorites') {
     if (empty($_SESSION['user_id'])) Utils::jsonResponse(['error' => 'not_authenticated'], 401);
     $ids = $fm->listForUser($_SESSION['user_id']);
     Utils::jsonResponse(['ok' => true, 'listing_ids' => $ids]);
+}
+
+if ($action === 'dashboard_overview') {
+    if (empty($_SESSION['user_id'])) Utils::jsonResponse(['error' => 'not_authenticated'], 401);
+    $user_id = $_SESSION['user_id'];
+    $listings = $lm->list(['owner_id' => $user_id], 1000, 0);
+    $listings_count = count($listings);
+    $favorites = $fm->listForUser($user_id);
+    $favorites_count = count($favorites);
+    $conversations = $cm->listForUser($user_id, 1000, 0);
+    $messages_count = 0;
+    foreach ($conversations as $conv) {
+        $messages = $msgm->listByConversation($conv['id'], 1000, 0);
+        $messages_count += count($messages);
+    }
+    $unread_count = $msgm->getUnreadCount($user_id);
+    Utils::jsonResponse(['ok' => true, 'stats' => [
+        'listings_count' => $listings_count,
+        'favorites_count' => $favorites_count,
+        'messages_count' => $messages_count,
+        'unread_messages' => $unread_count
+    ]]);
+}
+
+if ($action === 'dashboard_favorites') {
+    if (empty($_SESSION['user_id'])) Utils::jsonResponse(['error' => 'not_authenticated'], 401);
+    $user_id = $_SESSION['user_id'];
+    $favorite_ids = $fm->listForUser($user_id);
+    $favorites = [];
+    foreach ($favorite_ids as $id) {
+        $listing = $lm->getById($id);
+        if ($listing) $favorites[] = $listing;
+    }
+    Utils::jsonResponse(['ok' => true, 'favorites' => $favorites]);
+}
+
+if ($action === 'dashboard_listings') {
+    if (empty($_SESSION['user_id'])) Utils::jsonResponse(['error' => 'not_authenticated'], 401);
+    $user_id = $_SESSION['user_id'];
+    $listings = $lm->list(['owner_id' => $user_id], 50, 0);
+    Utils::jsonResponse(['ok' => true, 'listings' => $listings]);
+}
+
+if ($action === 'dashboard_messages') {
+    if (empty($_SESSION['user_id'])) Utils::jsonResponse(['error' => 'not_authenticated'], 401);
+    $user_id = $_SESSION['user_id'];
+    $conversations = $cm->listForUser($user_id, 50, 0);
+    $result = [];
+    foreach ($conversations as $conv) {
+        $messages = $msgm->listByConversation($conv['id'], 10, 0);
+        $last_message = end($messages);
+        $result[] = [
+            'conversation' => $conv,
+            'last_message' => $last_message,
+            'messages_count' => count($messages)
+        ];
+    }
+    Utils::jsonResponse(['ok' => true, 'conversations' => $result]);
 }
 
 Utils::jsonResponse(['error' => 'unknown_action'], 400);

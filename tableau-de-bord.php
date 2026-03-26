@@ -969,7 +969,7 @@
                                 </button>
                             </div>
                             
-                            <table class="table-favoris">
+                            <table class="table-favoris" id="favoris-table">
                                 <thead>
                                     <tr>
                                         <th>Terrain</th>
@@ -1101,7 +1101,7 @@
                                 <button class="btn btn-outline">Expirées (0)</button>
                             </div>
                             
-                            <div style="display: flex; flex-direction: column; gap: 20px;">
+                            <div style="display: flex; flex-direction: column; gap: 20px;" id="opportunites-list">
                                 <!-- ANNONCE 1 -->
                                 <div class="project-card">
                                     <div class="project-header">
@@ -1711,6 +1711,8 @@
                             document.getElementById('favorites-count').textContent = res.stats.favorites_count;
                             document.getElementById('messages-count').textContent = res.stats.messages_count;
                             document.getElementById('unread-count').textContent = res.stats.unread_messages;
+                        } else {
+                            console.error('Error loading overview', res);
                         }
                     } catch (e) {
                         console.error('Failed to load overview', e);
@@ -1731,27 +1733,32 @@
                                             <img src="${fav.thumbnail_path || 'img/placeholder.jpg'}" alt="Terrain" class="favoris-image">
                                             <div class="favoris-info">
                                                 <h4>${fav.title}</h4>
-                                                <p>${fav.address_text}</p>
+                                                <p>${fav.id}</p>
                                             </div>
                                         </div>
                                     </td>
-                                    <td>${fav.area_m2} m²</td>
-                                    <td>${fav.price} USD</td>
                                     <td>${fav.ville}, ${fav.province}</td>
+                                    <td>${fav.area_m2} m²</td>
+                                    <td><strong>${fav.price} USD</strong></td>
+                                    <td><span class="terrain-statut statut-disponible">${fav.is_published ? 'Disponible' : 'Non publié'}</span></td>
                                     <td>
-                                        <button class="btn-icon" data-fav-id="${fav.id}" title="Retirer des favoris">
-                                            <i class="fas fa-heart"></i>
-                                        </button>
-                                        <button class="btn-icon" title="Voir le détail">
+                                        <button class="btn-icon" style="margin-right: 8px;" title="Voir le détail">
                                             <i class="fas fa-eye"></i>
+                                        </button>
+                                        <button class="btn-icon" data-fav-id="${fav.id}" title="Retirer des favoris" style="color: #ff6b6b;">
+                                            <i class="fas fa-trash"></i>
                                         </button>
                                     </td>
                                 `;
                                 tbody.appendChild(tr);
                             });
+                        } else {
+                            console.error('Error loading favorites', res);
+                            document.querySelector('#favoris-table tbody').innerHTML = '<tr><td colspan="6" style="text-align: center; color: var(--gris-moyen);">Aucun favori trouvé</td></tr>';
                         }
                     } catch (e) {
                         console.error('Failed to load favorites', e);
+                        document.querySelector('#favoris-table tbody').innerHTML = '<tr><td colspan="6" style="text-align: center; color: var(--gris-moyen);">Erreur lors du chargement</td></tr>';
                     }
                 }
 
@@ -1764,20 +1771,53 @@
                             res.listings.forEach(listing => {
                                 const div = document.createElement('div');
                                 div.className = 'project-card';
+                                const statusClass = listing.is_published ? 'status-termine' : 'status-attente';
+                                const statusText = listing.is_published ? 'Active' : 'En attente';
                                 div.innerHTML = `
                                     <div class="project-header">
-                                        <div class="project-title">${listing.title}</div>
-                                        <div class="project-status status-${listing.is_published ? 'termine' : 'attente'}">${listing.is_published ? 'Publié' : 'Brouillon'}</div>
+                                        <span class="project-title">${listing.title}</span>
+                                        <span class="project-status ${statusClass}">${statusText}</span>
                                     </div>
-                                    <p>${listing.description}</p>
-                                    <div>Superficie: ${listing.area_m2} m² - Prix: ${listing.price} USD</div>
-                                    <div>${listing.address_text}, ${listing.ville}, ${listing.province}</div>
+                                    <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; margin: 20px 0;">
+                                        <div>
+                                            <span style="color: var(--gris-moyen); font-size: 0.85rem;">Superficie</span>
+                                            <p style="font-weight: 700; color: var(--bleu-pro);">${listing.area_m2} m²</p>
+                                        </div>
+                                        <div>
+                                            <span style="color: var(--gris-moyen); font-size: 0.85rem;">Prix</span>
+                                            <p style="font-weight: 700; color: var(--bleu-pro);">$${listing.price}</p>
+                                        </div>
+                                        <div>
+                                            <span style="color: var(--gris-moyen); font-size: 0.85rem;">Localisation</span>
+                                            <p style="font-weight: 700; color: var(--bleu-pro);">${listing.ville}, ${listing.province}</p>
+                                        </div>
+                                        <div>
+                                            <span style="color: var(--gris-moyen); font-size: 0.85rem;">Statut</span>
+                                            <p style="font-weight: 700; color: var(--bleu-pro);">${listing.statut || 'Disponible'}</p>
+                                        </div>
+                                    </div>
+                                    <p style="margin: 12px 0; color: var(--gris-moyen);">${listing.description}</p>
+                                    <div style="display: flex; gap: 12px; justify-content: flex-end;">
+                                        <button class="btn btn-outline" style="padding: 8px 20px;">
+                                            <i class="fas fa-edit"></i> Modifier
+                                        </button>
+                                        <button class="btn btn-outline" style="padding: 8px 20px;">
+                                            <i class="fas fa-eye"></i> Voir
+                                        </button>
+                                    </div>
                                 `;
                                 container.appendChild(div);
                             });
+                            if (res.listings.length === 0) {
+                                container.innerHTML = '<div style="text-align: center; color: var(--gris-moyen); padding: 40px;">Aucune opportunité trouvée</div>';
+                            }
+                        } else {
+                            console.error('Error loading listings', res);
+                            document.getElementById('opportunites-list').innerHTML = '<div style="text-align: center; color: var(--gris-moyen); padding: 40px;">Erreur lors du chargement</div>';
                         }
                     } catch (e) {
                         console.error('Failed to load listings', e);
+                        document.getElementById('opportunites-list').innerHTML = '<div style="text-align: center; color: var(--gris-moyen); padding: 40px;">Erreur lors du chargement</div>';
                     }
                 }
 
@@ -1800,6 +1840,8 @@
                                 `;
                                 container.appendChild(item);
                             });
+                        } else {
+                            console.error('Error loading messages', res);
                         }
                     } catch (e) {
                         console.error('Failed to load messages', e);
