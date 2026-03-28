@@ -366,15 +366,52 @@
                         <div class="terrain-prix">
                             <span class="prix-valeur">${l.price || 'N/A'}</span>
                             <span class="prix-devise">${l.currency || ''}</span>
-                            <button class="fav-btn" data-fav-id="${l.id}" style="margin-top: 16px; background: none; border: none; cursor: pointer; color: var(--or); font-weight: 600;">
-                                <i class="far fa-heart"></i> Favori
-                            </button>
+                            <div style="display: flex; gap: 8px; margin-top: 16px;">
+                                <button class="fav-btn" data-fav-id="${l.id}" style="flex: 1; background: none; border: 1px solid #e0e6ed; cursor: pointer; padding: 8px 12px; border-radius: 8px; color: var(--or); font-weight: 600; transition: all 0.3s;">
+                                    <i class="far fa-heart"></i> Favori
+                                </button>
+                                <button class="contact-btn" data-listing-id="${l.id}" style="flex: 1; background: var(--or); border: none; cursor: pointer; padding: 8px 12px; border-radius: 8px; color: white; font-weight: 600; transition: all 0.3s;">
+                                    <i class="fas fa-envelope"></i> Contacter
+                                </button>
+                            </div>
                         </div>`;
                     container.appendChild(div);
                 });
                 
                 if (statsEl) statsEl.textContent = rows.length + ' opportunité' + (rows.length > 1 ? 's' : '') + ' foncière' + (rows.length > 1 ? 's' : '');
                 KelActions.attachFavoriteButtons('.fav-btn');
+                
+                // Attach contact buttons
+                container.querySelectorAll('.contact-btn').forEach(btn => {
+                    btn.addEventListener('click', async (e) => {
+                        e.preventDefault();
+                        if (!<?php echo $logged ? 'true' : 'false'; ?>) {
+                            KelActions.showToast('Vous devez être connecté pour contacter le propriétaire', 'error');
+                            setTimeout(() => window.location.href = 'connexion.php', 1000);
+                            return;
+                        }
+                        
+                        const listingId = btn.dataset.listingId;
+                        btn.disabled = true;
+                        btn.textContent = 'Chargement...';
+                        
+                        const listingRes = await KelActions.getListingDetails(listingId);
+                        btn.disabled = false;
+                        btn.innerHTML = '<i class="fas fa-envelope"></i> Contacter';
+                        
+                        if (listingRes && listingRes.owner && listingRes.listing) {
+                            KelActions.openContactModal(
+                                listingRes.owner.id,
+                                listingRes.owner.display_name || listingRes.owner.email,
+                                listingRes.owner.email,
+                                listingId,
+                                listingRes.listing.title
+                            );
+                        } else {
+                            KelActions.showToast('Erreur lors du chargement du propriétaire', 'error');
+                        }
+                    });
+                });
             }
 
             async function load(filters={}) {

@@ -326,7 +326,7 @@
                 return $id;
             }
             public function listForUser($user_id, $limit = 50, $offset = 0) {
-                $stmt = $this->pdo->prepare('SELECT DISTINCT c.* FROM conversations c JOIN messages m ON c.id = m.conversation_id WHERE m.sender_id = ? ORDER BY c.created_at DESC LIMIT ? OFFSET ?');
+                $stmt = $this->pdo->prepare('SELECT DISTINCT c.* FROM conversations c JOIN conversation_members cm ON c.id = cm.conversation_id WHERE cm.user_id = ? ORDER BY c.created_at DESC LIMIT ? OFFSET ?');
                 $stmt->execute([$user_id, $limit, $offset]);
                 return $stmt->fetchAll();
             }

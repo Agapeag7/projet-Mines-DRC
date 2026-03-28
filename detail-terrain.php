@@ -1,4 +1,13 @@
-<?php if (session_status() === PHP_SESSION_NONE) session_start(); $logged = !empty($_SESSION['user_id']); ?>
+<?php 
+if (session_status() === PHP_SESSION_NONE) session_start(); 
+$logged = !empty($_SESSION['user_id']);
+
+// Redirect to login if not logged in
+if (!$logged) {
+    header('Location: connexion.php');
+    exit;
+}
+?>
 <!DOCTYPE html>
 <html lang="fr">
     <head>
@@ -772,14 +781,20 @@
 
             // ===== WIRE CONTACT BUTTON =====
             const contactBtn = document.querySelector('.contact-actions .btn-primary');
-            if (contactBtn) {
+            if (contactBtn && res.owner) {
                 contactBtn.addEventListener('click', function(e){
                     e.preventDefault();
                     if (!window.__loggedIn && !document.querySelector('[data-user-id]')) {
                         KelActions.showToast('Vous devez être connecté pour contacter le propriétaire', 'error');
                         setTimeout(() => window.location.href = 'connexion.php', 1000);
                     } else {
-                        KelActions.showToast('Fonction de contact bientôt disponible', 'info');
+                        KelActions.openContactModal(
+                            res.owner.id,
+                            res.owner.display_name || res.owner.email,
+                            res.owner.email,
+                            id,
+                            l.title
+                        );
                     }
                 });
             }

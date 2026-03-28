@@ -367,6 +367,208 @@
         return await window.KelFonciaAPI.postJSON('kyc_request', { type, evidence });
     }
 
+    // Messaging helpers
+    async function initiateConversation(ownerId, listingId, ownerName, listingTitle) {
+        if (!ownerId) {
+            showToast('Erreur: propriétaire non trouvé', 'error');
+            return { error: 'missing_owner' };
+        }
+        
+        // Create a conversation
+        const sujet = listingTitle ? `À propos de: ${listingTitle}` : 'Nouvelle conversation';
+        const res = await window.KelFonciaAPI.postJSON('conversation_create', {
+            sujet: sujet,
+            listing_id: listingId,
+            participants: [ownerId]
+        });
+        
+        if (res && res.ok) {
+            return res;
+        } else {
+            const errMsg = res?.message || res?.error || 'Erreur lors de la création de la conversation';
+            showToast(errMsg, 'error');
+            return res;
+        }
+    }
+
+    async function sendMessage(conversationId, content) {
+        if (!conversationId || !content) {
+            showToast('Conversation ou message manquant', 'error');
+            return { error: 'missing_fields' };
+        }
+        
+        const res = await window.KelFonciaAPI.postJSON('message_send', {
+            conversation_id: conversationId,
+            content: content
+        });
+        
+        if (res && res.ok) {
+            showToast('Message envoyé', 'success');
+            return res;
+        } else {
+            const errMsg = res?.message || res?.error || 'Erreur lors de l\'envoi du message';
+            showToast(errMsg, 'error');
+            return res;
+        }
+    }
+
+    async function getListingDetails(listingId) {
+        if (!listingId) return null;
+        const res = await window.KelFonciaAPI.get('listings_get', { id: listingId });
+        return (res && res.ok) ? res : null;
+    }
+
+    function openContactModal(ownerId, ownerName, ownerEmail, listingId, listingTitle) {
+        // Check if modal already exists
+        let modal = document.getElementById('contact-modal-overlay');
+        if (modal) modal.remove();
+
+        // Create modal overlay
+        const overlay = document.createElement('div');
+        overlay.id = 'contact-modal-overlay';
+        overlay.style.cssText = `
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 5000;
+            opacity: 0;
+            animation: fadeIn 0.3s ease-out forwards;
+        `;
+
+        // Create modal content
+        const modalContent = document.createElement('div');
+        modalContent.style.cssText = `
+            background: white;
+            border-radius: 12px;
+            max-width: 500px;
+            width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            animation: slideUp 0.3s ease-out;
+        `;
+
+        const initials = (ownerName || ownerEmail || 'U').split(' ').map(n => n[0]).join('').toUpperCase().substring(0, 2);
+        const recipientColor = '#007bff';
+
+        modalContent.innerHTML = `
+            <div style="padding: 30px; border-bottom: 1px solid #e0e6ed;">
+                <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px;">
+                    <h3 style="color: var(--bleu-pro); margin: 0;">Contacter le propriétaire</h3>
+                    <button id="contact-modal-close" style="background: none; border: none; font-size: 1.5rem; cursor: pointer; color: var(--gris-moyen); padding: 0;">✕</button>
+                </div>
+                <div style="display: flex; align-items: center; gap: 12px;">
+                    <div style="width: 50px; height: 50px; background: ${recipientColor}; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-weight: 700;">
+                        ${initials}
+                    </div>
+                    <div>
+                        <div style="font-weight: 600; color: var(--bleu-pro);">${ownerName || ownerEmail}</div>
+                        <div style="font-size: 0.9rem; color: var(--gris-moyen);">${ownerName ? ownerEmail : 'Propriétaire'}</div>
+                    </div>
+                </div>
+            </div>
+            <div style="padding: 30px;">
+                <form id="contact-form">
+                    <div style="margin-bottom: 20px;">
+                        <label style="display: block; font-weight: 600; color: var(--bleu-pro); margin-bottom: 8px;">Sujet du message</label>
+                        <input type="text" name="sujet" value="${listingTitle ? 'À propos de: ' + listingTitle : ''}" readonly style="width: 100%; padding: 12px; border: 1px solid #e0e6ed; border-radius: 8px; background: #f8fafd; color: var(--gris-moyen);">
+                    </div>
+                    <div style="margin-bottom: 20px;">
+                        <label style="display: block; font-weight: 600; color: var(--bleu-pro); margin-bottom: 8px;">Votre message</label>
+                        <textarea name="message" placeholder="Écrivez votre message..." required style="width: 100%; padding: 12px; border: 1px solid #e0e6ed; border-radius: 8px; font-family: 'Inter', sans-serif; font-size: 0.95rem; min-height: 150px; resize: vertical;"></textarea>
+                    </div>
+                    <div style="display: flex; gap: 12px;">
+                        <button type="button" id="contact-modal-cancel" style="flex: 1; padding: 12px; border: 1px solid #e0e6ed; background: white; color: var(--gris-moyen); border-radius: 8px; font-weight: 600; cursor: pointer; transition: all 0.3s;">
+                            Annuler
+                        </button>
+                        <button type="submit" style="flex: 1; padding: 12px; background: var(--or); color: white; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; transition: all 0.3s;">
+                            <i class="fas fa-paper-plane" style="margin-right: 6px;"></i>Envoyer
+                        </button>
+                    </div>
+                </form>
+            </div>
+        `;
+
+        overlay.appendChild(modalContent);
+        document.body.appendChild(overlay);
+
+        // Add animation styles if not already present
+        if (!document.getElementById('contact-modal-styles')) {
+            const style = document.createElement('style');
+            style.id = 'contact-modal-styles';
+            style.textContent = `
+                @keyframes slideUp {
+                    from { transform: translateY(30px); opacity: 0; }
+                    to { transform: translateY(0); opacity: 1; }
+                }
+                @keyframes fadeIn {
+                    from { opacity: 0; }
+                    to { opacity: 1; }
+                }
+            `;
+            document.head.appendChild(style);
+        }
+
+        // Close button handlers
+        const closeBtn = modalContent.querySelector('#contact-modal-close');
+        const cancelBtn = modalContent.querySelector('#contact-modal-cancel');
+        
+        const closeModal = () => {
+            overlay.style.opacity = '0';
+            setTimeout(() => overlay.remove(), 300);
+        };
+
+        closeBtn.addEventListener('click', closeModal);
+        cancelBtn.addEventListener('click', closeModal);
+        overlay.addEventListener('click', (e) => {
+            if (e.target === overlay) closeModal();
+        });
+
+        // Form submission
+        const form = modalContent.querySelector('#contact-form');
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const messageInput = form.querySelector('textarea[name="message"]');
+            const message = messageInput.value.trim();
+            
+            if (!message) {
+                showToast('Veuillez écrire un message', 'error');
+                return;
+            }
+
+            const submitBtn = form.querySelector('button[type="submit"]');
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'Envoi en cours...';
+
+            // Create conversation first
+            const convRes = await initiateConversation(ownerId, listingId, ownerName, listingTitle);
+            
+            if (convRes && convRes.ok && convRes.id) {
+                // Send the message
+                const msgRes = await sendMessage(convRes.id, message);
+                
+                if (msgRes && msgRes.ok) {
+                    showToast('Message envoyé avec succès!', 'success');
+                    closeModal();
+                } else {
+                    showToast('Message créé mais erreur d\'envoi', 'error');
+                    submitBtn.disabled = false;
+                    submitBtn.textContent = 'Envoyer';
+                }
+            } else {
+                showToast('Erreur lors de la création de la conversation', 'error');
+                submitBtn.disabled = false;
+                submitBtn.textContent = 'Envoyer';
+            }
+        });
+    }
+
     // expose API
     window.KelActions = {
         login,
@@ -379,7 +581,11 @@
         showToast,
         register,
         attachRegisterForm,
-        requestKyc
+        requestKyc,
+        initiateConversation,
+        sendMessage,
+        getListingDetails,
+        openContactModal
     };
 
 })();

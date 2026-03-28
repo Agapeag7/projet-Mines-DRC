@@ -239,7 +239,17 @@ if ($action === 'listings_get' || $action === 'get') {
         }
     }
 
-    Utils::jsonResponse(['ok' => true, 'listing' => $listing]);
+    // Get owner info
+    $owner = null;
+    if (!empty($listing['owner_id'])) {
+        $um = new UserModel($db);
+        $owner = $um->findById($listing['owner_id']);
+    }
+
+    // Get media for this listing
+    $medias = $mm->listByListing($id);
+
+    Utils::jsonResponse(['ok' => true, 'listing' => $listing, 'owner' => $owner, 'medias' => $medias]);
 }
 
 if ($action === 'listings_update' || $action === 'update') {

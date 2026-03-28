@@ -1792,8 +1792,11 @@
                                     <td><strong>${fav.price} USD</strong></td>
                                     <td><span class="terrain-statut statut-disponible">${fav.is_published ? 'Disponible' : 'Non publié'}</span></td>
                                     <td>
-                                        <button class="btn-icon" style="margin-right: 8px;" title="Voir le détail">
+                                        <button class="btn-icon btn-view-detail" data-listing-id="${fav.id}" style="margin-right: 8px;" title="Voir le détail">
                                             <i class="fas fa-eye"></i>
+                                        </button>
+                                        <button class="btn-icon btn-contact" data-listing-id="${fav.id}" style="margin-right: 8px; color: var(--or);" title="Contacter le propriétaire">
+                                            <i class="fas fa-envelope"></i>
                                         </button>
                                         <button class="btn-icon" data-fav-id="${fav.id}" title="Retirer des favoris" style="color: #ff6b6b;">
                                             <i class="fas fa-trash"></i>
@@ -1801,6 +1804,41 @@
                                     </td>
                                 `;
                                 tbody.appendChild(tr);
+                            });
+
+                            // Add view detail button handlers
+                            document.querySelectorAll('.btn-view-detail').forEach(btn => {
+                                btn.addEventListener('click', (e) => {
+                                    e.preventDefault();
+                                    const listingId = btn.dataset.listingId;
+                                    window.location.href = 'detail-terrain.php?id=' + listingId;
+                                });
+                            });
+
+                            // Add contact button handlers
+                            document.querySelectorAll('.btn-contact').forEach(btn => {
+                                btn.addEventListener('click', async (e) => {
+                                    e.preventDefault();
+                                    const listingId = btn.dataset.listingId;
+                                    btn.disabled = true;
+                                    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+                                    
+                                    const listingRes = await KelActions.getListingDetails(listingId);
+                                    btn.disabled = false;
+                                    btn.innerHTML = '<i class="fas fa-envelope"></i>';
+                                    
+                                    if (listingRes && listingRes.owner && listingRes.listing) {
+                                        KelActions.openContactModal(
+                                            listingRes.owner.id,
+                                            listingRes.owner.display_name || listingRes.owner.email,
+                                            listingRes.owner.email,
+                                            listingId,
+                                            listingRes.listing.title
+                                        );
+                                    } else {
+                                        KelActions.showToast('Erreur lors du chargement du propriétaire', 'error');
+                                    }
+                                });
                             });
                         } else {
                             console.error('Error loading favorites', res);
