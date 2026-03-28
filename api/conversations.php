@@ -36,16 +36,48 @@ if ($action === 'dashboard_messages') {
     $user_id = $_SESSION['user_id'];
     $conversations = $cm->listForUser($user_id, 50, 0);
     $result = [];
+    $unread_count = 0;
+    
     foreach ($conversations as $conv) {
         $messages = $mm->listByConversation($conv['id'], 10, 0);
         $last_message = end($messages);
+        
+        // Get other user in conversation
+        $stmt = $db->prepare('
+            SELECT u.* FROM users u
+            INNER JOIN conversation_members cm ON u.id = cm.user_id
+            WHERE cm.conversation_id = ? AND u.id != ?
+            LIMIT 1
+        ');
+        $stmt->execute([$conv['id'], $user_id]);
+        $other_user = $stmt->fetch();
+        
+        // Count unread messages in this conversation
+        $stmt = $db->prepare('
+            SELECT COUNT(*) as count FROM messages
+            WHERE conversation_id = ? AND sender_id != ? AND is_read = 0
+        ');
+        $stmt->execute([$conv['id'], $user_id]);
+        $unread_in_conv = $stmt->fetch()['count'] ?? 0;
+        $unread_count += $unread_in_conv;
+        
         $result[] = [
             'conversation' => $conv,
             'last_message' => $last_message,
-            'messages_count' => count($messages)
+            'messages_count' => count($messages),
+            'unread_count' => $unread_in_conv,
+            'other_user' => $other_user
         ];
     }
-    Utils::jsonResponse(['ok' => true, 'conversations' => $result]);
+    
+    Utils::jsonResponse([
+        'ok' => true,
+        'conversations' => $result,
+        'stats' => [
+            'unread_messages' => $unread_count,
+            'total_conversations' => count($result)
+        ]
+    ]);
 }
 
 /**
@@ -140,6 +172,8 @@ if ($action === 'message_list' || $action === 'conversation_list') {
     $messages = $mm->listByConversation($conversation_id, $limit, $offset);
     foreach ($messages as &$msg) {
         if ($msg['attachments']) $msg['attachments'] = json_decode($msg['attachments'], true);
+        // Add is_sender field
+        $msg['is_sender'] = ($msg['sender_id'] === $_SESSION['user_id']);
     }
     
     Utils::jsonResponse(['ok' => true, 'messages' => $messages]);

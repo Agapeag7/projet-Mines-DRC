@@ -1909,35 +1909,263 @@
                     }
                 }
 
-                async function loadMessages() {
+                let currentConversationId = null;
+                let currentRecipientName = null;
+
+                // Load and render messages for a specific conversation
+                async function loadConversationMessages(conversationId, recipientName) {
                     try {
-                        const res = await window.KelFonciaAPI.postJSON('dashboard_messages', {});
+                        currentConversationId = conversationId;
+                        currentRecipientName = recipientName;
+                        
+                        // Update messaging header with recipient info
+                        const initials = recipientName.split(' ').map(n => n[0]).join('').toUpperCase().substring(0, 2);
+                        const messagingUserAvatar = document.querySelector('.messaging-user-avatar');
+                        const messagingUserName = document.querySelector('.messaging-user-name');
+                        const messagingUserStatus = document.querySelector('.messaging-user-status');
+                        
+                        if (messagingUserAvatar) messagingUserAvatar.textContent = initials;
+                        if (messagingUserName) messagingUserName.textContent = recipientName;
+                        if (messagingUserStatus) messagingUserStatus.innerHTML = '<i class="fas fa-circle" style="font-size: 0.5rem;"></i> En ligne';
+                        
+                        // Show messaging footer
+                        const messagingFooter = document.querySelector('.messaging-footer');
+                        if (messagingFooter) messagingFooter.style.display = 'flex';
+                        
+                        const res = await window.KelFonciaAPI.get('message_list', {
+                            conversation_id: conversationId,
+                            limit: 50,
+                            offset: 0
+                        });
+                        
                         if (res && res.ok) {
-                            const container = document.querySelector('.conversations-list');
-                            container.innerHTML = '<input type="text" class="conversation-search" placeholder="Rechercher des conversations...">';
-                            // Mettre à jour le badge du menu avec le nombre total de conversations
-                            let unreadCount = 0;
-                            res.conversations.forEach(conv => {
-                                // Compter les messages non lus (optionnel - si vous avez cette info)
-                                const item = document.createElement('div');
-                                item.className = 'conversation-item';
-                                item.innerHTML = `
-                                    <div class="conversation-avatar" style="background: #007bff;">${conv.conversation.sujet ? conv.conversation.sujet[0].toUpperCase() : 'C'}</div>
-                                    <div class="conversation-info">
-                                        <div class="conversation-name">${conv.conversation.sujet || 'Conversation'}</div>
-                                        <div class="conversation-preview">${conv.last_message ? conv.last_message.content.substring(0, 50) : 'Aucun message'}</div>
-                                    </div>
-                                    <div class="conversation-time">${new Date(conv.conversation.created_at).toLocaleDateString()}</div>
-                                `;
-                                container.appendChild(item);
+                            renderMessages(res.messages || []);
+                            
+                            // Mark messages as read
+                            await window.KelFonciaAPI.postJSON('conversation_mark_read', {
+                                conversation_id: conversationId
                             });
-                            document.getElementById('menu-messages-badge').textContent = res.conversations.length;
+                            
+                            // Reload badge to update unread count
+                            const dashRes = await window.KelFonciaAPI.postJSON('dashboard_messages', {});
+                            if (dashRes && dashRes.stats) {
+                                document.getElementById('menu-messages-badge').textContent = dashRes.stats.unread_messages || 0;
+                            }
                         } else {
                             console.error('Error loading messages', res);
                         }
                     } catch (e) {
                         console.error('Failed to load messages', e);
                     }
+                }
+
+                // Render messages in the messaging body
+                function renderMessages(messages) {
+                    const messagingBody = document.querySelector('.messaging-body');
+                    messagingBody.innerHTML = '';
+                    
+                    if (!messages || messages.length === 0) {
+                        messagingBody.innerHTML = '<div style="display: flex; align-items: center; justify-content: center; height: 100%; color: var(--gris-moyen);">Aucun message</div>';
+                        return;
+                    }
+                    
+                    messages.forEach(msg => {
+                        const bubble = document.createElement('div');
+                        bubble.className = msg.is_sender ? 'message-bubble sent' : 'message-bubble received';
+                        
+                        const time = new Date(msg.created_at);
+                        const timeStr = time.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
+                        
+                        bubble.innerHTML = `
+                            <div class="message-text">${escapeHtml(msg.content)}</div>
+                            <div class="message-time">${timeStr}</div>
+                        `;
+                        
+                        messagingBody.appendChild(bubble);
+                    });
+                    
+                    // Scroll to bottom
+                    messagingBody.scrollTop = messagingBody.scrollHeight;
+                }
+
+                // Escape HTML special characters
+                function escapeHtml(text) {
+                    const map = {
+                        '&': '&amp;',
+                        '<': '&lt;',
+                        '>': '&gt;',
+                        '"': '&quot;',
+                        "'": '&#039;'
+                    };
+                    return text.replace(/[&<>"']/g, m => map[m]);
+                }
+
+                // Show empty state placeholder
+                function showEmptyState() {
+                    const messagingBody = document.querySelector('.messaging-body');
+                    const messagingFooter = document.querySelector('.messaging-footer');
+                    messagingBody.innerHTML = `
+                        <div style="display: flex; align-items: center; justify-content: center; height: 100%; color: var(--gris-moyen); text-align: center;">
+                            <div style="padding: 40px 20px;">
+                                <i class="fas fa-comments" style="font-size: 3rem; margin-bottom: 20px; opacity: 0.5;"></i>
+                                <p style="margin: 0; font-size: 1.1rem;">Sélectionnez une conversation</p>
+                                <p style="margin: 8px 0 0 0; font-size: 0.9rem;">et affichez la conversation !</p>
+                            </div>
+                        </div>
+                    `;
+                    if (messagingFooter) messagingFooter.style.display = 'none';
+                }
+
+                async function loadMessages() {
+                    try {
+                        const res = await window.KelFonciaAPI.postJSON('dashboard_messages', {});
+                        if (res && res.ok) {
+                            const container = document.querySelector('.conversations-list');
+                            container.innerHTML = '<input type="text" class="conversation-search" placeholder="Rechercher des conversations...">';
+                            
+                            // Show empty state on load
+                            showEmptyState();
+                            currentConversationId = null;
+                            
+                            // Update badge with unread count
+                            if (res.stats && res.stats.unread_messages) {
+                                document.getElementById('menu-messages-badge').textContent = res.stats.unread_messages;
+                            } else {
+                                document.getElementById('menu-messages-badge').textContent = '0';
+                            }
+                            
+                            res.conversations.forEach(conv => {
+                                const item = document.createElement('div');
+                                item.className = 'conversation-item';
+                                item.dataset.conversationId = conv.conversation.id;
+                                
+                                // Generate avatar color
+                                const colors = ['#007bff', '#e74c3c', '#3498db', '#2ecc71', '#f39c12', '#9b59b6', '#1abc9c', '#34495e'];
+                                const colorIndex = Math.abs(conv.conversation.id.charCodeAt(0)) % colors.length;
+                                const avatarColor = colors[colorIndex];
+                                
+                                // Get recipient name (other participant)
+                                const recipientName = conv.other_user ? conv.other_user.name : 'Utilisateur';
+                                const initials = recipientName.split(' ').map(n => n[0]).join('').toUpperCase().substring(0, 2);
+                                
+                                item.innerHTML = `
+                                    <div class="conversation-avatar" style="background: ${avatarColor};">${initials}</div>
+                                    <div class="conversation-info">
+                                        <div class="conversation-name">${recipientName}</div>
+                                        <div class="conversation-preview">${conv.last_message ? conv.last_message.content.substring(0, 50) : 'Aucun message'}</div>
+                                    </div>
+                                    <div class="conversation-time">${formatConversationTime(new Date(conv.conversation.created_at))}</div>
+                                `;
+                                
+                                // Add click handler
+                                item.addEventListener('click', function() {
+                                    // Highlight selected conversation
+                                    document.querySelectorAll('.conversation-item').forEach(conv => {
+                                        conv.style.background = '';
+                                        conv.style.borderLeft = '';
+                                    });
+                                    this.style.background = 'rgba(199, 154, 62, 0.05)';
+                                    this.style.borderLeft = '3px solid var(--or)';
+                                    
+                                    // Load messages for this conversation
+                                    loadConversationMessages(conv.conversation.id, recipientName);
+                                    
+                                    // Show messaging footer on mobile
+                                    if (window.innerWidth <= 768) {
+                                        document.querySelector('.messaging-container').classList.add('mobile-show-window');
+                                    }
+                                });
+                                
+                                container.appendChild(item);
+                            });
+                        } else {
+                            console.error('Error loading messages', res);
+                        }
+                    } catch (e) {
+                        console.error('Failed to load messages', e);
+                    }
+                }
+
+                // Format time for conversation list
+                function formatConversationTime(date) {
+                    const today = new Date();
+                    const yesterday = new Date(today);
+                    yesterday.setDate(yesterday.getDate() - 1);
+                    
+                    const dateStr = date.toDateString();
+                    const todayStr = today.toDateString();
+                    const yesterdayStr = yesterday.toDateString();
+                    
+                    if (dateStr === todayStr) {
+                        return date.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
+                    } else if (dateStr === yesterdayStr) {
+                        return 'Hier';
+                    } else {
+                        return date.toLocaleDateString('fr-FR', { day: '2-digit', month: '2-digit' });
+                    }
+                }
+
+                // Handle message input form submission
+                const messagingForm = document.querySelector('.messaging-footer');
+                const sendBtn = document.querySelector('.messaging-send-btn');
+                const messageInput = document.querySelector('.messaging-input input');
+
+                if (messagingForm && sendBtn && messageInput) {
+                    const sendMessage = async () => {
+                        if (!currentConversationId) {
+                            return; // No conversation selected
+                        }
+                        
+                        const content = messageInput.value.trim();
+                        if (!content) return;
+                        
+                        // Disable button and show loading state
+                        sendBtn.disabled = true;
+                        const originalText = sendBtn.innerHTML;
+                        sendBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+                        
+                        try {
+                            const res = await window.KelFonciaAPI.postJSON('message_send', {
+                                conversation_id: currentConversationId,
+                                content: content
+                            });
+                            
+                            if (res && res.ok) {
+                                messageInput.value = '';
+                                // Reload messages to show the new one
+                                loadConversationMessages(currentConversationId, currentRecipientName);
+                            } else {
+                                window.KelFoncia?.showToast('Erreur lors de l\'envoi du message', 'error');
+                            }
+                        } catch (e) {
+                            console.error('Failed to send message', e);
+                            window.KelFoncia?.showToast('Erreur lors de l\'envoi du message', 'error');
+                        } finally {
+                            sendBtn.disabled = false;
+                            sendBtn.innerHTML = originalText;
+                        }
+                    };
+
+                    // Send on button click
+                    sendBtn.addEventListener('click', sendMessage);
+
+                    // Send on Enter key
+                    messageInput.addEventListener('keypress', (e) => {
+                        if (e.key === 'Enter' && !e.shiftKey) {
+                            e.preventDefault();
+                            sendMessage();
+                        }
+                    });
+                }
+
+                // Handle back button on mobile
+                const backBtn = document.querySelector('.messaging-back-btn');
+                if (backBtn) {
+                    backBtn.addEventListener('click', function() {
+                        const messagingContainer = document.querySelector('.messaging-container');
+                        messagingContainer.classList.remove('mobile-show-window');
+                        currentConversationId = null;
+                    });
                 }
                 
                 menuLinks.forEach(link => {
@@ -2074,44 +2302,12 @@
             // Lancer au chargement du DOM
             document.addEventListener('DOMContentLoaded', initDashboardResponsive);
 
-            // GESTION MESSAGERIE RESPONSIVE MOBILE
-            document.addEventListener('DOMContentLoaded', function() {
+            // GESTION MESSAGERIE RESPONSIVE MOBILE - Reset on resize
+            window.addEventListener('resize', function() {
                 const messagingContainer = document.querySelector('.messaging-container');
-                const conversationItems = document.querySelectorAll('.conversation-item');
-                const backBtn = document.querySelector('.messaging-back-btn');
-
-                if (!messagingContainer) return;
-
-                // Clic sur une conversation
-                conversationItems.forEach((item, index) => {
-                    item.addEventListener('click', function() {
-                        // Only on mobile/tablet
-                        if (window.innerWidth <= 768) {
-                            messagingContainer.classList.add('mobile-show-window');
-                            // Highlight selected conversation
-                            conversationItems.forEach(conv => {
-                                conv.style.background = '';
-                                conv.style.borderLeft = '';
-                            });
-                            this.style.background = 'rgba(199, 154, 62, 0.05)';
-                            this.style.borderLeft = '3px solid var(--or)';
-                        }
-                    });
-                });
-
-                // Clic sur le bouton retour
-                if (backBtn) {
-                    backBtn.addEventListener('click', function() {
-                        messagingContainer.classList.remove('mobile-show-window');
-                    });
+                if (messagingContainer && window.innerWidth > 768) {
+                    messagingContainer.classList.remove('mobile-show-window');
                 }
-
-                // Reset on resize
-                window.addEventListener('resize', function() {
-                    if (window.innerWidth > 768) {
-                        messagingContainer.classList.remove('mobile-show-window');
-                    }
-                });
             });
         </script>
     </body>
