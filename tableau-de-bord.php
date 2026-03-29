@@ -2034,25 +2034,30 @@
                                 document.getElementById('menu-messages-badge').textContent = '0';
                             }
                             
-                            res.conversations.forEach(conv => {
-                                const item = document.createElement('div');
-                                item.className = 'conversation-item';
-                                item.dataset.conversationId = conv.conversation.id;
+                            // Check if conversations exist and add them
+                            if (res.conversations && res.conversations.length > 0) {
+                                res.conversations.forEach(conv => {
+                                    const item = document.createElement('div');
+                                    item.className = 'conversation-item';
+                                    item.dataset.conversationId = conv.conversation.id;
                                 
                                 // Generate avatar color
                                 const colors = ['#007bff', '#e74c3c', '#3498db', '#2ecc71', '#f39c12', '#9b59b6', '#1abc9c', '#34495e'];
-                                const colorIndex = Math.abs(conv.conversation.id.charCodeAt(0)) % colors.length;
+                                const colorIndex = Math.abs((conv.conversation.id || '0').toString().charCodeAt(0)) % colors.length;
                                 const avatarColor = colors[colorIndex];
                                 
-                                // Get recipient name (other participant)
-                                const recipientName = conv.other_user ? conv.other_user.name : 'Utilisateur';
-                                const initials = recipientName.split(' ').map(n => n[0]).join('').toUpperCase().substring(0, 2);
+                                // Get recipient name (other participant) with safe fallback
+                                const recipientName = (conv.other_user && conv.other_user.name) ? conv.other_user.name : (conv.other_user_name || 'Utilisateur');
+                                const initials = (recipientName && recipientName.length > 0) ? recipientName.split(' ').map(n => n[0]).join('').toUpperCase().substring(0, 2) : 'U';
+                                
+                                // Get last message with safe fallback
+                                const lastMessage = (conv.last_message && conv.last_message.content) ? conv.last_message.content.substring(0, 50) : 'Aucun message';
                                 
                                 item.innerHTML = `
                                     <div class="conversation-avatar" style="background: ${avatarColor};">${initials}</div>
                                     <div class="conversation-info">
                                         <div class="conversation-name">${recipientName}</div>
-                                        <div class="conversation-preview">${conv.last_message ? conv.last_message.content.substring(0, 50) : 'Aucun message'}</div>
+                                        <div class="conversation-preview">${lastMessage}</div>
                                     </div>
                                     <div class="conversation-time">${formatConversationTime(new Date(conv.conversation.created_at))}</div>
                                 `;
@@ -2078,6 +2083,13 @@
                                 
                                 container.appendChild(item);
                             });
+                            } else {
+                                // Show empty state message if no conversations
+                                const emptyMsg = document.createElement('div');
+                                emptyMsg.style.cssText = 'padding: 40px 20px; text-align: center; color: var(--gris-moyen);';
+                                emptyMsg.innerHTML = '<i class="fas fa-inbox" style="font-size: 2rem; color: var(--or); margin-bottom: 16px; opacity: 0.5; display: block;"></i><p>Aucune conversation</p>';
+                                container.appendChild(emptyMsg);
+                            }
                         } else {
                             console.error('Error loading messages', res);
                         }
