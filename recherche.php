@@ -400,12 +400,20 @@
                         btn.innerHTML = '<i class="fas fa-envelope"></i> Contacter';
                         
                         if (listingRes && listingRes.owner && listingRes.listing) {
+                            // Build message subject with terrain details
+                            const location = [listingRes.listing.ville, listingRes.listing.province].filter(x => x).join(', ');
+                            const subject = `À propos de: ${listingRes.listing.title}${location ? ' - ' + location : ''}`;
+                            
+                            // Store subject in global variable for tableau-de-bord to use
+                            window.contactMessageSubject = subject;
+                            
                             KelActions.openContactModal(
                                 listingRes.owner.id,
                                 listingRes.owner.display_name || listingRes.owner.email,
                                 listingRes.owner.email,
                                 listingId,
-                                listingRes.listing.title
+                                listingRes.listing.title,
+                                subject  // Pass subject as 6th parameter
                             );
                         } else {
                             KelActions.showToast('Erreur lors du chargement du propriétaire', 'error');

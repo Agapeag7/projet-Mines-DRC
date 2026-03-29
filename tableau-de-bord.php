@@ -1931,6 +1931,7 @@
 
                 let currentConversationId = null;
                 let currentRecipientName = null;
+                let currentMessageSubject = null;  // Store optional message subject (e.g., from contact form)
 
                 // Load and render messages for a specific conversation
                 async function loadConversationMessages(conversationId, recipientName) {
@@ -1996,10 +1997,22 @@
                         const time = new Date(msg.created_at);
                         const timeStr = time.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
                         
-                        bubble.innerHTML = `
-                            <div class="message-text">${escapeHtml(msg.content)}</div>
-                            <div class="message-time">${timeStr}</div>
-                        `;
+                        // Extract subject if message starts with **SUJET: ... **
+                        let content = msg.content;
+                        let subject = null;
+                        const subjectMatch = content.match(/^\*\*SUJET:\s*(.+?)\*\*\n\n/);
+                        if (subjectMatch) {
+                            subject = subjectMatch[1];
+                            content = content.replace(/^\*\*SUJET:\s*.+?\*\*\n\n/, '');
+                        }
+                        
+                        let messageHtml = `<div class="message-text">`;
+                        if (subject) {
+                            messageHtml += `<div style="font-weight: 700; margin-bottom: 8px; font-size: 0.85em; opacity: 0.9; border-bottom: 1px solid rgba(0,0,0,0.1); padding-bottom: 8px;">${escapeHtml(subject)}</div>`;
+                        }
+                        messageHtml += `${escapeHtml(content)}</div><div class="message-time">${timeStr}</div>`;
+                        
+                        bubble.innerHTML = messageHtml;
                         
                         messagingBody.appendChild(bubble);
                     });
@@ -2056,53 +2069,105 @@
                             
                             // Check if conversations exist and add them
                             if (res.conversations && res.conversations.length > 0) {
-                                res.conversations.forEach(conv => {
+                                res.conversations.forEach((conv, idx) => {
                                     const item = document.createElement('div');
                                     item.className = 'conversation-item';
                                     item.dataset.conversationId = conv.conversation.id;
                                 
-                                // Generate avatar color
-                                const colors = ['#007bff', '#e74c3c', '#3498db', '#2ecc71', '#f39c12', '#9b59b6', '#1abc9c', '#34495e'];
-                                const colorIndex = Math.abs((conv.conversation.id || '0').toString().charCodeAt(0)) % colors.length;
-                                const avatarColor = colors[colorIndex];
-                                
-                                // Get recipient name (other participant) with safe fallback
-                                const recipientName = (conv.other_user && conv.other_user.name) ? conv.other_user.name : (conv.other_user_name || 'Utilisateur');
-                                const initials = (recipientName && recipientName.length > 0) ? recipientName.split(' ').map(n => n[0]).join('').toUpperCase().substring(0, 2) : 'U';
-                                
-                                // Get last message with safe fallback
-                                const lastMessage = (conv.last_message && conv.last_message.content) ? conv.last_message.content.substring(0, 50) : 'Aucun message';
-                                
-                                item.innerHTML = `
-                                    <div class="conversation-avatar" style="background: ${avatarColor};">${initials}</div>
-                                    <div class="conversation-info">
-                                        <div class="conversation-name">${recipientName}</div>
-                                        <div class="conversation-preview">${lastMessage}</div>
-                                    </div>
-                                    <div class="conversation-time">${formatConversationTime(new Date(conv.conversation.created_at))}</div>
-                                `;
-                                
-                                // Add click handler
-                                item.addEventListener('click', function() {
-                                    // Highlight selected conversation
-                                    document.querySelectorAll('.conversation-item').forEach(conv => {
-                                        conv.style.background = '';
-                                        conv.style.borderLeft = '';
-                                    });
-                                    this.style.background = 'rgba(199, 154, 62, 0.05)';
-                                    this.style.borderLeft = '3px solid var(--or)';
+                                    // Generate avatar color
+                                    const colors = ['#007bff', '#e74c3c', '#3498db', '#2ecc71', '#f39c12', '#9b59b6', '#1abc9c', '#34495e'];
+                                    const colorIndex = Math.abs((conv.conversation.id || '0').toString().charCodeAt(0)) % colors.length;
+                                    const avatarColor = colors[colorIndex];
                                     
-                                    // Load messages for this conversation
-                                    loadConversationMessages(conv.conversation.id, recipientName);
+                                    // Get recipient name from other_user with multiple fallback sources
+                                    let recipientName = 'Utilisateur';
                                     
-                                    // Show messaging footer on mobile
-                                    if (window.innerWidth <= 768) {
-                                        document.querySelector('.messaging-container').classList.add('mobile-show-window');
+                                    // First try: Use other_user direct
+                                    if (conv.other_user) {
+                                        if (conv.other_user.display_name) {
+                                            recipientName = conv.other_user.display_name;
+                                        } else if (conv.other_user.email) {
+                                            recipientName = conv.other_user.email.split('@')[0];
+                                        }
                                     }
+                                    
+                                    // Fallback: Use subject if no other_user available
+                                    if (recipientName === 'Utilisateur' && conv.conversation.sujet) {
+                                        // Extract the terrain name from subject "À propos de: Terrain Name - Location"
+                                        const subjectParts = conv.conversation.sujet.replace('À propos de: ', '').split(' - ');
+                                        if (subjectParts.length > 0) {
+                                            recipientName = 'Re: ' + subjectParts[0];
+                                        }
+                                    }
+                                    
+                                    // Additional fallback: Check all_members if available
+                                    if (recipientName === 'Utilisateur' && conv.all_members && conv.all_members.length > 1) {
+                                        // Get first member that's not the current user (approximate)
+                                        for (let member of conv.all_members) {
+                                            if (member.display_name || member.email) {
+                                                recipientName = member.display_name || member.email.split('@')[0];
+                                                break;
+                                            }
+                                        }
+                                    }
+                                    
+                                    const initials = (recipientName && recipientName.length > 0) ? recipientName.split(' ').map(n => n[0]).join('').toUpperCase().substring(0, 2) : 'U';
+                                    
+                                    // Get last message with safe fallback, removing subject prefix if present
+                                    let messagePreview = 'Aucun message';
+                                    if (conv.last_message && conv.last_message.content) {
+                                        let content = conv.last_message.content;
+                                        // Remove subject line from preview if present
+                                        content = content.replace(/^\*\*SUJET:\s*(.+?)\*\*\n\n/, '');
+                                        messagePreview = content.substring(0, 50);
+                                    }
+                                    const lastMessage = messagePreview;
+                                    
+                                    // Get subject from conversation if available
+                                    const subject = conv.conversation.sujet || null;
+                                    
+                                    item.innerHTML = `
+                                        <div class="conversation-avatar" style="background: ${avatarColor};">${initials}</div>
+                                        <div class="conversation-info">
+                                            <div class="conversation-name">${recipientName}</div>
+                                            <div class="conversation-preview">${lastMessage}</div>
+                                        </div>
+                                        <div class="conversation-time">${formatConversationTime(new Date(conv.conversation.created_at))}</div>
+                                    `;
+                                    
+                                    // Add click handler
+                                    item.addEventListener('click', function() {
+                                        // Highlight selected conversation
+                                        document.querySelectorAll('.conversation-item').forEach(conv => {
+                                            conv.style.background = '';
+                                            conv.style.borderLeft = '';
+                                        });
+                                        this.style.background = 'rgba(199, 154, 62, 0.05)';
+                                        this.style.borderLeft = '3px solid var(--or)';
+                                        
+                                        // Load messages for this conversation
+                                        loadConversationMessages(conv.conversation.id, recipientName);
+                                        
+                                        // If there's a subject, store it for sending messages
+                                        if (subject) {
+                                            currentMessageSubject = `À propos de: ${subject.split('À propos de: ')[1] || subject}`;
+                                        }
+                                        
+                                        // If there's a subject from contact form (from recherche.php), use it
+                                        if (window.contactMessageSubject) {
+                                            currentMessageSubject = window.contactMessageSubject;
+                                            // Clear the global variable after using it
+                                            window.contactMessageSubject = null;
+                                        }
+                                        
+                                        // Show messaging footer on mobile
+                                        if (window.innerWidth <= 768) {
+                                            document.querySelector('.messaging-container').classList.add('mobile-show-window');
+                                        }
+                                    });
+                                    
+                                    container.appendChild(item);
                                 });
-                                
-                                container.appendChild(item);
-                            });
                             } else {
                                 // Show empty state message if no conversations
                                 const emptyMsg = document.createElement('div');
@@ -2148,8 +2213,13 @@
                             return; // No conversation selected
                         }
                         
-                        const content = messageInput.value.trim();
+                        let content = messageInput.value.trim();
                         if (!content) return;
+                        
+                        // Prepend subject if one was set (from contact form)
+                        if (currentMessageSubject) {
+                            content = `**SUJET: ${currentMessageSubject}**\n\n${content}`;
+                        }
                         
                         // Disable button and show loading state
                         sendBtn.disabled = true;
@@ -2159,11 +2229,14 @@
                         try {
                             const res = await window.KelFonciaAPI.postJSON('message_send', {
                                 conversation_id: currentConversationId,
-                                content: content
+                                content: content,
+                                subject: currentMessageSubject  // Also send subject as separate field for API
                             });
                             
                             if (res && res.ok) {
                                 messageInput.value = '';
+                                // Clear subject after sending
+                                currentMessageSubject = null;
                                 // Reload messages to show the new one
                                 loadConversationMessages(currentConversationId, currentRecipientName);
                             } else {

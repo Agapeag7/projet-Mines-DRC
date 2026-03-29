@@ -42,15 +42,24 @@ if ($action === 'dashboard_messages') {
         $messages = $mm->listByConversation($conv['id'], 10, 0);
         $last_message = end($messages);
         
-        // Get other user in conversation
+        // Get all participants in conversation
         $stmt = $db->prepare('
             SELECT u.* FROM users u
             INNER JOIN conversation_members cm ON u.id = cm.user_id
-            WHERE cm.conversation_id = ? AND u.id != ?
-            LIMIT 1
+            WHERE cm.conversation_id = ?
+            ORDER BY u.id
         ');
-        $stmt->execute([$conv['id'], $user_id]);
-        $other_user = $stmt->fetch();
+        $stmt->execute([$conv['id']]);
+        $all_members = $stmt->fetchAll();
+        
+        // Find other user (any participant that is not the current user)
+        $other_user = null;
+        foreach ($all_members as $member) {
+            if ($member['id'] !== $user_id) {
+                $other_user = $member;
+                break;
+            }
+        }
         
         // Count unread messages in this conversation
         $stmt = $db->prepare('
@@ -66,7 +75,8 @@ if ($action === 'dashboard_messages') {
             'last_message' => $last_message,
             'messages_count' => count($messages),
             'unread_count' => $unread_in_conv,
-            'other_user' => $other_user
+            'other_user' => $other_user,
+            'all_members' => $all_members
         ];
     }
     
