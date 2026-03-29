@@ -16,6 +16,9 @@
                 border-radius: var(--border-radius-lg);
                 padding: 35px;
                 box-shadow: var(--ombre);
+                display: flex;
+                flex-direction: column;
+                flex: 1;
             }
             
             .dashboard-header {
@@ -423,10 +426,13 @@
             
             .dashboard-section {
                 display: none;
+                min-height: 100%;
             }
             
             .dashboard-section.active {
-                display: block;
+                display: flex;
+                flex-direction: column;
+                min-height: calc(100vh - 200px);
             }
 
             /* STYLES POUR MESSAGERIE RESPONSIVE */
@@ -435,6 +441,7 @@
                 grid-template-columns: 1fr 2fr;
                 gap: 30px;
                 height: 500px;
+                flex: 1;
             }
 
             .conversations-list {
@@ -700,20 +707,24 @@
 
                 /* MESSAGERIE RESPONSIVE */
                 .messaging-container {
-                    grid-template-columns: 1fr;
+                    display: flex;
+                    flex-direction: column;
                     gap: 0;
                     height: auto;
+                    max-height: none;
+                    flex: 1;
                 }
 
                 .conversations-list {
                     border-right: none;
                     border-bottom: 1px solid #e0e6ed;
                     padding-right: 0;
-                    padding-bottom: 0;
-                    max-height: 200px;
-                    min-height: 150px;
-                    margin-bottom: 20px;
+                    padding-bottom: 20px;
+                    margin-bottom: 0;
                     display: block;
+                    overflow-y: auto;
+                    flex: 1;
+                    min-height: 150px;
                 }
 
                 .conversation-item {
@@ -727,9 +738,11 @@
                 }
 
                 .messaging-window {
-                    height: 450px;
+                    height: auto;
+                    flex: 1;
                     display: none;
                     flex-direction: column;
+                    min-height: 300px;
                 }
 
                 .messaging-header {
@@ -789,15 +802,22 @@
             @media (max-width: 480px) {
                 .messaging-container {
                     gap: 0;
+                    max-height: none;
+                    flex: 1;
                 }
 
                 .conversations-list {
-                    max-height: 120px;
-                    margin-bottom: 16px;
+                    max-height: none;
+                    margin-bottom: 0;
+                    flex: 1;
+                    min-height: 100px;
+                    padding-bottom: 16px;
                 }
 
                 .messaging-window {
-                    height: 400px;
+                    height: auto;
+                    flex: 1;
+                    min-height: 250px;
                 }
 
                 .messaging-header {
