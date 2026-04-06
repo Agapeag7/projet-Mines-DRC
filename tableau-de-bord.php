@@ -1764,6 +1764,11 @@
                     'parametres': document.getElementById('section-parametres')
                 };
 
+                // Check for URL parameters to auto-navigate
+                const urlParams = new URLSearchParams(window.location.search);
+                const requestedSection = urlParams.get('section');
+                const requestedConversationId = urlParams.get('conversation_id');
+
                 // Data loading functions
                 async function loadOverview() {
                     try {
@@ -2168,6 +2173,20 @@
                                     
                                     container.appendChild(item);
                                 });
+                                
+                                // Auto-open pending conversation if requested
+                                if (window.__pendingConversationId) {
+                                    const pendingId = window.__pendingConversationId;
+                                    window.__pendingConversationId = null; // Clear it
+                                    
+                                    // Find and click the conversation
+                                    setTimeout(() => {
+                                        const conversationItem = document.querySelector(`.conversation-item[data-conversation-id="${pendingId}"]`);
+                                        if (conversationItem) {
+                                            conversationItem.click();
+                                        }
+                                    }, 100);
+                                }
                             } else {
                                 // Show empty state message if no conversations
                                 const emptyMsg = document.createElement('div');
@@ -2302,7 +2321,25 @@
                 });
 
                 // Charger les données initiales pour la section "Vue d'ensemble"
-                loadOverview();
+                if (requestedSection && sections[requestedSection]) {
+                    // Auto-navigate to requested section
+                    const sectionLink = document.querySelector(`.dashboard-menu a[data-section="${requestedSection}"]`);
+                    if (sectionLink) {
+                        sectionLink.classList.add('active');
+                        sections[requestedSection].classList.add('active');
+                        if (requestedSection === 'overview') loadOverview();
+                        else if (requestedSection === 'favoris') loadFavorites();
+                        else if (requestedSection === 'opportunites') loadOpportunites();
+                        else if (requestedSection === 'messages') {
+                            // Store the conversation ID to open after loading
+                            window.__pendingConversationId = requestedConversationId;
+                            loadMessages();
+                        }
+                    }
+                } else {
+                    // Load default section (overview)
+                    loadOverview();
+                }
                 
                 // Gestionnaire pour les boutons "Voir le détail" dans favoris
                 const viewButtons = document.querySelectorAll('.btn-icon .fa-eye');

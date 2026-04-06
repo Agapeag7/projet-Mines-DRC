@@ -556,6 +556,10 @@
                 if (msgRes && msgRes.ok) {
                     showToast('Message envoyé avec succès!', 'success');
                     closeModal();
+                    // Redirect to dashboard messages section with this conversation
+                    setTimeout(() => {
+                        window.location.href = 'tableau-de-bord.php?section=messages&conversation_id=' + encodeURIComponent(convRes.id);
+                    }, 1000);
                 } else {
                     showToast('Message créé mais erreur d\'envoi', 'error');
                     submitBtn.disabled = false;

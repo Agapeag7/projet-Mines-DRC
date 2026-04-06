@@ -72,4 +72,60 @@ if ($action === 'media_delete' || $action === 'delete') {
     Utils::jsonResponse(['ok' => (bool)$ok]);
 }
 
+if ($action === 'download' || $action === 'media_download') {
+    $id = $_GET['id'] ?? $_POST['id'] ?? null;
+    if (!$id) Utils::jsonResponse(['error' => 'missing_id'], 400);
+    
+    $m = $mm->getById($id);
+    if (!$m) Utils::jsonResponse(['error' => 'not_found'], 404);
+    
+    // Try to find and serve the file
+    $filePath = null;
+    $basePath = rtrim(__DIR__ . '/..', '/');
+    
+    if (!empty($m['path'])) {
+        $pathVariants = [
+            $basePath . '/' . ltrim($m['path'], '/'),  // /uploads/file.pdf
+            $basePath . '/uploads/' . basename($m['path']),  // Direct uploads lookup by name
+            $basePath . '/doc/jur/' . basename($m['path']),  // Legacy jur lookup
+            $basePath . '/doc/photos/' . basename($m['path']),  // Legacy photos lookup
+        ];
+        
+        foreach ($pathVariants as $variant) {
+            if (file_exists($variant)) {
+                $filePath = $variant;
+                break;
+            }
+        }
+    }
+    
+    if (!$filePath || !file_exists($filePath)) {
+        header('HTTP/1.0 404 Not Found');
+        die('File not found');
+    }
+    
+    // Check if file is readable and safe
+    $realPath = realpath($filePath);
+    $basePath = realpath($basePath);
+    if (!$realPath || !$basePath || strpos($realPath, $basePath) !== 0) {
+        header('HTTP/1.0 403 Forbidden');
+        die('Access denied');
+    }
+    
+    // Get filename for download
+    $filename = !empty($m['filename']) ? $m['filename'] : basename($realPath);
+    
+    // Serve the file
+    header('Content-Type: ' . ($m['mime_type'] ?? 'application/octet-stream'));
+    header('Content-Disposition: attachment; filename="' . addslashes($filename) . '"');
+    header('Content-Length: ' . filesize($realPath));
+    header('Cache-Control: no-cache, must-revalidate');
+    header('Pragma: public');
+    
+    // Clear output buffer and send file
+    if (ob_get_level()) ob_end_clean();
+    readfile($realPath);
+    exit;
+}
+
 Utils::jsonResponse(['error' => 'unknown_action'], 400);

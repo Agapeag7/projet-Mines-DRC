@@ -630,8 +630,21 @@ if (!$logged) {
                 res.medias.slice(0, 3).forEach((media, idx) => {
                     const thumb = document.createElement('div');
                     thumb.className = 'gallery-thumb';
-                    const mediaUrl = media.path ? '/KelFoncia-DRC/' + media.path.replace(/^\/+/, '') : `data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="200" height="150"%3E%3Crect fill="%23f0f4f8" width="200" height="150"/%3E%3C/svg%3E`;
-                    thumb.innerHTML = `<img src="${mediaUrl}" alt="Photo ${idx+1}" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22200%22 height=%22150%22%3E%3Crect fill=%22%23f0f4f8%22 width=%22200%22 height=%22150%22/%3E%3C/svg%3E'">`;
+                    
+                    // Construct URL for media - use API for legacy paths
+                    let mediaUrl = '';
+                    if (media.path) {
+                        const isLegacy = media.path.includes('doc/jur/') || media.path.includes('doc/photos/');
+                        if (isLegacy) {
+                            // For legacy paths, try direct access first, but include fallback
+                            mediaUrl = '/KelFoncia-DRC/' + media.path.replace(/^\/+/, '');
+                        } else {
+                            mediaUrl = '/KelFoncia-DRC/' + media.path.replace(/^\/+/, '');
+                        }
+                    }
+                    
+                    const fallbackSvg = `data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="200" height="150"%3E%3Crect fill="%23f0f4f8" width="200" height="150"/%3E%3C/svg%3E`;
+                    thumb.innerHTML = `<img src="${mediaUrl || fallbackSvg}" alt="Photo ${idx+1}" onerror="this.src='${fallbackSvg}'">`;
                     galleryThumbs.appendChild(thumb);
                 });
 
@@ -693,13 +706,17 @@ if (!$logged) {
                         const li = document.createElement('li');
                         const icon = doc.mime_type?.includes('pdf') ? 'fa-file-pdf' : 'fa-file-image';
                         const color = doc.mime_type?.includes('pdf') ? '#e74c3c' : '#3498db';
+                        
+                        // Construct download URL - always use API for consistency
+                        let downloadUrl = '/KelFoncia-DRC/api/media.php?action=download&id=' + encodeURIComponent(doc.id);
+                        
                         li.innerHTML = `
                             <i class="fas ${icon}" style="color: ${color};"></i>
                             <div style="flex: 1;">
-                                <a href="#">${doc.caption || doc.filename || 'Document'}</a>
+                                <a href="${downloadUrl}" download="${doc.filename || 'document'}" style="color: var(--bleu-pro); text-decoration: none; font-weight: 500;">${doc.caption || doc.filename || 'Document'}</a>
                                 <span style="display: block; color: var(--gris-moyen); font-size: 0.85rem;">${doc.size_bytes ? (Math.round(doc.size_bytes / 1024 / 1024 * 10) / 10) + ' Mo' : 'N/A'}</span>
                             </div>
-                            <i class="fas fa-download" style="color: var(--gris-moyen); cursor: pointer;"></i>
+                            <i class="fas fa-download" style="color: var(--gris-moyen); cursor: pointer;" onclick="event.preventDefault(); window.location.href = '${downloadUrl}';"></i>
                         `;
                         docList.appendChild(li);
                     });

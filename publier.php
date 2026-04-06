@@ -364,11 +364,8 @@
                         const text = cnt > 1 ? cnt + ' fichiers sélectionnés' : (cnt === 1 ? '1 fichier sélectionné' : 'Ajouter des fichiers');
                         area.querySelector('p').textContent = text;
                         area.style.borderColor = cnt > 0 ? 'var(--or)' : '#e0e6ed';
-                        // For single file inputs like documents, disable further clicks
-                        if (fileInput.name === 'documents[]' && cnt > 0) {
-                            area.style.pointerEvents = 'none';
-                            area.querySelector('p').textContent = 'Fichier sélectionné';
-                        }
+                        // Allow multiple selections without disabling clicks
+                        // User can keep adding files
                     });
                 });
 

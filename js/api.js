@@ -9,7 +9,7 @@
     function endpointFor(action) {
         const auth = ['login','register'];
         const listings = ['list','listings_list','create','listings_create','get','listings_get','update','listings_update','delete','listings_delete','toggle_favorite','favorite_toggle'];
-        const media = ['upload','media_upload','media_list','list_by_listing','media_get','media_delete'];
+        const media = ['upload','media_upload','media_list','list_by_listing','media_get','media_delete','download','media_download'];
         const notifications = ['notifications_list','notifications_mark_read','notifications_create','list','mark_read','create'];
         const conversations = ['conversation_create','message_send','message_list','conversation_list','send','create','dashboard_messages','conversation_mark_read','message_mark_read'];
         const kyc = ['kyc_request','request'];
