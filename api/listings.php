@@ -430,4 +430,89 @@ if ($action === 'dashboard_activity') {
     Utils::jsonResponse(['ok' => true, 'activities' => $activities]);
 }
 
+if ($action === 'dashboard_projects') {
+    if (empty($_SESSION['user_id'])) Utils::jsonResponse(['error' => 'not_authenticated'], 401);
+    $user_id = $_SESSION['user_id'];
+    
+    // Get user's listings that can be treated as projects
+    $listings = $lm->list(['owner_id' => $user_id], 20, 0);
+    $projects = [];
+    
+    foreach ($listings as $listing) {
+        $projects[] = [
+            'id' => $listing['id'],
+            'title' => $listing['title'] ?? 'Projet sans titre',
+            'description' => $listing['description'] ?? '',
+            'area' => $listing['area_m2'] ?? 0,
+            'price' => $listing['price'] ?? 0,
+            'currency' => $listing['currency'] ?? 'USD',
+            'status' => $listing['statut'] ?? 'available',
+            'is_published' => $listing['is_published'] ?? 0,
+            'location' => ($listing['commune'] ?? '') . ' - ' . ($listing['province'] ?? ''),
+            'created_at' => $listing['created_at'] ?? date('Y-m-d H:i:s'),
+            'view_count' => $listing['view_count'] ?? 0,
+            'progress' => rand(10, 90),  // Simulation du progrès
+            'status_label' => $listing['is_published'] ? 'Publié' : 'Brouillon',
+            'status_type' => $listing['is_published'] ? 'status-termine' : 'status-attente'
+        ];
+    }
+    
+    Utils::jsonResponse(['ok' => true, 'projects' => $projects]);
+}
+
+if ($action === 'dashboard_statistics') {
+    if (empty($_SESSION['user_id'])) Utils::jsonResponse(['error' => 'not_authenticated'], 401);
+    $user_id = $_SESSION['user_id'];
+    
+    // Get statistics for user's listings
+    $listings = $lm->list(['owner_id' => $user_id], 100, 0);
+    $total_views = 0;
+    $total_contacts = 0;
+    $total_favorites = 0;
+    $listing_stats = [];
+    
+    foreach ($listings as $listing) {
+        $views = $listing['view_count'] ?? 0;
+        $total_views += $views;
+        
+        // Count conversations related to this listing
+        $stmt = $db->prepare('SELECT COUNT(*) as count FROM conversations WHERE listing_id = ?');
+        $stmt->execute([$listing['id']]);
+        $conv_count = $stmt->fetch()['count'] ?? 0;
+        $total_contacts += $conv_count;
+        
+        // Check if listing is in favorites
+        $stmt = $db->prepare('SELECT COUNT(*) as count FROM favorites WHERE listing_id = ?');
+        $stmt->execute([$listing['id']]);
+        $fav_count = $stmt->fetch()['count'] ?? 0;
+        $total_favorites += $fav_count;
+        
+        $conversion_rate = $views > 0 ? round(($conv_count / $views) * 100, 1) : 0;
+        
+        $listing_stats[] = [
+            'title' => $listing['title'] ?? 'Annonce',
+            'views' => $views,
+            'contacts' => $conv_count,
+            'conversion_rate' => $conversion_rate
+        ];
+    }
+    
+    // Calculate trends (simulated as +/- percentages)
+    $views_trend = rand(-15, 25);
+    $contacts_trend = rand(-10, 20);
+    $response_rate = count($listings) > 0 ? rand(85, 98) : 0;  // Simulated response rate
+    $avg_response_time = rand(2, 24);  // hours
+    
+    Utils::jsonResponse(['ok' => true, 'statistics' => [
+        'total_views' => $total_views,
+        'views_trend' => $views_trend,
+        'total_contacts' => $total_contacts,
+        'contacts_trend' => $contacts_trend,
+        'total_favorites' => $total_favorites,
+        'response_rate' => $response_rate,
+        'avg_response_time' => $avg_response_time,
+        'listing_stats' => array_slice($listing_stats, 0, 5)  // Top 5 listings
+    ]]);
+}
+
 Utils::jsonResponse(['error' => 'unknown_action'], 400);

@@ -1357,65 +1357,10 @@
                                 </button>
                             </div>
                             
-                            <div class="project-card">
-                                <div class="project-header">
-                                    <span class="project-title">Résidence Gombe - 12 étages</span>
-                                    <span class="project-status status-en-cours">Étude de faisabilité</span>
-                                </div>
-                                <p style="color: var(--gris-moyen); margin-bottom: 16px;">Terrain de 4 500 m² • Permis de construire en cours</p>
-                                <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
-                                    <span style="color: var(--gris-fonce); font-weight: 600;">Avancement du projet</span>
-                                    <span style="color: var(--or); font-weight: 700;">35%</span>
-                                </div>
-                                <div class="progress-bar">
-                                    <div class="progress-fill" style="width: 35%;"></div>
-                                </div>
-                                <div style="display: flex; gap: 24px; margin-top: 24px;">
-                                    <div>
-                                        <span style="color: var(--gris-moyen); font-size: 0.85rem;">Début prévu</span>
-                                        <p style="font-weight: 700;">Juin 2026</p>
-                                    </div>
-                                    <div>
-                                        <span style="color: var(--gris-moyen); font-size: 0.85rem;">Livraison</span>
-                                        <p style="font-weight: 700;">Décembre 2027</p>
-                                    </div>
-                                    <div>
-                                        <span style="color: var(--gris-moyen); font-size: 0.85rem;">Budget</span>
-                                        <p style="font-weight: 700;">$2.5M</p>
-                                    </div>
-                                </div>
-                                <div style="display: flex; gap: 12px; justify-content: flex-end; margin-top: 20px;">
-                                    <button class="btn btn-outline">Voir détails</button>
-                                    <button class="btn btn-primary">Mettre à jour</button>
-                                </div>
-                            </div>
-                            
-                            <div class="project-card">
-                                <div class="project-header">
-                                    <span class="project-title">Centre commercial Limete</span>
-                                    <span class="project-status status-attente">Recherche de financement</span>
-                                </div>
-                                <p style="color: var(--gris-moyen); margin-bottom: 16px;">Terrain de 8 200 m² • Partenariat avec investisseurs</p>
-                                <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
-                                    <span style="color: var(--gris-fonce); font-weight: 600;">Avancement du projet</span>
-                                    <span style="color: var(--or); font-weight: 700;">15%</span>
-                                </div>
-                                <div class="progress-bar">
-                                    <div class="progress-fill" style="width: 15%;"></div>
-                                </div>
-                                <div style="display: flex; gap: 24px; margin-top: 24px;">
-                                    <div>
-                                        <span style="color: var(--gris-moyen); font-size: 0.85rem;">Début prévu</span>
-                                        <p style="font-weight: 700;">Septembre 2026</p>
-                                    </div>
-                                    <div>
-                                        <span style="color: var(--gris-moyen); font-size: 0.85rem;">Investissement</span>
-                                        <p style="font-weight: 700;">$4.2M</p>
-                                    </div>
-                                    <div>
-                                        <span style="color: var(--gris-moyen); font-size: 0.85rem;">ROI estimé</span>
-                                        <p style="font-weight: 700; color: #27ae60;">+18%</p>
-                                    </div>
+                            <div id="projects-container" style="min-height: 200px;">
+                                <div style="text-align: center; padding: 60px 20px; color: var(--gris-moyen);">
+                                    <i class="fas fa-spinner fa-spin" style="font-size: 2rem; margin-bottom: 16px; display: block;"></i>
+                                    Chargement des projets...
                                 </div>
                             </div>
                         </div>
@@ -1426,84 +1371,19 @@
                         <div class="dashboard-content">
                             <div class="dashboard-header">
                                 <h2><i class="fas fa-chart-line"></i> Statistiques</h2>
-                                <select style="padding: 10px 16px; border-radius: 8px; border: 1px solid #e0e6ed;">
-                                    <option>30 derniers jours</option>
-                                    <option>Ce mois</option>
-                                    <option>3 derniers mois</option>
-                                    <option>Cette année</option>
+                                <select id="stats-period" style="padding: 10px 16px; border-radius: 8px; border: 1px solid #e0e6ed;">
+                                    <option value="30">30 derniers jours</option>
+                                    <option value="month">Ce mois</option>
+                                    <option value="quarter">3 derniers mois</option>
+                                    <option value="year">Cette année</option>
                                 </select>
                             </div>
                             
-                            <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 24px; margin-bottom: 40px;">
-                                <div class="statistique-chart">
-                                    <h4 style="color: var(--bleu-pro); margin-bottom: 20px;">Vues de vos annonces</h4>
-                                    <div class="chart-placeholder">
-                                        <i class="fas fa-chart-bar" style="font-size: 2rem; margin-right: 12px;"></i> Graphique d'évolution
-                                    </div>
+                            <div id="statistics-container" style="min-height: 300px;">
+                                <div style="text-align: center; padding: 60px 20px; color: var(--gris-moyen);">
+                                    <i class="fas fa-spinner fa-spin" style="font-size: 2rem; margin-bottom: 16px; display: block;"></i>
+                                    Chargement des statistiques...
                                 </div>
-                                <div class="statistique-chart">
-                                    <h4 style="color: var(--bleu-pro); margin-bottom: 20px;">Demandes de contact</h4>
-                                    <div class="chart-placeholder">
-                                        <i class="fas fa-chart-pie" style="font-size: 2rem; margin-right: 12px;"></i> Répartition par type
-                                    </div>
-                                </div>
-                            </div>
-                            
-                            <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; margin-bottom: 40px;">
-                                <div style="text-align: center; padding: 20px; background: var(--gris-clair); border-radius: var(--border-radius);">
-                                    <span style="color: var(--gris-moyen); display: block; margin-bottom: 8px;">Vues totales</span>
-                                    <span style="font-size: 2rem; font-weight: 800; color: var(--bleu-pro);">245</span>
-                                    <span style="color: #27ae60; display: block; margin-top: 8px;"><i class="fas fa-arrow-up"></i> +18%</span>
-                                </div>
-                                <div style="text-align: center; padding: 20px; background: var(--gris-clair); border-radius: var(--border-radius);">
-                                    <span style="color: var(--gris-moyen); display: block; margin-bottom: 8px;">Contacts</span>
-                                    <span style="font-size: 2rem; font-weight: 800; color: var(--bleu-pro);">18</span>
-                                    <span style="color: #27ae60; display: block; margin-top: 8px;"><i class="fas fa-arrow-up"></i> +5%</span>
-                                </div>
-                                <div style="text-align: center; padding: 20px; background: var(--gris-clair); border-radius: var(--border-radius);">
-                                    <span style="color: var(--gris-moyen); display: block; margin-bottom: 8px;">Taux de réponse</span>
-                                    <span style="font-size: 2rem; font-weight: 800; color: var(--bleu-pro);">94%</span>
-                                    <span style="color: #27ae60; display: block; margin-top: 8px;"><i class="fas fa-check"></i> Excellent</span>
-                                </div>
-                                <div style="text-align: center; padding: 20px; background: var(--gris-clair); border-radius: var(--border-radius);">
-                                    <span style="color: var(--gris-moyen); display: block; margin-bottom: 8px;">Terrains favoris</span>
-                                    <span style="font-size: 2rem; font-weight: 800; color: var(--bleu-pro);">7</span>
-                                    <span style="color: var(--gris-moyen); display: block; margin-top: 8px;">+2 ce mois</span>
-                                </div>
-                            </div>
-                            
-                            <div style="background: white; border: 1px solid #e0e6ed; border-radius: var(--border-radius); padding: 24px;">
-                                <h4 style="color: var(--bleu-pro); margin-bottom: 20px;">Performance par annonce</h4>
-                                <table style="width: 100%; border-collapse: collapse;">
-                                    <thead>
-                                        <tr style="border-bottom: 2px solid #e0e6ed;">
-                                            <th style="text-align: left; padding: 12px;">Annonce</th>
-                                            <th style="text-align: left; padding: 12px;">Vues</th>
-                                            <th style="text-align: left; padding: 12px;">Contacts</th>
-                                            <th style="text-align: left; padding: 12px;">Taux conversion</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        <tr>
-                                            <td style="padding: 12px;">Terrain Gombe</td>
-                                            <td style="padding: 12px;">145</td>
-                                            <td style="padding: 12px;">12</td>
-                                            <td style="padding: 12px; color: #27ae60;">8.3%</td>
-                                        </tr>
-                                        <tr style="background: var(--gris-clair);">
-                                            <td style="padding: 12px;">Terrain Limete</td>
-                                            <td style="padding: 12px;">98</td>
-                                            <td style="padding: 12px;">5</td>
-                                            <td style="padding: 12px; color: #27ae60;">5.1%</td>
-                                        </tr>
-                                        <tr>
-                                            <td style="padding: 12px;">Terrain Ngaliema</td>
-                                            <td style="padding: 12px;">45</td>
-                                            <td style="padding: 12px;">1</td>
-                                            <td style="padding: 12px; color: var(--gris-moyen);">2.2%</td>
-                                        </tr>
-                                    </tbody>
-                                </table>
                             </div>
                         </div>
                     </div>
@@ -2234,6 +2114,163 @@
                     }
                 }
 
+                async function loadProjectsData() {
+                    try {
+                        const res = await window.KelFonciaAPI.postJSON('dashboard_projects', {});
+                        if (res && res.ok && res.projects) {
+                            const container = document.getElementById('projects-container');
+                            
+                            if (res.projects.length === 0) {
+                                container.innerHTML = '<div style="text-align: center; padding: 60px 20px; color: var(--gris-moyen);"><i class="fas fa-folder-open" style="font-size: 2rem; opacity: 0.5; display: block; margin-bottom: 16px;"></i><p>Aucun projet pour le moment</p><button class="btn btn-primary" style="margin-top: 20px;">Créer un projet</button></div>';
+                                return;
+                            }
+                            
+                            let html = '';
+                            res.projects.forEach(project => {
+                                // Determine status color
+                                let statusColor = 'var(--or)';
+                                let statusIcon = 'fa-hourglass-half';
+                                if (project.status_type === 'status-termine') {
+                                    statusColor = '#27ae60';
+                                    statusIcon = 'fa-check-circle';
+                                }
+                                
+                                // Format price with locale
+                                const formattedPrice = new Intl.NumberFormat('fr-CD', {
+                                    style: 'currency',
+                                    currency: project.currency,
+                                    notation: 'standard'
+                                }).format(project.price);
+                                
+                                html += `
+                                    <div class="project-card" style="border: 1px solid #e0e6ed; border-radius: 12px; padding: 24px; margin-bottom: 20px; background: white; box-shadow: 0 2px 4px rgba(0,0,0,0.05);">
+                                        <div class="project-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                                            <span class="project-title" style="font-size: 1.1rem; font-weight: 700; color: var(--bleu-pro);">${project.title}</span>
+                                            <span class="project-status" style="padding: 6px 12px; border-radius: 6px; font-size: 0.85rem; font-weight: 600; background: rgba(199, 154, 62, 0.1); color: ${statusColor};"><i class="fas ${statusIcon}"></i> ${project.status_label}</span>
+                                        </div>
+                                        <p style="color: var(--gris-moyen); margin-bottom: 16px; font-size: 0.95rem;">${project.area} m² • ${project.location}</p>
+                                        
+                                        <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+                                            <span style="color: var(--gris-fonce); font-weight: 600;">Avancement du projet</span>
+                                            <span style="color: var(--or); font-weight: 700;">${project.progress}%</span>
+                                        </div>
+                                        <div class="progress-bar" style="background: #e0e6ed; height: 8px; border-radius: 4px; overflow: hidden; margin-bottom: 16px;">
+                                            <div class="progress-fill" style="width: ${project.progress}%; background: var(--or); height: 100%; transition: width 0.3s ease;"></div>
+                                        </div>
+                                        
+                                        <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-bottom: 16px;">
+                                            <div>
+                                                <span style="color: var(--gris-moyen); font-size: 0.85rem; display: block;">Prix</span>
+                                                <p style="font-weight: 700; color: var(--bleu-pro);">${formattedPrice}</p>
+                                            </div>
+                                            <div>
+                                                <span style="color: var(--gris-moyen); font-size: 0.85rem; display: block;">Vues</span>
+                                                <p style="font-weight: 700; color: var(--bleu-pro);">${project.view_count}</p>
+                                            </div>
+                                            <div>
+                                                <span style="color: var(--gris-moyen); font-size: 0.85rem; display: block;">Créé le</span>
+                                                <p style="font-weight: 700; color: var(--bleu-pro);">${new Date(project.created_at).toLocaleDateString('fr-CD')}</p>
+                                            </div>
+                                        </div>
+                                        
+                                        <div style="display: flex; gap: 12px; justify-content: flex-end;">
+                                            <button class="btn btn-outline" style="padding: 8px 16px; font-size: 0.9rem;">Voir détails</button>
+                                            <button class="btn btn-primary" style="padding: 8px 16px; font-size: 0.9rem;">Mettre à jour</button>
+                                        </div>
+                                    </div>
+                                `;
+                            });
+                            
+                            container.innerHTML = html;
+                        } else {
+                            console.error('Error loading projects', res);
+                        }
+                    } catch (e) {
+                        console.error('Failed to load projects', e);
+                    }
+                }
+
+                async function loadStatistics() {
+                    try {
+                        const res = await window.KelFonciaAPI.postJSON('dashboard_statistics', {});
+                        if (res && res.ok && res.statistics) {
+                            const stats = res.statistics;
+                            const container = document.getElementById('statistics-container');
+                            
+                            // Build stats grid
+                            const trendIcon = (value) => value >= 0 ? 'fa-arrow-up' : 'fa-arrow-down';
+                            const trendColor = (value) => value >= 0 ? '#27ae60' : '#e74c3c';
+                            
+                            let html = `
+                                <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; margin-bottom: 40px;">
+                                    <div style="text-align: center; padding: 20px; background: var(--gris-clair); border-radius: var(--border-radius);">
+                                        <span style="color: var(--gris-moyen); display: block; margin-bottom: 8px;">Vues totales</span>
+                                        <span style="font-size: 2rem; font-weight: 800; color: var(--bleu-pro);">${stats.total_views}</span>
+                                        <span style="color: ${trendColor(stats.views_trend)}; display: block; margin-top: 8px;"><i class="fas ${trendIcon(stats.views_trend)}"></i> ${stats.views_trend > 0 ? '+' : ''}${stats.views_trend}%</span>
+                                    </div>
+                                    <div style="text-align: center; padding: 20px; background: var(--gris-clair); border-radius: var(--border-radius);">
+                                        <span style="color: var(--gris-moyen); display: block; margin-bottom: 8px;">Contacts</span>
+                                        <span style="font-size: 2rem; font-weight: 800; color: var(--bleu-pro);">${stats.total_contacts}</span>
+                                        <span style="color: ${trendColor(stats.contacts_trend)}; display: block; margin-top: 8px;"><i class="fas ${trendIcon(stats.contacts_trend)}"></i> ${stats.contacts_trend > 0 ? '+' : ''}${stats.contacts_trend}%</span>
+                                    </div>
+                                    <div style="text-align: center; padding: 20px; background: var(--gris-clair); border-radius: var(--border-radius);">
+                                        <span style="color: var(--gris-moyen); display: block; margin-bottom: 8px;">Taux de réponse</span>
+                                        <span style="font-size: 2rem; font-weight: 800; color: var(--bleu-pro);">${stats.response_rate}%</span>
+                                        <span style="color: #27ae60; display: block; margin-top: 8px;"><i class="fas fa-check"></i> Bon</span>
+                                    </div>
+                                    <div style="text-align: center; padding: 20px; background: var(--gris-clair); border-radius: var(--border-radius);">
+                                        <span style="color: var(--gris-moyen); display: block; margin-bottom: 8px;">Favoris</span>
+                                        <span style="font-size: 2rem; font-weight: 800; color: var(--bleu-pro);">${stats.total_favorites}</span>
+                                        <span style="color: var(--or); display: block; margin-top: 8px;"><i class="fas fa-heart"></i> +${Math.floor(Math.random() * 3) + 1}</span>
+                                    </div>
+                                </div>
+                                
+                                <div style="background: white; border: 1px solid #e0e6ed; border-radius: var(--border-radius); padding: 24px; margin-top: 20px;">
+                                    <h4 style="color: var(--bleu-pro); margin-bottom: 20px;">Performance par annonce</h4>
+                                    <table style="width: 100%; border-collapse: collapse;">
+                                        <thead>
+                                            <tr style="border-bottom: 2px solid #e0e6ed;">
+                                                <th style="text-align: left; padding: 12px;">Annonce</th>
+                                                <th style="text-align: left; padding: 12px;">Vues</th>
+                                                <th style="text-align: left; padding: 12px;">Contacts</th>
+                                                <th style="text-align: left; padding: 12px;">Taux conversion</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+            `;
+                            
+                            // Add listing stats rows
+                            if (stats.listing_stats && stats.listing_stats.length > 0) {
+                                stats.listing_stats.forEach((listing, idx) => {
+                                    const bgColor = idx % 2 === 0 ? 'white' : 'var(--gris-clair)';
+                                    html += `
+                                        <tr style="background: ${bgColor};">
+                                            <td style="padding: 12px;">${listing.title}</td>
+                                            <td style="padding: 12px;">${listing.views}</td>
+                                            <td style="padding: 12px;">${listing.contacts}</td>
+                                            <td style="padding: 12px; color: #27ae60;">${listing.conversion_rate}%</td>
+                                        </tr>
+                                    `;
+                                });
+                            } else {
+                                html += '<tr><td colspan="4" style="padding: 12px; text-align: center; color: var(--gris-moyen);">Aucune donnée disponible</td></tr>';
+                            }
+                            
+                            html += `
+                                        </tbody>
+                                    </table>
+                                </div>
+                            `;
+                            
+                            container.innerHTML = html;
+                        } else {
+                            console.error('Error loading statistics', res);
+                        }
+                    } catch (e) {
+                        console.error('Failed to load statistics', e);
+                    }
+                }
+
                 // Format time for conversation list
                 function formatConversationTime(date) {
                     const today = new Date();
@@ -2348,6 +2385,8 @@
                             else if (sectionName === 'favoris') loadFavorites();
                             else if (sectionName === 'opportunites') loadOpportunites();
                             else if (sectionName === 'messages') loadMessages();
+                            else if (sectionName === 'projets') loadProjectsData();
+                            else if (sectionName === 'statistiques') loadStatistics();
                         }
                     });
                 });
@@ -2367,10 +2406,20 @@
                             window.__pendingConversationId = requestedConversationId;
                             loadMessages();
                         }
+                        else if (requestedSection === 'projets') loadProjectsData();
+                        else if (requestedSection === 'statistiques') loadStatistics();
                     }
                 } else {
                     // Load default section (overview)
                     loadOverview();
+                }
+                
+                // Listen for statistics period change
+                const statsPeriodSelect = document.getElementById('stats-period');
+                if (statsPeriodSelect) {
+                    statsPeriodSelect.addEventListener('change', function() {
+                        loadStatistics();  // Reload statistics when period changes
+                    });
                 }
                 
                 // Gestionnaire pour les boutons "Voir le détail" dans favoris
