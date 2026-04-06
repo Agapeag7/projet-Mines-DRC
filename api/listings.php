@@ -515,4 +515,24 @@ if ($action === 'dashboard_statistics') {
     ]]);
 }
 
+if ($action === 'user_profile') {
+    if (empty($_SESSION['user_id'])) Utils::jsonResponse(['error' => 'not_authenticated'], 401);
+    
+    $um = new UserModel($db);
+    $user = $um->findById($_SESSION['user_id']);
+    
+    if (!$user) Utils::jsonResponse(['error' => 'user_not_found'], 404);
+    
+    Utils::jsonResponse(['ok' => true, 'user' => [
+        'id' => $user['id'],
+        'display_name' => $user['display_name'] ?? $user['nom_complet'] ?? 'Utilisateur',
+        'email' => $user['email'] ?? '',
+        'fonction' => $user['fonction'] ?? 'Professionnel du foncier',
+        'phone' => $user['phone'] ?? $user['telephone'] ?? '',
+        'photo_url' => $user['photo_url'] ?? '',
+        'verified' => !empty($user['kyc_status']) && $user['kyc_status'] === 'verified',
+        'bio' => $user['bio'] ?? ''
+    ]]);
+}
+
 Utils::jsonResponse(['error' => 'unknown_action'], 400);

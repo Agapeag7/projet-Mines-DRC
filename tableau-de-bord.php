@@ -888,14 +888,14 @@
             <div class="container dashboard">
                 <!-- SIDEBAR - MENU PRINCIPAL -->
                 <aside class="dashboard-sidebar fade-in">
-                    <div style="text-align: center; margin-bottom: 30px;">
+                    <div style="text-align: center; margin-bottom: 30px;" id="sidebar-profile">
                         <div style="width: 80px; height: 80px; background: var(--bleu-clair); border-radius: 50%; margin: 0 auto 16px; display: flex; align-items: center; justify-content: center; color: white; font-size: 2rem; font-weight: 700;">
-                            PM
+                            <span id="profile-initials">--</span>
                         </div>
-                        <h3 style="color: var(--bleu-pro); margin-bottom: 4px;">Promoteur Immobilier</h3>
-                        <p style="color: var(--gris-moyen);">Marc Luyeye</p>
-                        <span style="background: rgba(199, 154, 62, 0.1); color: var(--or); padding: 4px 12px; border-radius: 20px; font-size: 0.8rem; display: inline-block; margin-top: 8px;">
-                            <i class="fas fa-check-circle"></i> Compte vérifié
+                        <h3 style="color: var(--bleu-pro); margin-bottom: 4px;" id="profile-fonction">Chargement...</h3>
+                        <p style="color: var(--gris-moyen);" id="profile-name">--</p>
+                        <span id="profile-badge" style="background: rgba(199, 154, 62, 0.1); color: var(--or); padding: 4px 12px; border-radius: 20px; font-size: 0.8rem; display: inline-block; margin-top: 8px;">
+                            <i class="fas fa-circle" style="font-size: 0.5rem;"></i> Compte en attente
                         </span>
                     </div>
                     
@@ -910,7 +910,7 @@
                     </ul>
                     
                     <div style="margin-top: 40px; padding-top: 20px; border-top: 1px solid #e0e6ed;">
-                        <a href="#" style="display: flex; align-items: center; gap: 12px; color: var(--gris-moyen); padding: 12px 16px;">
+                        <a href="deconnexion.php" style="display: flex; align-items: center; gap: 12px; color: var(--gris-moyen); padding: 12px 16px;">
                             <i class="fas fa-sign-out-alt"></i> Déconnexion
                         </a>
                     </div>
@@ -1598,6 +1598,9 @@
                     'statistiques': document.getElementById('section-statistiques'),
                     'parametres': document.getElementById('section-parametres')
                 };
+
+                // Load user profile data in sidebar
+                loadUserProfile();
 
                 // Check for URL parameters to auto-navigate
                 const urlParams = new URLSearchParams(window.location.search);
@@ -2419,6 +2422,38 @@
                             }
                         }
                     });
+                }
+
+                async function loadUserProfile() {
+                    try {
+                        const res = await window.KelFonciaAPI.postJSON('user_profile', {});
+                        if (res && res.ok && res.user) {
+                            const user = res.user;
+                            
+                            // Update profile initials
+                            const nameArray = user.display_name.split(' ');
+                            const initials = nameArray.map(n => n[0]).join('').toUpperCase().substring(0, 2);
+                            document.getElementById('profile-initials').textContent = initials;
+                            
+                            // Update profile name and function
+                            document.getElementById('profile-name').textContent = user.display_name || 'Utilisateur';
+                            document.getElementById('profile-fonction').textContent = user.fonction || 'Professionnel';
+                            
+                            // Update badge
+                            const badge = document.getElementById('profile-badge');
+                            if (user.verified) {
+                                badge.innerHTML = '<i class="fas fa-check-circle"></i> Compte vérifié';
+                                badge.style.color = 'var(--or)';
+                            } else {
+                                badge.innerHTML = '<i class="fas fa-circle" style="font-size: 0.5rem;"></i> Compte en attente';
+                                badge.style.color = 'var(--gris-moyen)';
+                            }
+                        } else {
+                            console.error('Error loading user profile', res);
+                        }
+                    } catch (e) {
+                        console.error('Failed to load user profile', e);
+                    }
                 }
 
                 // Format time for conversation list
