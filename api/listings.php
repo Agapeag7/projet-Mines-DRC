@@ -369,4 +369,65 @@ if ($action === 'dashboard_messages') {
     Utils::jsonResponse(['ok' => true, 'conversations' => $result]);
 }
 
+if ($action === 'dashboard_activity') {
+    if (empty($_SESSION['user_id'])) Utils::jsonResponse(['error' => 'not_authenticated'], 401);
+    $user_id = $_SESSION['user_id'];
+    $activities = [];
+    
+    // 1. Get recent messages from conversations
+    $conversations = $cm->listForUser($user_id, 10, 0);
+    foreach ($conversations as $conv) {
+        $messages = $msgm->listByConversation($conv['id'], 1, 0);
+        if (!empty($messages)) {
+            $last_msg = $messages[0];
+            $activities[] = [
+                'type' => 'message',
+                'title' => 'Nouveau message',
+                'description' => substr($last_msg['content'], 0, 100),
+                'icon' => 'fa-message',
+                'timestamp' => $last_msg['created_at'] ?? $conv['created_at'],
+                'link' => 'tableau-de-bord.php?section=messages&conversation_id=' . $conv['id']
+            ];
+        }
+    }
+    
+    // 2. Get user's listings (recently published)
+    $listings = $lm->list(['owner_id' => $user_id], 10, 0);
+    foreach ($listings as $listing) {
+        $activities[] = [
+            'type' => 'listing_published',
+            'title' => 'Annonce publiée',
+            'description' => $listing['title'] ?? 'Terrain à vendre',
+            'icon' => 'fa-check-circle',
+            'icon_color' => '#27ae60',
+            'timestamp' => $listing['created_at'] ?? date('Y-m-d H:i:s'),
+            'link' => 'detail-terrain.php?id=' . $listing['id']
+        ];
+    }
+    
+    // 3. Get favorite listings (recently favorited)
+    $favorites = $fm->listForUser($user_id);
+    if (!empty($favorites)) {
+        $activities[] = [
+            'type' => 'favorite_added',
+            'title' => 'Terrain ajouté aux favoris',
+            'description' => 'Vous avez ' . count($favorites) . ' favoris',
+            'icon' => 'fa-heart',
+            'icon_color' => 'var(--or)',
+            'timestamp' => date('Y-m-d H:i:s'),
+            'link' => 'tableau-de-bord.php?section=favoris'
+        ];
+    }
+    
+    // Sort by timestamp descending
+    usort($activities, function($a, $b) {
+        return strtotime($b['timestamp']) - strtotime($a['timestamp']);
+    });
+    
+    // Limit to 5 most recent activities
+    $activities = array_slice($activities, 0, 5);
+    
+    Utils::jsonResponse(['ok' => true, 'activities' => $activities]);
+}
+
 Utils::jsonResponse(['error' => 'unknown_action'], 400);

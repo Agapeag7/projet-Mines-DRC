@@ -953,56 +953,10 @@
 
                             <!-- ACTIVITÉ RÉCENTE -->
                             <h3 style="color: var(--bleu-pro); margin: 40px 0 20px;">Activité récente</h3>
-                            
-                            <div class="notification unread">
-                                <div class="notification-icon">
-                                    <i class="fas fa-eye"></i>
-                                </div>
-                                <div class="notification-content">
-                                    <div class="notification-title">Vous avez consulté un terrain à Gombe</div>
-                                    <div class="notification-meta">
-                                        <span><i class="fas fa-ruler-combined"></i> 4 500 m²</span>
-                                        <span><i class="fas fa-tag"></i> $450 000</span>
-                                    </div>
-                                </div>
-                                <div class="notification-time">
-                                    Il y a 2 heures
-                                </div>
-                                <a href="detail-terrain.php" class="btn-icon">
-                                    <i class="fas fa-arrow-right"></i>
-                                </a>
-                            </div>
-                            
-                            <div class="notification">
-                                <div class="notification-icon">
-                                    <i class="fas fa-message"></i>
-                                </div>
-                                <div class="notification-content">
-                                    <div class="notification-title">Nouveau message de Jean-Pierre M.</div>
-                                    <div class="notification-meta">
-                                        <span>À propos du terrain à Gombe</span>
-                                    </div>
-                                </div>
-                                <div class="notification-time">
-                                    Il y a 5 heures
-                                </div>
-                                <button class="btn-icon">
-                                    <i class="fas fa-reply"></i>
-                                </button>
-                            </div>
-                            
-                            <div class="notification">
-                                <div class="notification-icon">
-                                    <i class="fas fa-check-circle" style="color: #27ae60;"></i>
-                                </div>
-                                <div class="notification-content">
-                                    <div class="notification-title">Votre annonce a été vérifiée</div>
-                                    <div class="notification-meta">
-                                        <span>Terrain à Limete - Référence KF-2026-045</span>
-                                    </div>
-                                </div>
-                                <div class="notification-time">
-                                    Hier
+                            <div id="recent-activity-container" style="min-height: 200px;">
+                                <div style="text-align: center; padding: 60px 20px; color: var(--gris-moyen);">
+                                    <i class="fas fa-spinner fa-spin" style="font-size: 2rem; margin-bottom: 16px; display: block;"></i>
+                                    Chargement de l'activité...
                                 </div>
                             </div>
                             
@@ -1781,6 +1735,8 @@
                             // Mettre à jour les badges du menu
                             document.getElementById('menu-favorites-badge').textContent = res.stats.favorites_count;
                             document.getElementById('menu-messages-badge').textContent = res.stats.unread_messages;
+                            // Load recent activity
+                            loadRecentActivity();
                         } else {
                             console.error('Error loading overview', res);
                         }
@@ -1788,6 +1744,82 @@
                         console.error('Failed to load overview', e);
                     }
                 }
+
+                async function loadRecentActivity() {
+                    try {
+                        const res = await window.KelFonciaAPI.postJSON('dashboard_activity', {});
+                        if (res && res.ok && res.activities) {
+                            const container = document.getElementById('recent-activity-container');
+                            if (!container) return;
+                            
+                            let html = '';
+                            if (res.activities.length === 0) {
+                                html = `
+                                    <div style="text-align: center; padding: 60px 20px; color: var(--gris-moyen);">
+                                        <i class="fas fa-inbox" style="font-size: 2rem; margin-bottom: 16px; display: block; opacity: 0.5;"></i>
+                                        <p>Aucune activité récente</p>
+                                    </div>
+                                `;
+                            } else {
+                                res.activities.forEach(activity => {
+                                    const iconColor = activity.icon_color || 'var(--or)';
+                                    const isUnread = activity.type === 'message';
+                                    const timeAgo = formatTimeAgo(activity.timestamp);
+                                    const link = activity.link ? `href="${activity.link}"` : '';
+                                    const tagName = activity.link ? 'a' : 'div';
+                                    
+                                    html += `
+                                        <${tagName} class="notification ${isUnread ? 'unread' : ''}" ${link} style="cursor: pointer; text-decoration: none;">
+                                            <div class="notification-icon" style="color: ${iconColor};">
+                                                <i class="fas ${activity.icon}"></i>
+                                            </div>
+                                            <div class="notification-content">
+                                                <div class="notification-title">${activity.title}</div>
+                                                <div class="notification-meta">
+                                                    <span>${activity.description}</span>
+                                                </div>
+                                            </div>
+                                            <div class="notification-time">
+                                                ${timeAgo}
+                                            </div>
+                                        </${tagName}>
+                                    `;
+                                });
+                            }
+                            
+                            container.innerHTML = html;
+                        } else {
+                            console.error('Error loading recent activity', res);
+                        }
+                    } catch (e) {
+                        console.error('Failed to load recent activity', e);
+                    }
+                }
+
+                function formatTimeAgo(timestamp) {
+                    if (!timestamp) return 'Récemment';
+                    
+                    const now = new Date();
+                    const then = new Date(timestamp);
+                    const seconds = Math.floor((now - then) / 1000);
+                    
+                    if (seconds < 60) return 'À l\'instant';
+                    if (seconds < 3600) {
+                        const minutes = Math.floor(seconds / 60);
+                        return `Il y a ${minutes} minute${minutes > 1 ? 's' : ''}`;
+                    }
+                    if (seconds < 86400) {
+                        const hours = Math.floor(seconds / 3600);
+                        return `Il y a ${hours} heure${hours > 1 ? 's' : ''}`;
+                    }
+                    if (seconds < 604800) {
+                        const days = Math.floor(seconds / 86400);
+                        return `Il y a ${days} jour${days > 1 ? 's' : ''}`;
+                    }
+                    
+                    return then.toLocaleDateString('fr-FR');
+                }
+
 
                 async function loadFavorites() {
                     try {

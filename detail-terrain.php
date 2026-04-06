@@ -801,18 +801,15 @@ if (!$logged) {
             if (contactBtn && res.owner) {
                 contactBtn.addEventListener('click', function(e){
                     e.preventDefault();
-                    if (!window.__loggedIn && !document.querySelector('[data-user-id]')) {
-                        KelActions.showToast('Vous devez être connecté pour contacter le propriétaire', 'error');
-                        setTimeout(() => window.location.href = 'connexion.php', 1000);
-                    } else {
-                        KelActions.openContactModal(
-                            res.owner.id,
-                            res.owner.display_name || res.owner.email,
-                            res.owner.email,
-                            id,
-                            l.title
-                        );
-                    }
+                    // User is already logged in (checked server-side via PHP)
+                    // Open contact modal directly
+                    KelActions.openContactModal(
+                        res.owner.id,
+                        res.owner.display_name || res.owner.email,
+                        res.owner.email,
+                        id,
+                        l.title
+                    );
                 });
             }
 
