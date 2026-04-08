@@ -305,7 +305,30 @@
                 return;
             }
 
-            const res = await createListingFromForm(form);
+            // Create FormData manually to include selected files from DataTransfer
+            const formData = new FormData(form);
+            
+            // Clear file inputs and add files from DataTransfer (if available)
+            formData.delete('photos[]');
+            formData.delete('documents[]');
+            
+            // Add photos from global selectedPhotos if available
+            if (window.selectedPhotos && window.selectedPhotos.items) {
+                Array.from(window.selectedPhotos.items).forEach(item => {
+                    const file = item.getAsFile();
+                    formData.append('photos[]', file);
+                });
+            }
+            
+            // Add documents from global selectedDocuments if available
+            if (window.selectedDocuments && window.selectedDocuments.items) {
+                Array.from(window.selectedDocuments.items).forEach(item => {
+                    const file = item.getAsFile();
+                    formData.append('documents[]', file);
+                });
+            }
+
+            const res = await window.KelFonciaAPI.postFormData('listings_create', formData);
             if (btn) {
                 btn.disabled = false;
                 btn.textContent = 'Publier mon annonce';

@@ -372,22 +372,22 @@
                 const photosListEl = document.getElementById('photos-list');
                 const photosItemsEl = document.getElementById('photos-items');
                 const MAX_PHOTOS = 3;
-                let selectedPhotos = new DataTransfer();
+                window.selectedPhotos = new DataTransfer();
 
                 // Add hover effects
                 photosUploadArea.addEventListener('mouseenter', () => {
-                    if (selectedPhotos.items.length < MAX_PHOTOS) {
+                    if (window.selectedPhotos.items.length < MAX_PHOTOS) {
                         photosUploadArea.style.background = '#f5f7fa';
                         photosUploadArea.style.borderColor = 'var(--or)';
                     }
                 });
                 photosUploadArea.addEventListener('mouseleave', () => {
                     photosUploadArea.style.background = 'transparent';
-                    photosUploadArea.style.borderColor = selectedPhotos.items.length > 0 ? 'var(--or)' : '#e0e6ed';
+                    photosUploadArea.style.borderColor = window.selectedPhotos.items.length > 0 ? 'var(--or)' : '#e0e6ed';
                 });
 
                 photosUploadArea.addEventListener('click', () => {
-                    if (selectedPhotos.items.length < MAX_PHOTOS) {
+                    if (window.selectedPhotos.items.length < MAX_PHOTOS) {
                         photosInput.click();
                     } else {
                         KelActions.showToast('Vous avez atteint le maximum de 3 photos', 'error');
@@ -396,32 +396,31 @@
 
                 photosInput.addEventListener('change', (e) => {
                     const newFiles = Array.from(e.target.files);
-                    const totalWillBe = selectedPhotos.items.length + newFiles.length;
+                    const totalWillBe = window.selectedPhotos.items.length + newFiles.length;
 
                     if (totalWillBe > MAX_PHOTOS) {
-                        const canAdd = MAX_PHOTOS - selectedPhotos.items.length;
+                        const canAdd = MAX_PHOTOS - window.selectedPhotos.items.length;
                         KelActions.showToast(`Vous ne pouvez ajouter que ${canAdd} photo(s) de plus`, 'error');
                         photosInput.value = '';
                         return;
                     }
 
                     newFiles.forEach(file => {
-                        selectedPhotos.items.add(file);
+                        window.selectedPhotos.items.add(file);
                     });
 
-                    photosInput.files = selectedPhotos.files;
                     updatePhotosDisplay();
                     photosInput.value = '';
                 });
 
                 function updatePhotosDisplay() {
-                    const count = selectedPhotos.items.length;
+                    const count = window.selectedPhotos.items.length;
                     photosCountEl.textContent = count + ' photo' + (count > 1 ? 's' : '') + ' ajoutée' + (count > 1 ? 's' : '');
                     
                     if (count > 0) {
                         photosListEl.style.display = 'block';
                         photosItemsEl.innerHTML = '';
-                        Array.from(selectedPhotos.items).forEach((item, index) => {
+                        Array.from(window.selectedPhotos.items).forEach((item, index) => {
                             const file = item.getAsFile();
                             const div = document.createElement('div');
                             div.style.cssText = 'display: flex; align-items: center; justify-content: space-between; padding: 12px; background: #f5f7fa; border-radius: 8px; border-left: 4px solid var(--or);';
@@ -442,13 +441,12 @@
                                 e.preventDefault();
                                 const index = parseInt(btn.dataset.index);
                                 const newTransfer = new DataTransfer();
-                                Array.from(selectedPhotos.items).forEach((item, i) => {
+                                Array.from(window.selectedPhotos.items).forEach((item, i) => {
                                     if (i !== index) {
                                         newTransfer.items.add(item.getAsFile());
                                     }
                                 });
-                                selectedPhotos = newTransfer;
-                                photosInput.files = selectedPhotos.files;
+                                window.selectedPhotos = newTransfer;
                                 updatePhotosDisplay();
                             });
                         });
@@ -464,22 +462,22 @@
                 const documentsListEl = document.getElementById('documents-list');
                 const documentsItemsEl = document.getElementById('documents-items');
                 const MAX_DOCUMENTS = 5;
-                let selectedDocuments = new DataTransfer();
+                window.selectedDocuments = new DataTransfer();
 
                 // Add hover effects
                 documentsUploadArea.addEventListener('mouseenter', () => {
-                    if (selectedDocuments.items.length < MAX_DOCUMENTS) {
+                    if (window.selectedDocuments.items.length < MAX_DOCUMENTS) {
                         documentsUploadArea.style.background = '#f5f7fa';
                         documentsUploadArea.style.borderColor = 'var(--or)';
                     }
                 });
                 documentsUploadArea.addEventListener('mouseleave', () => {
                     documentsUploadArea.style.background = 'transparent';
-                    documentsUploadArea.style.borderColor = selectedDocuments.items.length > 0 ? 'var(--or)' : '#e0e6ed';
+                    documentsUploadArea.style.borderColor = window.selectedDocuments.items.length > 0 ? 'var(--or)' : '#e0e6ed';
                 });
 
                 documentsUploadArea.addEventListener('click', () => {
-                    if (selectedDocuments.items.length < MAX_DOCUMENTS) {
+                    if (window.selectedDocuments.items.length < MAX_DOCUMENTS) {
                         documentsInput.click();
                     } else {
                         KelActions.showToast('Vous avez atteint le maximum de 5 documents', 'error');
@@ -488,32 +486,31 @@
 
                 documentsInput.addEventListener('change', (e) => {
                     const newFiles = Array.from(e.target.files);
-                    const totalWillBe = selectedDocuments.items.length + newFiles.length;
+                    const totalWillBe = window.selectedDocuments.items.length + newFiles.length;
 
                     if (totalWillBe > MAX_DOCUMENTS) {
-                        const canAdd = MAX_DOCUMENTS - selectedDocuments.items.length;
+                        const canAdd = MAX_DOCUMENTS - window.selectedDocuments.items.length;
                         KelActions.showToast(`Vous ne pouvez ajouter que ${canAdd} document(s) de plus`, 'error');
                         documentsInput.value = '';
                         return;
                     }
 
                     newFiles.forEach(file => {
-                        selectedDocuments.items.add(file);
+                        window.selectedDocuments.items.add(file);
                     });
 
-                    documentsInput.files = selectedDocuments.files;
                     updateDocumentsDisplay();
                     documentsInput.value = '';
                 });
 
                 function updateDocumentsDisplay() {
-                    const count = selectedDocuments.items.length;
+                    const count = window.selectedDocuments.items.length;
                     documentsCountEl.textContent = count + ' document' + (count > 1 ? 's' : '') + ' ajouté' + (count > 1 ? 's' : '');
                     
                     if (count > 0) {
                         documentsListEl.style.display = 'block';
                         documentsItemsEl.innerHTML = '';
-                        Array.from(selectedDocuments.items).forEach((item, index) => {
+                        Array.from(window.selectedDocuments.items).forEach((item, index) => {
                             const file = item.getAsFile();
                             const div = document.createElement('div');
                             div.style.cssText = 'display: flex; align-items: center; justify-content: space-between; padding: 12px; background: #f5f7fa; border-radius: 8px; border-left: 4px solid var(--or);';
@@ -534,13 +531,12 @@
                                 e.preventDefault();
                                 const index = parseInt(btn.dataset.index);
                                 const newTransfer = new DataTransfer();
-                                Array.from(selectedDocuments.items).forEach((item, i) => {
+                                Array.from(window.selectedDocuments.items).forEach((item, i) => {
                                     if (i !== index) {
                                         newTransfer.items.add(item.getAsFile());
                                     }
                                 });
-                                selectedDocuments = newTransfer;
-                                documentsInput.files = selectedDocuments.files;
+                                window.selectedDocuments = newTransfer;
                                 updateDocumentsDisplay();
                             });
                         });
@@ -549,7 +545,7 @@
                     }
                 }
 
-                // Draft handling
+                // Draft handling & file submission
                 const publishForm = document.querySelector('.publier-form');
                 const publishInput = document.getElementById('is_published');
                 const draftBtn = document.getElementById('save-draft-btn');

@@ -41,6 +41,24 @@
         } catch (e) { return { error: e.message }; }
     }
 
+    async function postFormData(action, formData) {
+        const url = endpointFor(action);
+        try {
+            const res = await fetch(url, { method: 'POST', body: formData, credentials: 'same-origin' });
+            const text = await res.text();
+            if (text.trim().startsWith('<')) {
+                console.error('Non-JSON response received', text);
+                return { error: 'non_json_response', raw: text };
+            }
+            try {
+                return JSON.parse(text);
+            } catch(jsonErr) {
+                console.error('JSON parse failed', jsonErr, text);
+                return { error: jsonErr.message, raw: text };
+            }
+        } catch (e) { return { error: e.message }; }
+    }
+
     async function postJSON(action, obj) {
         const url = endpointFor(action);
         try {
@@ -79,5 +97,5 @@
         } catch(e) { return { error: e.message }; }
     }
 
-    window.KelFonciaAPI = { postForm, postJSON, get };
+    window.KelFonciaAPI = { postForm, postFormData, postJSON, get };
 })();
