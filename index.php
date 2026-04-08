@@ -535,7 +535,7 @@
                 <div class="nav-links">
                     <?php if($logged): ?>
                         <a href="tableau-de-bord.php">Tableau de bord</a>
-                        <a href="deconnexion.php">Déconnexion</a>
+                        <a href="deconnexion.php" class="nav-cta">Déconnexion</a>
                     <?php else: ?>
                         <a href="connexion.php" class="nav-cta">Se connecter</a>
                     <?php endif; ?>
@@ -613,7 +613,7 @@
                     <div class="feature-item fade-in">
                         <div class="feature-icon"><i class="fas fa-table-cells-large"></i></div>
                         <div class="feature-text">
-                            <h4>Tableau de bord pro</h4>
+                            <h4>Tableau de bord</h4>
                             <p>Suivi des opportunités, favoris, statistiques de visibilité de vos annonces.</p>
                         </div>
                     </div>

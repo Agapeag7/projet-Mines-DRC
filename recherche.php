@@ -21,7 +21,7 @@
                     <a href="publier.php">Publier</a>
                     <?php if($logged): ?>
                         <a href="tableau-de-bord.php">Tableau de bord</a>
-                        <a href="deconnexion.php">Déconnexion</a>
+                        <a href="deconnexion.php" class="nav-cta">Déconnexion</a>
                     <?php else: ?>
                         <a href="connexion.php" class="nav-cta">Se connecter</a>
                     <?php endif; ?>

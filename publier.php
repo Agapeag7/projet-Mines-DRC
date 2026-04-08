@@ -19,7 +19,7 @@
                     <a href="publier.php" class="active">Publier</a>
                     <?php if($logged): ?>
                         <a href="tableau-de-bord.php">Tableau de bord</a>
-                        <a href="deconnexion.php">Déconnexion</a>
+                        <a href="deconnexion.php" class="nav-cta">Déconnexion</a>
                     <?php else: ?>
                         <a href="connexion.php" class="nav-cta">Se connecter</a>
                     <?php endif; ?>
@@ -38,6 +38,97 @@
                         Mettez en valeur votre terrain et entrez en relation avec des promoteurs qualifiés
                     </p>
                 </div>
+
+                <!-- SECTION RECHERCHE ANNONCES EXISTANTES -->
+                <section style="margin-bottom: 60px; background: white; padding: 40px; border-radius: 16px;">
+                    <h2 style="font-size: 1.5rem; color: var(--bleu-pro); margin-bottom: 30px; text-align: center;">
+                        <i class="fas fa-search" style="color: var(--or); margin-right: 12px;"></i>Voir les terrains existants
+                    </h2>
+                    
+                    <div class="filtres-avances fade-in" style="margin-bottom: 30px;">
+                        <div class="filtres-grid">
+                            <div class="filtre-groupe">
+                                <label>Province</label>
+                                <select id="province-select-search">
+                                    <option value="">Toutes les provinces</option>
+                                </select>
+                            </div>
+                            <div class="filtre-groupe">
+                                <label>Ville</label>
+                                <select id="ville-select-search" disabled>
+                                    <option value="">Toutes les villes</option>
+                                </select>
+                            </div>
+                            <div class="filtre-groupe">
+                                <label>Commune</label>
+                                <select id="commune-select-search" disabled>
+                                    <option value="">Toutes les communes</option>
+                                </select>
+                            </div>
+                            <div class="filtre-groupe">
+                                <label>Territoire</label>
+                                <select id="territoire-select-search" disabled>
+                                    <option value="">Tous les territoires</option>
+                                </select>
+                            </div>
+                            <div class="filtre-groupe">
+                                <label>Superficie min (m²)</label>
+                                <input type="number" id="min-area-search" placeholder="Ex: 500">
+                            </div>
+                            <div class="filtre-groupe">
+                                <label>Superficie max (m²)</label>
+                                <input type="number" id="max-area-search" placeholder="Ex: 10000">
+                            </div>
+                            <div class="filtre-groupe">
+                                <label>Budget max (USD)</label>
+                                <input type="number" id="budget-search" placeholder="Ex: 500000">
+                            </div>
+                            <div class="filtre-groupe">
+                                <label>Usage</label>
+                                <select id="usage-search">
+                                    <option value="">Tous</option>
+                                    <option value="residentiel">Résidentiel</option>
+                                    <option value="commercial">Commercial</option>
+                                    <option value="industriel">Industriel</option>
+                                    <option value="mixte">Mixte</option>
+                                    <option value="agricole">Agricole</option>
+                                </select>
+                            </div>
+                            <div class="filtre-groupe">
+                                <label>Statut juridique</label>
+                                <select id="statut-search">
+                                    <option value="">Tous</option>
+                                    <option value="titre_foncier">Titre foncier</option>
+                                    <option value="certificat">Certificat d'enregistrement</option>
+                                    <option value="contrat_location">Contrat de location</option>
+                                    <option value="droit_coutumier">Droit coutumier</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="filtres-actions">
+                            <button class="btn btn-outline" id="reset-search-btn">Réinitialiser</button>
+                            <button class="btn btn-primary" id="apply-search-btn">Appliquer les filtres</button>
+                        </div>
+                    </div>
+
+                    <div class="resultats-stats fade-in" style="margin-bottom: 30px;">
+                        <h3 style="font-size: 1.1rem; color: var(--bleu-pro); margin-bottom: 15px;" id="search-count">Chargement des annonces...</h3>
+                        <select id="sort-search" style="padding: 8px 16px; border-radius: 8px; border: 1px solid #e0e6ed;">
+                            <option value="">Trier par : Pertinence</option>
+                            <option value="price-asc">Prix croissant</option>
+                            <option value="price-desc">Prix décroissant</option>
+                            <option value="area-asc">Superficie croissante</option>
+                            <option value="area-desc">Superficie décroissante</option>
+                        </select>
+                    </div>
+
+                    <div class="liste-terrains fade-in" id="search-listings" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px;">
+                        <div style="text-align: center; padding: 60px 20px; grid-column: 1 / -1;">
+                            <i class="fas fa-spinner fa-spin" style="font-size: 2rem; color: var(--or); margin-bottom: 15px; display: block;"></i>
+                            <p style="color: var(--gris-moyen);">Chargement des annonces...</p>
+                        </div>
+                    </div>
+                </section>
 
                 <form class="publier-form fade-in" method="post" enctype="multipart/form-data">
                     <input type="hidden" name="is_published" id="is_published" value="1">
@@ -229,6 +320,246 @@
         <script src="js/api.js"></script>
         <script src="js/actions.js"></script>
         <script>
+            // Initialize search section
+            document.addEventListener('DOMContentLoaded', function() {
+                const provinceSelectSearch = document.getElementById('province-select-search');
+                const villeSelectSearch = document.getElementById('ville-select-search');
+                const communeSelectSearch = document.getElementById('commune-select-search');
+                const territoireSelectSearch = document.getElementById('territoire-select-search');
+                const searchListingsContainer = document.getElementById('search-listings');
+                const searchCountEl = document.getElementById('search-count');
+                const applySearchBtn = document.getElementById('apply-search-btn');
+                const resetSearchBtn = document.getElementById('reset-search-btn');
+                const sortSearchSelect = document.getElementById('sort-search');
+
+                function setOptions(select, items, placeholder) {
+                    select.innerHTML = '';
+                    const opt = document.createElement('option');
+                    opt.value = '';
+                    opt.textContent = placeholder;
+                    select.appendChild(opt);
+                    items.forEach(item => {
+                        const o = document.createElement('option');
+                        o.value = item;
+                        o.textContent = item;
+                        select.appendChild(o);
+                    });
+                }
+
+                // Initialise provinces
+                setOptions(provinceSelectSearch, getProvinces(), 'Toutes les provinces');
+
+                provinceSelectSearch.addEventListener('change', function () {
+                    const prov = this.value;
+                    if (!prov) {
+                        setOptions(villeSelectSearch, [], 'Toutes les villes');
+                        setOptions(communeSelectSearch, [], 'Toutes les communes');
+                        setOptions(territoireSelectSearch, [], 'Tous les territoires');
+                        villeSelectSearch.disabled = true;
+                        communeSelectSearch.disabled = true;
+                        territoireSelectSearch.disabled = true;
+                        return;
+                    }
+                    const villes = getVillesByProvince(prov);
+                    const territoires = getTerritoiresByProvince(prov);
+                    setOptions(villeSelectSearch, villes, 'Toutes les villes');
+                    setOptions(communeSelectSearch, [], 'Toutes les communes');
+                    setOptions(territoireSelectSearch, territoires, 'Tous les territoires');
+                    villeSelectSearch.disabled = villes.length === 0;
+                    communeSelectSearch.disabled = true;
+                    territoireSelectSearch.disabled = territoires.length === 0;
+                });
+
+                villeSelectSearch.addEventListener('change', function () {
+                    const prov = provinceSelectSearch.value;
+                    const ville = this.value;
+                    if (!ville) {
+                        setOptions(communeSelectSearch, [], 'Toutes les communes');
+                        communeSelectSearch.disabled = true;
+                        territoireSelectSearch.disabled = getTerritoiresByProvince(prov).length === 0;
+                        return;
+                    }
+                    const communes = getCommunesByVille(prov, ville);
+                    setOptions(communeSelectSearch, communes, 'Toutes les communes');
+                    communeSelectSearch.disabled = communes.length === 0;
+                    territoireSelectSearch.disabled = false;
+                });
+
+                communeSelectSearch.addEventListener('change', function () {
+                    if (this.value) {
+                        territoireSelectSearch.value = '';
+                        territoireSelectSearch.disabled = true;
+                    } else {
+                        territoireSelectSearch.disabled = getTerritoiresByProvince(provinceSelectSearch.value).length === 0;
+                    }
+                });
+
+                // Render listings function
+                async function renderListings(rows) {
+                    searchListingsContainer.innerHTML = '';
+                    if (!rows || rows.length === 0) {
+                        searchListingsContainer.innerHTML = `<div style="text-align: center; padding: 60px 20px; color: var(--gris-moyen); grid-column: 1 / -1;">
+                            <i class="fas fa-search" style="font-size: 3rem; opacity: 0.3; display: block; margin-bottom: 20px;"></i>
+                            <p>Aucune annonce ne correspond à votre recherche.</p>
+                            <p style="font-size: 0.9rem;">Essayez un autre critère ou publiez votre terrain ci-dessous.</p>
+                        </div>`;
+                        if (searchCountEl) searchCountEl.textContent = '0 opportunité foncière';
+                        return;
+                    }
+                    
+                    rows.forEach(l => {
+                        const div = document.createElement('div');
+                        div.className = 'terrain-card';
+                        const localPlaceholder = 'img/placeholder.png';
+                        let imgSrc = localPlaceholder;
+                        if (l.thumbnail_full_url) {
+                            imgSrc = l.thumbnail_full_url;
+                        } else if (l.thumbnail_path) {
+                            imgSrc = '/KelFoncia-DRC/' + l.thumbnail_path.replace(/^\/+/, '');
+                        } else if (l.thumbnail_id) {
+                            imgSrc = '/KelFoncia-DRC/doc/photos/' + l.thumbnail_id;
+                        }
+                        const locText = [l.ville, l.province].filter(x=>x).join(', ');
+                        
+                        div.innerHTML = `
+                            <a href="detail-terrain.php?id=${l.id}" style="text-decoration: none; color: inherit;">
+                                <img src="${imgSrc}" alt="${l.title}" class="terrain-image" onerror="this.src='${localPlaceholder}'">
+                            </a>
+                            <div class="terrain-infos">
+                                <h3><a href="detail-terrain.php?id=${l.id}" style="color: inherit; text-decoration: none;">${l.title || 'Terrain'}</a></h3>
+                                <div class="terrain-details">
+                                    ${l.area_m2 ? `<span class="terrain-detail-item"><i class="fas fa-ruler-combined"></i> ${l.area_m2} m²</span>` : ''}
+                                    ${l.statut ? `<span class="terrain-detail-item"><i class="fas fa-file-signature"></i> ${l.statut}</span>` : ''}
+                                    ${locText ? `<span class="terrain-detail-item"><i class="fas fa-map-pin"></i> ${locText}</span>` : ''}
+                                </div>
+                                <span class="terrain-statut statut-verifie"><i class="fas fa-check-circle"></i> Vérifié</span>
+                            </div>
+                            <div class="terrain-prix">
+                                <span class="prix-valeur">${l.price || 'N/A'}</span>
+                                <span class="prix-devise">${l.currency || ''}</span>
+                                <div style="display: flex; gap: 8px; margin-top: 16px;">
+                                    <button class="fav-btn" data-fav-id="${l.id}" style="flex: 1; background: none; border: 1px solid #e0e6ed; cursor: pointer; padding: 8px 12px; border-radius: 8px; color: var(--or); font-weight: 600; transition: all 0.3s;">
+                                        <i class="far fa-heart"></i> Favori
+                                    </button>
+                                    <button class="contact-btn" data-listing-id="${l.id}" style="flex: 1; background: var(--or); border: none; cursor: pointer; padding: 8px 12px; border-radius: 8px; color: white; font-weight: 600; transition: all 0.3s;">
+                                        <i class="fas fa-envelope"></i> Contacter
+                                    </button>
+                                </div>
+                            </div>`;
+                        searchListingsContainer.appendChild(div);
+                    });
+                    
+                    if (searchCountEl) searchCountEl.textContent = rows.length + ' opportunité' + (rows.length > 1 ? 's' : '') + ' foncière' + (rows.length > 1 ? 's' : '');
+                    KelActions.attachFavoriteButtons('.fav-btn');
+                    
+                    // Attach contact buttons
+                    searchListingsContainer.querySelectorAll('.contact-btn').forEach(btn => {
+                        btn.addEventListener('click', async (e) => {
+                            e.preventDefault();
+                            if (!<?php echo $logged ? 'true' : 'false'; ?>) {
+                                KelActions.showToast('Vous devez être connecté pour contacter le propriétaire', 'error');
+                                setTimeout(() => window.location.href = 'connexion.php', 1000);
+                                return;
+                            }
+                            
+                            const listingId = btn.dataset.listingId;
+                            btn.disabled = true;
+                            btn.textContent = 'Chargement...';
+                            
+                            const listingRes = await KelActions.getListingDetails(listingId);
+                            btn.disabled = false;
+                            btn.innerHTML = '<i class="fas fa-envelope"></i> Contacter';
+                            
+                            if (listingRes && listingRes.owner && listingRes.listing) {
+                                const location = [listingRes.listing.ville, listingRes.listing.province].filter(x => x).join(', ');
+                                const subject = `À propos de: ${listingRes.listing.title}${location ? ' - ' + location : ''}`;
+                                window.contactMessageSubject = subject;
+                                
+                                KelActions.openContactModal(
+                                    listingRes.owner.id,
+                                    listingRes.owner.display_name || listingRes.owner.email,
+                                    listingRes.owner.email,
+                                    listingId,
+                                    listingRes.listing.title,
+                                    subject
+                                );
+                            } else {
+                                KelActions.showToast('Erreur lors du chargement du propriétaire', 'error');
+                            }
+                        });
+                    });
+                }
+
+                // Load listings with filters
+                async function loadSearchListings(filters={}) {
+                    searchListingsContainer.innerHTML = `<div style="text-align: center; padding: 60px 20px; grid-column: 1 / -1;">
+                        <div style="display: inline-block;">
+                            <i class="fas fa-spinner fa-spin" style="font-size: 3rem; color: var(--or);"></i>
+                            <p style="margin-top: 20px; color: var(--gris-moyen);">Chargement des annonces...</p>
+                        </div>
+                    </div>`;
+                    
+                    const res = await KelFonciaAPI.get('listings_list', filters);
+                    if (!res || !res.ok) {
+                        searchListingsContainer.innerHTML = `<div style="text-align: center; padding: 60px 20px; color: #dc2626; grid-column: 1 / -1;">
+                            <i class="fas fa-exclamation-triangle" style="font-size: 3rem; opacity: 0.5; display: block; margin-bottom: 20px;"></i>
+                            <p>Erreur lors du chargement des annonces.</p>
+                            <p style="font-size: 0.9rem; margin-top: 10px;">${res?.message || 'Veuillez réessayer.'}</p>
+                        </div>`;
+                        if (searchCountEl) searchCountEl.textContent = '0 opportunité foncière';
+                        return;
+                    }
+                    renderListings(res.listings || []);
+                }
+
+                // Initial load
+                loadSearchListings();
+
+                // Apply filters button
+                applySearchBtn && applySearchBtn.addEventListener('click', function(e){
+                    e.preventDefault();
+                    const filters = {};
+                    const prov = provinceSelectSearch.value;
+                    const ville = villeSelectSearch.value;
+                    const minArea = document.getElementById('min-area-search').value;
+                    const maxArea = document.getElementById('max-area-search').value;
+                    const budget = document.getElementById('budget-search').value;
+                    const usage = document.getElementById('usage-search').value;
+                    const statut = document.getElementById('statut-search').value;
+                    
+                    if (prov) filters.province = prov;
+                    if (ville) filters.ville = ville;
+                    if (minArea) filters.min_area = minArea;
+                    if (maxArea) filters.max_area = maxArea;
+                    if (budget) filters.max_price = budget;
+                    if (usage) filters.usage = usage;
+                    if (statut) filters.statut = statut;
+                    
+                    loadSearchListings(filters);
+                });
+                
+                // Reset filters button
+                resetSearchBtn && resetSearchBtn.addEventListener('click', function(e){
+                    e.preventDefault();
+                    document.querySelectorAll('#province-select-search, #ville-select-search, #commune-select-search, #territoire-select-search').forEach(el => el.value = '');
+                    document.querySelectorAll('#min-area-search, #max-area-search, #budget-search, #usage-search, #statut-search').forEach(el => el.value = '');
+                    villeSelectSearch.disabled = true;
+                    communeSelectSearch.disabled = true;
+                    territoireSelectSearch.disabled = true;
+                    loadSearchListings();
+                });
+
+                // Sort handler
+                sortSearchSelect && sortSearchSelect.addEventListener('change', async function() {
+                    // Get current listings
+                    const listings = Array.from(searchListingsContainer.querySelectorAll('.terrain-card')).map(card => ({
+                        title: card.querySelector('h3').textContent,
+                        price: parseFloat(card.querySelector('.prix-valeur').textContent.replace(/[^0-9.-]/g, '')) || 0,
+                        area: parseFloat(card.querySelector('.fa-ruler-combined')?.parentElement?.textContent.replace(/[^0-9.-]/g, '')) || 0
+                    }));
+                });
+            });
+
             // Check if user is logged in
             document.addEventListener('DOMContentLoaded', function() {
                 <?php if (!$logged): ?>

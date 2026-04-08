@@ -873,7 +873,7 @@
                     <a href="publier.php">Publier</a>
                     <a href="tableau-de-bord.php" class="active">Tableau de bord</a>
                     <?php if($logged): ?>
-                        <a href="deconnexion.php">Déconnexion</a>
+                        <a href="deconnexion.php" class="nav-cta">Déconnexion</a>
                     <?php else: ?>
                         <a href="connexion.php" class="nav-cta">Se connecter</a>
                     <?php endif; ?>
