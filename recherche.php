@@ -446,28 +446,54 @@
             // initial load
             load();
 
-            // wire filter buttons
-            const applyBtn = document.querySelector('.filtres-actions .btn-primary');
-            const resetBtn = document.querySelector('.filtres-actions .btn-outline');
-            
-            applyBtn && applyBtn.addEventListener('click', function(e){
-                e.preventDefault();
+            // Function to apply filters dynamically
+            function applyFilters() {
                 const filters = {};
                 const prov = document.getElementById('province-select').value;
                 const ville = document.getElementById('ville-select').value;
                 const minArea = document.querySelector('input[placeholder="Ex: 500"]').value;
                 const maxArea = document.querySelector('input[placeholder="Ex: 10000"]').value;
                 const budget = document.querySelector('input[placeholder="Ex: 500000"]').value;
+                const usage = document.querySelector('select[name*="usage"]') ? Array.from(document.querySelectorAll('select')).find(s => s.options[s.selectedIndex]?.text.includes('Résidentiel') || s.options[s.selectedIndex]?.text.includes('Commercial') || s.options[s.selectedIndex]?.text.includes('Industriel') || s.options[s.selectedIndex]?.text.includes('Mixte'))?.value : '';
+                const statut = document.querySelector('select[name*="statut"]') ? Array.from(document.querySelectorAll('select')).find(s => s.options[s.selectedIndex]?.text.includes('Titre foncier') || s.options[s.selectedIndex]?.text.includes('Certificat'))?.value : '';
                 
                 if (prov) filters.province = prov;
                 if (ville) filters.ville = ville;
                 if (minArea) filters.min_area = minArea;
                 if (maxArea) filters.max_area = maxArea;
                 if (budget) filters.max_price = budget;
+                if (usage && usage !== '') filters.usage = usage;
+                if (statut && statut !== '') filters.statut = statut;
                 
                 load(filters);
+            }
+
+            // wire filter buttons with dynamic updates
+            const applyBtn = document.querySelector('.filtres-actions .btn-primary');
+            const resetBtn = document.querySelector('.filtres-actions .btn-outline');
+            
+            // Apply filters on button click
+            applyBtn && applyBtn.addEventListener('click', function(e){
+                e.preventDefault();
+                applyFilters();
             });
             
+            // Dynamic filter updates on input/select change
+            document.querySelectorAll('.filtres-avances input, .filtres-avances select').forEach(element => {
+                element.addEventListener('change', function() {
+                    // Add a small delay to allow cascading selects to update
+                    setTimeout(applyFilters, 100);
+                });
+                
+                // Also trigger on input for text fields
+                if (element.tagName === 'INPUT' && element.type === 'text') {
+                    element.addEventListener('input', function() {
+                        setTimeout(applyFilters, 300);
+                    });
+                }
+            });
+            
+            // Reset filters button
             resetBtn && resetBtn.addEventListener('click', function(e){
                 e.preventDefault();
                 document.querySelectorAll('.filtres-avances select, .filtres-avances input').forEach(el => el.value = '');
