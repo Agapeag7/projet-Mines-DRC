@@ -135,20 +135,31 @@
 
                     <!-- SECTION 3 : DOCUMENTS ET PHOTOS -->
                     <div class="form-section">
-                        <h3><i class="fas fa-images" style="color: var(--or); margin-right: 12px;"></i> Photos</h3>
-                        <div class="upload-area">
-                            <i class="fas fa-cloud-upload-alt"></i>
-                            <p style="font-weight: 600; margin-bottom: 8px;">Cliquez pour télécharger des photos</p>
-                            <p style="color: var(--gris-moyen); font-size: 0.9rem;">jpg, jpeg, png, webp, svg, gif, tiff, raw, jfif jusqu'à 10 Mo</p>
-                            <input type="file" name="photos[]" accept=".jpg,.jpeg,.png,.webp,.svg,.gif,.tiff,.raw,.jfif" multiple style="display:none;">
+                        <h3><i class="fas fa-images" style="color: var(--or); margin-right: 12px;"></i> Photos (1-3 maximum)</h3>
+                        <div class="upload-area-photos" style="border: 2px dashed #e0e6ed; padding: 30px; border-radius: 12px; text-align: center; cursor: pointer; transition: all 0.3s; margin-bottom: 20px;" id="photos-upload-area">
+                            <i class="fas fa-cloud-upload-alt" style="font-size: 2.5rem; color: var(--gris-moyen); margin-bottom: 12px; display: block;"></i>
+                            <p style="font-weight: 600; margin-bottom: 8px;">Cliquez pour ajouter des photos (max 3)</p>
+                            <p style="color: var(--gris-moyen); font-size: 0.9rem;">jpg, jpeg, png, webp jusqu'à 10 Mo chacune</p>
+                            <p style="margin-top: 12px; font-size: 0.85rem; color: var(--or); font-weight: 600;" id="photos-count">0 photo ajoutée</p>
+                            <input type="file" name="photos[]" id="photos-input" accept=".jpg,.jpeg,.png,.webp" style="display:none;">
                         </div>
-                            <div style="margin-top: 20px;">
-                            <label style="display: block; margin-bottom: 12px; font-weight: 600;">Documents juridiques (optionnel)</label>
-                            <div class="upload-area" style="padding: 20px;">
-                                <i class="fas fa-file-pdf" style="font-size: 1.8rem;"></i>
-                                <p style="font-weight: 600; margin-bottom: 4px;">Ajouter des documents</p>
-                                <p style="color: var(--gris-moyen); font-size: 0.8rem;">Titre foncier, certificat, plans...</p>
-                                    <input type="file" name="documents[]" accept=".pdf,.docx,.doc,.odt,.rtf,.txt,.xls,.xlsx,.ppt,.pptx,.ods,.odp,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/vnd.oasis.opendocument.text,application/rtf,text/plain,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/vnd.ms-powerpoint,application/vnd.openxmlformats-officedocument.presentationml.presentation,application/vnd.oasis.opendocument.spreadsheet,application/vnd.oasis.opendocument.presentation" style="display:none;">
+                        <div id="photos-list" style="display: none; margin-bottom: 20px;">
+                            <p style="font-weight: 600; margin-bottom: 12px;">Photos sélectionnées :</p>
+                            <div id="photos-items" style="display: flex; flex-direction: column; gap: 8px;"></div>
+                        </div>
+
+                        <div style="margin-top: 30px;">
+                            <h3 style="margin-bottom: 20px;"><i class="fas fa-file-pdf" style="color: var(--or); margin-right: 12px;"></i> Documents juridiques (optionnel, max 5)</h3>
+                            <div class="upload-area-documents" style="border: 2px dashed #e0e6ed; padding: 30px; border-radius: 12px; text-align: center; cursor: pointer; transition: all 0.3s; margin-bottom: 20px;" id="documents-upload-area">
+                                <i class="fas fa-file-pdf" style="font-size: 2.5rem; color: var(--gris-moyen); margin-bottom: 12px; display: block;"></i>
+                                <p style="font-weight: 600; margin-bottom: 8px;">Cliquez pour ajouter des documents (max 5)</p>
+                                <p style="color: var(--gris-moyen); font-size: 0.9rem;">Titre foncier, certificat, plans... PDF, Word, Excel, etc.</p>
+                                <p style="margin-top: 12px; font-size: 0.85rem; color: var(--or); font-weight: 600;" id="documents-count">0 document ajouté</p>
+                                <input type="file" name="documents[]" id="documents-input" accept=".pdf,.docx,.doc,.odt,.rtf,.txt,.xls,.xlsx,.ppt,.pptx,.ods,.odp" style="display:none;">
+                            </div>
+                            <div id="documents-list" style="display: none; margin-bottom: 20px;">
+                                <p style="font-weight: 600; margin-bottom: 12px;">Documents sélectionnés :</p>
+                                <div id="documents-items" style="display: flex; flex-direction: column; gap: 8px;"></div>
                             </div>
                         </div>
                     </div>
@@ -354,20 +365,189 @@
                 // Initialisation
                 initProvinces();
 
-                // Wire upload areas
-                document.querySelectorAll('.upload-area').forEach(area => {
-                    const fileInput = area.querySelector('input[type=file]');
-                    if (!fileInput) return;
-                    area.addEventListener('click', () => fileInput.click());
-                    fileInput.addEventListener('change', () => {
-                        const cnt = fileInput.files.length;
-                        const text = cnt > 1 ? cnt + ' fichiers sélectionnés' : (cnt === 1 ? '1 fichier sélectionné' : 'Ajouter des fichiers');
-                        area.querySelector('p').textContent = text;
-                        area.style.borderColor = cnt > 0 ? 'var(--or)' : '#e0e6ed';
-                        // Allow multiple selections without disabling clicks
-                        // User can keep adding files
-                    });
+                // Handle photos upload
+                const photosUploadArea = document.getElementById('photos-upload-area');
+                const photosInput = document.getElementById('photos-input');
+                const photosCountEl = document.getElementById('photos-count');
+                const photosListEl = document.getElementById('photos-list');
+                const photosItemsEl = document.getElementById('photos-items');
+                const MAX_PHOTOS = 3;
+                let selectedPhotos = new DataTransfer();
+
+                // Add hover effects
+                photosUploadArea.addEventListener('mouseenter', () => {
+                    if (selectedPhotos.items.length < MAX_PHOTOS) {
+                        photosUploadArea.style.background = '#f5f7fa';
+                        photosUploadArea.style.borderColor = 'var(--or)';
+                    }
                 });
+                photosUploadArea.addEventListener('mouseleave', () => {
+                    photosUploadArea.style.background = 'transparent';
+                    photosUploadArea.style.borderColor = selectedPhotos.items.length > 0 ? 'var(--or)' : '#e0e6ed';
+                });
+
+                photosUploadArea.addEventListener('click', () => {
+                    if (selectedPhotos.items.length < MAX_PHOTOS) {
+                        photosInput.click();
+                    } else {
+                        KelActions.showToast('Vous avez atteint le maximum de 3 photos', 'error');
+                    }
+                });
+
+                photosInput.addEventListener('change', (e) => {
+                    const newFiles = Array.from(e.target.files);
+                    const totalWillBe = selectedPhotos.items.length + newFiles.length;
+
+                    if (totalWillBe > MAX_PHOTOS) {
+                        const canAdd = MAX_PHOTOS - selectedPhotos.items.length;
+                        KelActions.showToast(`Vous ne pouvez ajouter que ${canAdd} photo(s) de plus`, 'error');
+                        photosInput.value = '';
+                        return;
+                    }
+
+                    newFiles.forEach(file => {
+                        selectedPhotos.items.add(file);
+                    });
+
+                    photosInput.files = selectedPhotos.files;
+                    updatePhotosDisplay();
+                    photosInput.value = '';
+                });
+
+                function updatePhotosDisplay() {
+                    const count = selectedPhotos.items.length;
+                    photosCountEl.textContent = count + ' photo' + (count > 1 ? 's' : '') + ' ajoutée' + (count > 1 ? 's' : '');
+                    
+                    if (count > 0) {
+                        photosListEl.style.display = 'block';
+                        photosItemsEl.innerHTML = '';
+                        Array.from(selectedPhotos.items).forEach((item, index) => {
+                            const file = item.getAsFile();
+                            const div = document.createElement('div');
+                            div.style.cssText = 'display: flex; align-items: center; justify-content: space-between; padding: 12px; background: #f5f7fa; border-radius: 8px; border-left: 4px solid var(--or);';
+                            div.innerHTML = `
+                                <span style="display: flex; align-items: center; gap: 10px;">
+                                    <i class="fas fa-image" style="color: var(--or);"></i>
+                                    <span style="font-size: 0.9rem;">${file.name}</span>
+                                </span>
+                                <button type="button" class="remove-photo-btn" data-index="${index}" style="background: none; border: none; color: #dc2626; cursor: pointer; padding: 4px 8px; font-weight: 600;">
+                                    <i class="fas fa-trash-alt"></i> Supprimer
+                                </button>
+                            `;
+                            photosItemsEl.appendChild(div);
+                        });
+
+                        document.querySelectorAll('.remove-photo-btn').forEach(btn => {
+                            btn.addEventListener('click', (e) => {
+                                e.preventDefault();
+                                const index = parseInt(btn.dataset.index);
+                                const newTransfer = new DataTransfer();
+                                Array.from(selectedPhotos.items).forEach((item, i) => {
+                                    if (i !== index) {
+                                        newTransfer.items.add(item.getAsFile());
+                                    }
+                                });
+                                selectedPhotos = newTransfer;
+                                photosInput.files = selectedPhotos.files;
+                                updatePhotosDisplay();
+                            });
+                        });
+                    } else {
+                        photosListEl.style.display = 'none';
+                    }
+                }
+
+                // Handle documents upload
+                const documentsUploadArea = document.getElementById('documents-upload-area');
+                const documentsInput = document.getElementById('documents-input');
+                const documentsCountEl = document.getElementById('documents-count');
+                const documentsListEl = document.getElementById('documents-list');
+                const documentsItemsEl = document.getElementById('documents-items');
+                const MAX_DOCUMENTS = 5;
+                let selectedDocuments = new DataTransfer();
+
+                // Add hover effects
+                documentsUploadArea.addEventListener('mouseenter', () => {
+                    if (selectedDocuments.items.length < MAX_DOCUMENTS) {
+                        documentsUploadArea.style.background = '#f5f7fa';
+                        documentsUploadArea.style.borderColor = 'var(--or)';
+                    }
+                });
+                documentsUploadArea.addEventListener('mouseleave', () => {
+                    documentsUploadArea.style.background = 'transparent';
+                    documentsUploadArea.style.borderColor = selectedDocuments.items.length > 0 ? 'var(--or)' : '#e0e6ed';
+                });
+
+                documentsUploadArea.addEventListener('click', () => {
+                    if (selectedDocuments.items.length < MAX_DOCUMENTS) {
+                        documentsInput.click();
+                    } else {
+                        KelActions.showToast('Vous avez atteint le maximum de 5 documents', 'error');
+                    }
+                });
+
+                documentsInput.addEventListener('change', (e) => {
+                    const newFiles = Array.from(e.target.files);
+                    const totalWillBe = selectedDocuments.items.length + newFiles.length;
+
+                    if (totalWillBe > MAX_DOCUMENTS) {
+                        const canAdd = MAX_DOCUMENTS - selectedDocuments.items.length;
+                        KelActions.showToast(`Vous ne pouvez ajouter que ${canAdd} document(s) de plus`, 'error');
+                        documentsInput.value = '';
+                        return;
+                    }
+
+                    newFiles.forEach(file => {
+                        selectedDocuments.items.add(file);
+                    });
+
+                    documentsInput.files = selectedDocuments.files;
+                    updateDocumentsDisplay();
+                    documentsInput.value = '';
+                });
+
+                function updateDocumentsDisplay() {
+                    const count = selectedDocuments.items.length;
+                    documentsCountEl.textContent = count + ' document' + (count > 1 ? 's' : '') + ' ajouté' + (count > 1 ? 's' : '');
+                    
+                    if (count > 0) {
+                        documentsListEl.style.display = 'block';
+                        documentsItemsEl.innerHTML = '';
+                        Array.from(selectedDocuments.items).forEach((item, index) => {
+                            const file = item.getAsFile();
+                            const div = document.createElement('div');
+                            div.style.cssText = 'display: flex; align-items: center; justify-content: space-between; padding: 12px; background: #f5f7fa; border-radius: 8px; border-left: 4px solid var(--or);';
+                            div.innerHTML = `
+                                <span style="display: flex; align-items: center; gap: 10px;">
+                                    <i class="fas fa-file" style="color: var(--or);"></i>
+                                    <span style="font-size: 0.9rem;">${file.name}</span>
+                                </span>
+                                <button type="button" class="remove-document-btn" data-index="${index}" style="background: none; border: none; color: #dc2626; cursor: pointer; padding: 4px 8px; font-weight: 600;">
+                                    <i class="fas fa-trash-alt"></i> Supprimer
+                                </button>
+                            `;
+                            documentsItemsEl.appendChild(div);
+                        });
+
+                        document.querySelectorAll('.remove-document-btn').forEach(btn => {
+                            btn.addEventListener('click', (e) => {
+                                e.preventDefault();
+                                const index = parseInt(btn.dataset.index);
+                                const newTransfer = new DataTransfer();
+                                Array.from(selectedDocuments.items).forEach((item, i) => {
+                                    if (i !== index) {
+                                        newTransfer.items.add(item.getAsFile());
+                                    }
+                                });
+                                selectedDocuments = newTransfer;
+                                documentsInput.files = selectedDocuments.files;
+                                updateDocumentsDisplay();
+                            });
+                        });
+                    } else {
+                        documentsListEl.style.display = 'none';
+                    }
+                }
 
                 // Draft handling
                 const publishForm = document.querySelector('.publier-form');
