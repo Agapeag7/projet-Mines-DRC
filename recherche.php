@@ -147,7 +147,7 @@
 
                             <!-- CARTE TERRAIN 2 -->
                             <div class="terrain-card">
-                                <img src="https://images.unsplash.com/photo-1582407947304-fd86f028f716?ixlib=rb-4.0.3&auto=format&fit=crop&w=180&q=80" alt="Terrain" class="terrain-image" onerror="this.src='img/placeholder.jpg'"
+                                <img src="https://images.unsplash.com/photo-1582407947304-fd86f028f716?ixlib=rb-4.0.3&auto=format&fit=crop&w=180&q=80" alt="Terrain" class="terrain-image" onerror="this.src='img/placeholder.jpg'">
                                 <div class="terrain-infos">
                                     <h3>Terrain commercial - Limete</h3>
                                     <div class="terrain-details">
@@ -166,7 +166,7 @@
 
                             <!-- CARTE TERRAIN 3 -->
                             <div class="terrain-card">
-                                <img src="https://images.unsplash.com/photo-1564013799919-ab600027ffc6?ixlib=rb-4.0.3&auto=format&fit=crop&w=180&q=80" alt="Terrain" class="terrain-image" onerror="this.src='img/placeholder.jpg'"
+                                <img src="https://images.unsplash.com/photo-1564013799919-ab600027ffc6?ixlib=rb-4.0.3&auto=format&fit=crop&w=180&q=80" alt="Terrain" class="terrain-image" onerror="this.src='img/placeholder.jpg'">
                                 <div class="terrain-infos">
                                     <h3>Terrain industriel - Mont Ngafula</h3>
                                     <div class="terrain-details">
