@@ -284,35 +284,50 @@
                             const listing = res.listing;
                             
                             // Update page title
-                            document.querySelector('.section-title').textContent = 'Modifier l\'opportunité foncière';
-                            document.querySelector('.section-sub').textContent = listing.title;
+                            const titleEl = document.querySelector('.section-title');
+                            const subEl = document.querySelector('.section-sub');
+                            if (titleEl) titleEl.textContent = 'Modifier l\'opportunité foncière';
+                            if (subEl) subEl.textContent = listing.title;
                             
                             // Update button text
                             const submitBtn = document.querySelector('button[type=submit]');
                             if (submitBtn) submitBtn.textContent = 'Enregistrer les modifications';
                             
+                            // Helper function to safely set element values
+                            const setElementValue = (selector, value) => {
+                                const el = document.querySelector(selector);
+                                if (el) {
+                                    el.value = value || '';
+                                }
+                            };
+                            
                             // Fill the form with listing data
-                            document.getElementById('province-select').value = listing.province || '';
-                            document.getElementById('ville-select').value = listing.ville || '';
-                            document.getElementById('commune-select').value = listing.commune || '';
-                            document.getElementById('territoire-select').value = listing.territoire || '';
-                            document.querySelector('input[name="address_text"]').value = listing.address_text || '';
-                            document.querySelector('input[name="latitude"]').value = listing.latitude || '';
-                            document.querySelector('input[name="longitude"]').value = listing.longitude || '';
-                            document.querySelector('input[name="area_m2"]').value = listing.area_m2 || '';
-                            document.querySelector('input[name="usage"]').value = listing.usage || '';
-                            document.querySelector('input[name="price"]').value = listing.price || '';
-                            document.querySelector('input[name="statut"]').value = listing.statut || '';
-                            document.querySelector('input[name="reference_titre"]').value = listing.reference_titre || '';
-                            document.querySelector('input[name="annee_acquisition"]').value = listing.annee_acquisition || '';
-                            document.querySelector('textarea[name="description"]').value = listing.description || '';
+                            setElementValue('#province-select', listing.province);
+                            setElementValue('#ville-select', listing.ville);
+                            setElementValue('#commune-select', listing.commune);
+                            setElementValue('#territoire-select', listing.territoire);
+                            setElementValue('input[name="address_text"]', listing.address_text);
+                            setElementValue('input[name="latitude"]', listing.latitude);
+                            setElementValue('input[name="longitude"]', listing.longitude);
+                            setElementValue('input[name="area_m2"]', listing.area_m2);
+                            setElementValue('select[name="usage"]', listing.usage);
+                            setElementValue('input[name="price"]', listing.price);
+                            setElementValue('select[name="statut"]', listing.statut);
+                            setElementValue('input[name="reference_titre"]', listing.reference_titre);
+                            setElementValue('input[name="annee_acquisition"]', listing.annee_acquisition);
+                            setElementValue('textarea[name="description"]', listing.description);
                             
                             // Trigger province change event to populate cascading selectors
                             const provinceSelect = document.getElementById('province-select');
-                            provinceSelect.dispatchEvent(new Event('change'));
+                            if (provinceSelect) {
+                                provinceSelect.dispatchEvent(new Event('change'));
+                            }
                             
                             // Update hidden is_published field
-                            document.getElementById('is_published').value = listing.is_published ? '1' : '0';
+                            const isPublishedEl = document.getElementById('is_published');
+                            if (isPublishedEl) {
+                                isPublishedEl.value = listing.is_published ? '1' : '0';
+                            }
                         } else {
                             KelActions.showToast('Annonce non trouvée', 'error');
                             setTimeout(() => window.location.href = 'tableau-de-bord.php', 1500);
