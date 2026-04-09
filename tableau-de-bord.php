@@ -542,6 +542,7 @@
                 background: white;
                 height: 100%;
                 max-height: 100%;
+                min-height: 0;
             }
 
             .messaging-header {
@@ -551,6 +552,7 @@
                 padding: 16px 20px;
                 border-bottom: 1px solid #e0e6ed;
                 background: white;
+                flex-shrink: 0;
             }
 
             .messaging-user {
@@ -590,7 +592,7 @@
             .messaging-body {
                 flex: 1;
                 min-height: 0;
-                overflow-y: auto;
+                overflow-y: scroll;
                 padding: 20px;
                 display: flex;
                 flex-direction: column;
@@ -649,6 +651,7 @@
                 padding: 16px 20px;
                 border-top: 1px solid #e0e6ed;
                 background: white;
+                flex-shrink: 0;
             }
 
             .messaging-input {
@@ -773,12 +776,14 @@
                 .messaging-header {
                     justify-content: space-between;
                     padding: 12px 16px;
+                    flex-shrink: 0;
                 }
 
                 .messaging-body {
                     padding: 16px;
                     gap: 12px;
                     min-height: 0;
+                    overflow-y: scroll;
                 }
 
                 .message-bubble {
@@ -797,6 +802,7 @@
                 .messaging-footer {
                     padding: 12px 16px;
                     gap: 8px;
+                    flex-shrink: 0;
                 }
 
                 .messaging-input input {
@@ -853,6 +859,7 @@
 
                 .messaging-header {
                     padding: 12px 16px;
+                    flex-shrink: 0;
                 }
 
                 .messaging-user-name {
@@ -872,12 +879,14 @@
                     padding: 12px;
                     gap: 10px;
                     min-height: 0;
+                    overflow-y: scroll;
                 }
 
                 .messaging-footer {
                     padding: 10px 12px;
                     gap: 6px;
                     flex-wrap: wrap;
+                    flex-shrink: 0;
                 }
 
                 .messaging-input input {
