@@ -442,19 +442,30 @@
                 padding-right: 10px;
             }
 
+            /* Style spécifique pour la section messages */
+            #section-messages .dashboard-content {
+                max-height: calc(100vh - 200px);
+                overflow: hidden;
+                display: flex;
+                flex-direction: column;
+            }
+
             /* STYLES POUR MESSAGERIE RESPONSIVE */
             .messaging-container {
                 display: grid;
                 grid-template-columns: 1fr 2fr;
                 gap: 30px;
-                height: 500px;
                 flex: 1;
+                min-height: 0;
+                overflow: hidden;
             }
 
             .conversations-list {
                 border-right: 1px solid #e0e6ed;
                 padding-right: 20px;
                 overflow-y: auto;
+                height: 100%;
+                max-height: 100%;
             }
 
             .conversation-search {
@@ -529,6 +540,8 @@
                 border: 1px solid #e0e6ed;
                 border-radius: 8px;
                 background: white;
+                height: 100%;
+                max-height: 100%;
             }
 
             .messaging-header {
@@ -576,6 +589,7 @@
 
             .messaging-body {
                 flex: 1;
+                min-height: 0;
                 overflow-y: auto;
                 padding: 20px;
                 display: flex;
@@ -589,6 +603,7 @@
                 gap: 12px;
                 align-items: flex-end;
                 max-width: 70%;
+                min-width: 0;
             }
 
             .message-bubble.sent {
@@ -604,9 +619,11 @@
                 padding: 12px 16px;
                 border-radius: 12px;
                 word-wrap: break-word;
+                overflow-wrap: break-word;
                 max-width: 100%;
                 font-size: 0.95rem;
                 line-height: 1.4;
+                white-space: normal;
             }
 
             .message-bubble.sent .message-text {
@@ -717,9 +734,9 @@
                     display: flex;
                     flex-direction: column;
                     gap: 0;
-                    height: auto;
-                    max-height: none;
+                    max-height: calc(100vh - 340px);
                     flex: 1;
+                    min-height: 0;
                 }
 
                 .conversations-list {
@@ -750,6 +767,7 @@
                     display: none;
                     flex-direction: column;
                     min-height: 300px;
+                    max-height: 100%;
                 }
 
                 .messaging-header {
@@ -760,15 +778,20 @@
                 .messaging-body {
                     padding: 16px;
                     gap: 12px;
+                    min-height: 0;
                 }
 
                 .message-bubble {
                     max-width: 85%;
+                    min-width: 0;
                 }
 
                 .message-text {
                     padding: 10px 14px;
                     font-size: 0.9rem;
+                    word-wrap: break-word;
+                    overflow-wrap: break-word;
+                    white-space: normal;
                 }
 
                 .messaging-footer {
@@ -809,8 +832,9 @@
             @media (max-width: 480px) {
                 .messaging-container {
                     gap: 0;
-                    max-height: none;
+                    max-height: calc(100vh - 320px);
                     flex: 1;
+                    min-height: 0;
                 }
 
                 .conversations-list {
@@ -841,11 +865,13 @@
 
                 .message-bubble {
                     max-width: 90%;
+                    min-width: 0;
                 }
 
                 .messaging-body {
                     padding: 12px;
                     gap: 10px;
+                    min-height: 0;
                 }
 
                 .messaging-footer {
