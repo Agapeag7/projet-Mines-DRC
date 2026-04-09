@@ -41,6 +41,7 @@
 
                 <form class="publier-form fade-in" method="post" enctype="multipart/form-data">
                     <input type="hidden" name="is_published" id="is_published" value="1">
+                    <input type="hidden" name="id" id="listing_id" value="">
                     <!-- SECTION 1 : LOCALISATION -->
                     <div class="form-section">
                         <h3><i class="fas fa-map-marker-alt" style="color: var(--or); margin-right: 12px;"></i> Localisation</h3>
@@ -268,6 +269,61 @@
                     });
                 }
 
+                // Load listing data if editing
+                async function loadListingDataForEdit() {
+                    const urlParams = new URLSearchParams(window.location.search);
+                    const listingId = urlParams.get('id');
+                    
+                    if (!listingId) return;  // Not editing, creating new
+                    
+                    document.getElementById('listing_id').value = listingId;
+                    
+                    try {
+                        const res = await window.KelFonciaAPI.postJSON('listings_get', { id: listingId });
+                        if (res && res.ok && res.listing) {
+                            const listing = res.listing;
+                            
+                            // Update page title
+                            document.querySelector('.section-title').textContent = 'Modifier l\'opportunité foncière';
+                            document.querySelector('.section-sub').textContent = listing.title;
+                            
+                            // Update button text
+                            const submitBtn = document.querySelector('button[type=submit]');
+                            if (submitBtn) submitBtn.textContent = 'Enregistrer les modifications';
+                            
+                            // Fill the form with listing data
+                            document.getElementById('province-select').value = listing.province || '';
+                            document.getElementById('ville-select').value = listing.ville || '';
+                            document.getElementById('commune-select').value = listing.commune || '';
+                            document.getElementById('territoire-select').value = listing.territoire || '';
+                            document.querySelector('input[name="address_text"]').value = listing.address_text || '';
+                            document.querySelector('input[name="latitude"]').value = listing.latitude || '';
+                            document.querySelector('input[name="longitude"]').value = listing.longitude || '';
+                            document.querySelector('input[name="area_m2"]').value = listing.area_m2 || '';
+                            document.querySelector('input[name="usage"]').value = listing.usage || '';
+                            document.querySelector('input[name="price"]').value = listing.price || '';
+                            document.querySelector('input[name="statut"]').value = listing.statut || '';
+                            document.querySelector('input[name="reference_titre"]').value = listing.reference_titre || '';
+                            document.querySelector('input[name="annee_acquisition"]').value = listing.annee_acquisition || '';
+                            document.querySelector('textarea[name="description"]').value = listing.description || '';
+                            
+                            // Trigger province change event to populate cascading selectors
+                            const provinceSelect = document.getElementById('province-select');
+                            provinceSelect.dispatchEvent(new Event('change'));
+                            
+                            // Update hidden is_published field
+                            document.getElementById('is_published').value = listing.is_published ? '1' : '0';
+                        } else {
+                            KelActions.showToast('Annonce non trouvée', 'error');
+                            setTimeout(() => window.location.href = 'tableau-de-bord.php', 1500);
+                        }
+                    } catch (error) {
+                        console.error('Error loading listing:', error);
+                        KelActions.showToast('Erreur lors du chargement de l\'annonce', 'error');
+                        setTimeout(() => window.location.href = 'tableau-de-bord.php', 1500);
+                    }
+                }
+
                 // Événement changement de province
                 provinceSelect.addEventListener('change', function() {
                     const selectedProvince = this.value;
@@ -364,6 +420,7 @@
 
                 // Initialisation
                 initProvinces();
+                loadListingDataForEdit();
 
                 // Handle photos upload
                 const photosUploadArea = document.getElementById('photos-upload-area');
@@ -556,9 +613,99 @@
                     });
                 }
 
-                // Attach create listing form
-                KelActions.attachCreateListingForm('.publier-form');
+                // Attach form handler that supports both create and update
+                attachListingFormHandler('.publier-form');
             });
+
+            // Custom form handler that supports both create and update
+            function attachListingFormHandler(selector){
+                const form = document.querySelector(selector);
+                if (!form) return;
+                form.addEventListener('submit', async function(e){
+                    e.preventDefault();
+                    const isDraft = form.querySelector('#is_published') && form.querySelector('#is_published').value === '0';
+                    const certify = form.querySelector('#certify');
+                    if (!isDraft && (!certify || !certify.checked)) {
+                        KelActions.showToast('Vous devez certifier que les informations sont exactes.', 'error');
+                        return;
+                    }
+                    const btn = form.querySelector('button[type=submit]');
+                    if (btn) {
+                        btn.disabled = true;
+                        btn.textContent = btn.textContent.includes('Enregistrer') ? 'Mise à jour en cours...' : 'Création en cours...';
+                    }
+                    const invalidDocument = Array.from(form.querySelectorAll('input[name="documents[]"]'))
+                        .flatMap(input => Array.from(input.files || []))
+                        .find(file => !/[.](pdf|doc|docx|odt|rtf|txt|xls|xlsx|ppt|pptx|ods|odp)$/i.test(file.name));
+                    if (invalidDocument) {
+                        KelActions.showToast('Document détecté non autorisé : ' + invalidDocument.name, 'error');
+                        if (btn) {
+                            btn.disabled = false;
+                            btn.textContent = btn.textContent.includes('Enregistrer') ? 'Enregistrer les modifications' : 'Publier mon annonce';
+                        }
+                        return;
+                    }
+
+                    const oversizedFile = Array.from(form.querySelectorAll('input[type="file"]'))
+                        .flatMap(input => Array.from(input.files || []))
+                        .find(file => file.size > 10 * 1024 * 1024);
+                    if (oversizedFile) {
+                        KelActions.showToast('Fichier trop volumineux : ' + oversizedFile.name, 'error');
+                        if (btn) {
+                            btn.disabled = false;
+                            btn.textContent = btn.textContent.includes('Enregistrer') ? 'Enregistrer les modifications' : 'Publier mon annonce';
+                        }
+                        return;
+                    }
+
+                    // Determine if we're updating or creating
+                    const listingId = form.querySelector('#listing_id')?.value;
+                    const isUpdate = listingId && listingId.trim() !== '';
+                    const action = isUpdate ? 'listings_update' : 'listings_create';
+
+                    // Create FormData manually to include selected files from DataTransfer
+                    const formData = new FormData(form);
+                    
+                    // Clear file inputs and add files from DataTransfer (if available)
+                    formData.delete('photos[]');
+                    formData.delete('documents[]');
+                    
+                    // Add photos from global selectedPhotos if available
+                    if (window.selectedPhotos && window.selectedPhotos.items) {
+                        Array.from(window.selectedPhotos.items).forEach(item => {
+                            const file = item.getAsFile();
+                            formData.append('photos[]', file);
+                        });
+                    }
+                    
+                    // Add documents from global selectedDocuments if available
+                    if (window.selectedDocuments && window.selectedDocuments.items) {
+                        Array.from(window.selectedDocuments.items).forEach(item => {
+                            const file = item.getAsFile();
+                            formData.append('documents[]', file);
+                        });
+                    }
+
+                    const res = await window.KelFonciaAPI.postFormData(action, formData);
+                    if (btn) {
+                        btn.disabled = false;
+                        btn.textContent = btn.textContent.includes('Enregistrer') ? 'Enregistrer les modifications' : 'Publier mon annonce';
+                    }
+                    if (res && res.ok) {
+                        const successMsg = isUpdate ? 'Annonce modifiée avec succès!' : 'Annonce créée avec succès!';
+                        KelActions.showToast(successMsg, 'success');
+                        setTimeout(() => {
+                            window.location.href = 'tableau-de-bord.php?section=opportunites';
+                        }, 1000);
+                    } else {
+                        const errMsg = res?.message || res?.error || 'Erreur';
+                        if (res?.details && Array.isArray(res.details)) {
+                            errMsg += ' : ' + res.details.join(', ');
+                        }
+                        KelActions.showToast(errMsg, 'error');
+                    }
+                });
+            }
         </script>
     </body>
 </html>

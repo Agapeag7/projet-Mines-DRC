@@ -1142,15 +1142,18 @@
                                             <p style="font-weight: 700; color: var(--bleu-pro);">3</p>
                                         </div>
                                     </div>
-                                    <div style="display: flex; gap: 12px; justify-content: flex-end;">
-                                        <button class="btn btn-outline" style="padding: 8px 20px;">
-                                            <i class="fas fa-chart-line"></i> Statistiques
-                                        </button>
+                                    <div style="display: flex; gap: 12px; justify-content: flex-end; flex-wrap: wrap;">
                                         <button class="btn btn-outline" style="padding: 8px 20px;">
                                             <i class="fas fa-edit"></i> Modifier
                                         </button>
-                                        <button class="btn btn-primary" style="padding: 8px 20px;">
+                                        <button class="btn btn-outline" style="padding: 8px 20px;">
+                                            <i class="fas fa-eye-slash"></i> Rendre inactif
+                                        </button>
+                                        <button class="btn btn-outline" style="padding: 8px 20px;">
                                             <i class="fas fa-eye"></i> Voir
+                                        </button>
+                                        <button class="btn btn-outline" style="padding: 8px 20px; color: #e74c3c; border-color: #e74c3c;">
+                                            <i class="fas fa-trash"></i> Supprimer
                                         </button>
                                     </div>
                                 </div>
@@ -1179,15 +1182,18 @@
                                             <p style="font-weight: 700; color: var(--bleu-pro);">1</p>
                                         </div>
                                     </div>
-                                    <div style="display: flex; gap: 12px; justify-content: flex-end;">
-                                        <button class="btn btn-outline" style="padding: 8px 20px;">
-                                            <i class="fas fa-chart-line"></i> Statistiques
-                                        </button>
+                                    <div style="display: flex; gap: 12px; justify-content: flex-end; flex-wrap: wrap;">
                                         <button class="btn btn-outline" style="padding: 8px 20px;">
                                             <i class="fas fa-edit"></i> Modifier
                                         </button>
-                                        <button class="btn btn-primary" style="padding: 8px 20px;">
+                                        <button class="btn btn-outline" style="padding: 8px 20px;">
+                                            <i class="fas fa-eye-slash"></i> Rendre inactif
+                                        </button>
+                                        <button class="btn btn-outline" style="padding: 8px 20px;">
                                             <i class="fas fa-eye"></i> Voir
+                                        </button>
+                                        <button class="btn btn-outline" style="padding: 8px 20px; color: #e74c3c; border-color: #e74c3c;">
+                                            <i class="fas fa-trash"></i> Supprimer
                                         </button>
                                     </div>
                                 </div>
@@ -1216,12 +1222,18 @@
                                             <p style="font-weight: 700; color: var(--bleu-pro);">10/02/2026</p>
                                         </div>
                                     </div>
-                                    <div style="display: flex; gap: 12px; justify-content: flex-end;">
+                                    <div style="display: flex; gap: 12px; justify-content: flex-end; flex-wrap: wrap;">
                                         <button class="btn btn-outline" style="padding: 8px 20px;">
                                             <i class="fas fa-edit"></i> Modifier
                                         </button>
                                         <button class="btn btn-outline" style="padding: 8px 20px;">
-                                            <i class="fas fa-clock"></i> Suivre
+                                            <i class="fas fa-eye"></i> Rendre actif
+                                        </button>
+                                        <button class="btn btn-outline" style="padding: 8px 20px;">
+                                            <i class="fas fa-eye"></i> Voir
+                                        </button>
+                                        <button class="btn btn-outline" style="padding: 8px 20px; color: #e74c3c; border-color: #e74c3c;">
+                                            <i class="fas fa-trash"></i> Supprimer
                                         </button>
                                     </div>
                                 </div>
@@ -1800,7 +1812,7 @@
                             res.listings.forEach(listing => {
                                 const div = document.createElement('div');
                                 div.className = 'project-card';
-                                const statusClass = listing.is_published ? 'status-termine' : 'status-attente';
+                                const statusClass = listing.is_published ? 'status-en-cours' : 'status-attente';
                                 const statusText = listing.is_published ? 'Active' : 'En attente';
                                 div.innerHTML = `
                                     <div class="project-header">
@@ -1826,12 +1838,18 @@
                                         </div>
                                     </div>
                                     <p style="margin: 12px 0; color: var(--gris-moyen);">${listing.description}</p>
-                                    <div style="display: flex; gap: 12px; justify-content: flex-end;">
-                                        <button class="btn btn-outline" style="padding: 8px 20px;">
+                                    <div style="display: flex; gap: 12px; justify-content: flex-end; flex-wrap: wrap;">
+                                        <button class="btn btn-outline modify-listing-btn" data-listing-id="${listing.id}" style="padding: 8px 20px;">
                                             <i class="fas fa-edit"></i> Modifier
                                         </button>
-                                        <button class="btn btn-outline" style="padding: 8px 20px;">
+                                        <button class="btn btn-outline toggle-active-btn" data-listing-id="${listing.id}" data-is-published="${listing.is_published}" style="padding: 8px 20px;">
+                                            <i class="fas fa-${listing.is_published ? 'eye-slash' : 'eye'}"></i> ${listing.is_published ? 'Rendre inactif' : 'Rendre actif'}
+                                        </button>
+                                        <button class="btn btn-outline view-listing-btn" data-listing-id="${listing.id}" style="padding: 8px 20px;">
                                             <i class="fas fa-eye"></i> Voir
+                                        </button>
+                                        <button class="btn btn-outline delete-listing-btn" data-listing-id="${listing.id}" style="padding: 8px 20px; color: #e74c3c; border-color: #e74c3c;">
+                                            <i class="fas fa-trash"></i> Supprimer
                                         </button>
                                     </div>
                                 `;
@@ -1839,6 +1857,9 @@
                             });
                             if (res.listings.length === 0) {
                                 container.innerHTML = '<div style="text-align: center; color: var(--gris-moyen); padding: 40px;">Aucune opportunité trouvée</div>';
+                            } else {
+                                // Attach event listeners to the new buttons
+                                attachListingEventListeners();
                             }
                         } else {
                             console.error('Error loading listings', res);
@@ -1848,6 +1869,112 @@
                         console.error('Failed to load listings', e);
                         document.getElementById('opportunites-list').innerHTML = '<div style="text-align: center; color: var(--gris-moyen); padding: 40px;">Erreur lors du chargement</div>';
                     }
+                }
+
+                // Attach event listeners to listing action buttons
+                function attachListingEventListeners() {
+                    // Modify button
+                    document.querySelectorAll('.modify-listing-btn').forEach(btn => {
+                        btn.addEventListener('click', async function(e) {
+                            e.preventDefault();
+                            const listingId = this.dataset.listingId;
+                            window.location.href = 'publier.php?id=' + listingId;
+                        });
+                    });
+
+                    // Toggle active/inactive button
+                    document.querySelectorAll('.toggle-active-btn').forEach(btn => {
+                        btn.addEventListener('click', async function(e) {
+                            e.preventDefault();
+                            const listingId = this.dataset.listingId;
+                            const isPublished = this.dataset.isPublished === '1';
+                            const newStatus = isPublished ? 0 : 1;
+                            
+                            this.disabled = true;
+                            const originalHtml = this.innerHTML;
+                            this.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+                            
+                            try {
+                                const res = await window.KelFonciaAPI.postJSON('listings_update', {
+                                    id: listingId,
+                                    is_published: newStatus
+                                });
+                                
+                                if (res && res.ok) {
+                                    KelActions.showToast(newStatus ? '✓ Annonce réactivée' : '✓ Annonce désactivée', 'success');
+                                    // Reload the opportunites section
+                                    loadOpportunites();
+                                } else {
+                                    KelActions.showToast('Erreur lors de la mise à jour', 'error');
+                                    this.disabled = false;
+                                    this.innerHTML = originalHtml;
+                                }
+                            } catch (error) {
+                                console.error('Error updating listing:', error);
+                                KelActions.showToast('Erreur lors de la mise à jour', 'error');
+                                this.disabled = false;
+                                this.innerHTML = originalHtml;
+                            }
+                        });
+                    });
+
+                    // Delete button
+                    document.querySelectorAll('.delete-listing-btn').forEach(btn => {
+                        btn.addEventListener('click', async function(e) {
+                            e.preventDefault();
+                            const listingId = this.dataset.listingId;
+                            const listingTitle = this.closest('.project-card').querySelector('.project-title').textContent;
+                            
+                            // Confirm deletion
+                            if (!confirm(`Êtes-vous sûr de vouloir supprimer l'annonce "${listingTitle}" ?\n\nCette action est irréversible.`)) {
+                                return;
+                            }
+                            
+                            this.disabled = true;
+                            const originalHtml = this.innerHTML;
+                            this.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+                            
+                            try {
+                                const res = await window.KelFonciaAPI.postJSON('listings_delete', {
+                                    id: listingId
+                                });
+                                
+                                if (res && res.ok) {
+                                    KelActions.showToast('✓ Annonce supprimée', 'success');
+                                    // Remove the card with animation
+                                    const card = this.closest('.project-card');
+                                    card.style.opacity = '0';
+                                    card.style.transform = 'translateX(-20px)';
+                                    setTimeout(() => {
+                                        card.remove();
+                                        // Check if list is now empty
+                                        const container = document.getElementById('opportunites-list');
+                                        if (container.children.length === 0) {
+                                            container.innerHTML = '<div style="text-align: center; color: var(--gris-moyen); padding: 40px;">Aucune opportunité trouvée</div>';
+                                        }
+                                    }, 300);
+                                } else {
+                                    KelActions.showToast('Erreur lors de la suppression', 'error');
+                                    this.disabled = false;
+                                    this.innerHTML = originalHtml;
+                                }
+                            } catch (error) {
+                                console.error('Error deleting listing:', error);
+                                KelActions.showToast('Erreur lors de la suppression', 'error');
+                                this.disabled = false;
+                                this.innerHTML = originalHtml;
+                            }
+                        });
+                    });
+
+                    // View button
+                    document.querySelectorAll('.view-listing-btn').forEach(btn => {
+                        btn.addEventListener('click', function(e) {
+                            e.preventDefault();
+                            const listingId = this.dataset.listingId;
+                            window.location.href = 'detail-terrain.php?id=' + listingId;
+                        });
+                    });
                 }
 
                 let currentConversationId = null;

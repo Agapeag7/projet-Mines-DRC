@@ -4,7 +4,7 @@ console.log('animations.js loaded');
 function main() {
     console.log('main() start');
     
-    // 0️⃣ ROTATION DES PROVINCES (Hero Title)
+    // 1 ROTATION DES PROVINCES (Hero Title)
     const provincesList = [
         "Kinshasa", "Kasai", "Kasai Central", "Kasai Oriental", "Lualaba", "Haut Katanga",
         "Haut Lomami", "Katanga", "Maniema", "Nord Kivu", "Sud Kivu", "Ituri", "Tshopo",
@@ -62,7 +62,7 @@ function main() {
         observer.observe(el);
     });
 
-    // 2️⃣ ANIMATION DES CHIFFRES
+    // 2 ANIMATION DES CHIFFRES
     function animateNumber(element) {
         const value = element.innerText;
         if (value.includes('+')) {
@@ -81,7 +81,7 @@ function main() {
         }
     }
 
-    // 3️⃣ MOBILE MENU TOGGLE
+    // 3 MOBILE MENU TOGGLE
     const mobileMenuBtn = document.querySelector('.mobile-menu');
     const navLinks = document.querySelector('.nav-links');
     
@@ -121,7 +121,7 @@ function main() {
         });
     }
 
-    // 5️⃣ CARTES INTERACTIVES (Leaflet)
+    // 5 CARTES INTERACTIVES (Leaflet)
     window.initMap = function(containerId, lat, lng, zoom = 12, markers = []) {
         const container = document.getElementById(containerId);
         if (!container) return;
@@ -166,7 +166,7 @@ function main() {
         });
     }
 
-    // 7️⃣ UPLOAD AREA SIMULATION
+    // 7 UPLOAD AREA SIMULATION
     const uploadAreas = document.querySelectorAll('.upload-area');
     uploadAreas.forEach(area => {
         area.addEventListener('click', function() {
@@ -207,7 +207,7 @@ function main() {
         });
     });
 
-    // 8️⃣ STICKY NAVBAR
+    // 8 STICKY NAVBAR
     const header = document.querySelector('header');
     if (header) {
         let lastScroll = 0;
@@ -222,7 +222,7 @@ function main() {
         });
     }
 
-    // 9️⃣ INIT MAPS
+    // 9 INIT MAPS
     // Carte accueil
     if (document.getElementById('map')) {
         initMap('map', -4.325, 15.322, 12, [
@@ -243,7 +243,7 @@ function main() {
         ]);
     }
 
-    // 🔟 FIL D'ACTUALITÉS (données simulées)
+    // 10 FIL D'ACTUALITÉS (données simulées)
     function initFeed() {
         console.log('initFeed called');
         const container = document.getElementById('feed-list');
@@ -569,7 +569,7 @@ function main() {
         initFeed();
     }
 
-    // 🔟 ACTIVE NAVIGATION
+    // 11 ACTIVE NAVIGATION
     const currentPage = window.location.pathname.split('/').pop();
     document.querySelectorAll('.nav-links a').forEach(link => {
         const linkPage = link.getAttribute('href');
