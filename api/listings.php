@@ -298,17 +298,22 @@ if ($action === 'dashboard_overview') {
     $favorites = $fm->listForUser($user_id);
     $favorites_count = count($favorites);
     $conversations = $cm->listForUser($user_id, 1000, 0);
-    $messages_count = 0;
-    foreach ($conversations as $conv) {
-        $messages = $msgm->listByConversation($conv['id'], 1000, 0);
-        $messages_count += count($messages);
-    }
+    $conversations_count = count($conversations);
     $unread_count = $msgm->getUnreadCount($user_id);
+    
+    // Get user data for last login info (use updated_at or created_at as proxy)
+    $um = new UserModel($db);
+    $user = $um->findById($user_id);
+    // Use updated_at if available, otherwise created_at
+    $last_login = !empty($user['updated_at']) ? $user['updated_at'] : $user['created_at'];
+    
     Utils::jsonResponse(['ok' => true, 'stats' => [
         'listings_count' => $listings_count,
         'favorites_count' => $favorites_count,
-        'messages_count' => $messages_count,
+        'messages_count' => $conversations_count,
         'unread_messages' => $unread_count
+    ], 'user' => [
+        'last_login' => $last_login
     ]]);
 }
 

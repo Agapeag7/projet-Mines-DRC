@@ -435,6 +435,13 @@
                 min-height: calc(100vh - 200px);
             }
 
+            /* Style spécifique pour la section activité récente */
+            #recent-activity-container {
+                max-height: 400px;
+                overflow-y: auto;
+                padding-right: 10px;
+            }
+
             /* STYLES POUR MESSAGERIE RESPONSIVE */
             .messaging-container {
                 display: grid;
@@ -924,7 +931,7 @@
                         <div class="dashboard-content">
                             <div class="dashboard-header">
                                 <h2><i class="fas fa-chart-pie"></i> Vue d'ensemble</h2>
-                                <span style="color: var(--gris-moyen);">Dernière connexion : 12/02/2026 à 09:34</span>
+                                <span style="color: var(--gris-moyen);" id="last-login-text">Dernière connexion : --</span>
                             </div>
                             
                             <!-- STATISTIQUES RAPIDES -->
@@ -1631,6 +1638,29 @@
                             // Mettre à jour les badges du menu
                             document.getElementById('menu-favorites-badge').textContent = res.stats.favorites_count;
                             document.getElementById('menu-messages-badge').textContent = res.stats.unread_messages;
+                            
+                            // Update last login date
+                            if (res.user && res.user.last_login) {
+                                try {
+                                    const lastLogin = new Date(res.user.last_login);
+                                    // Only update if the date is valid
+                                    if (!isNaN(lastLogin.getTime())) {
+                                        const formattedDate = lastLogin.toLocaleDateString('fr-FR', { 
+                                            day: '2-digit', 
+                                            month: '2-digit', 
+                                            year: 'numeric' 
+                                        });
+                                        const formattedTime = lastLogin.toLocaleTimeString('fr-FR', { 
+                                            hour: '2-digit', 
+                                            minute: '2-digit' 
+                                        });
+                                        document.getElementById('last-login-text').textContent = `Dernière connexion : ${formattedDate} à ${formattedTime}`;
+                                    }
+                                } catch (dateError) {
+                                    console.warn('Invalid date format:', res.user.last_login);
+                                }
+                            }
+                            
                             // Load recent activity
                             loadRecentActivity();
                         } else {
