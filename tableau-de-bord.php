@@ -444,7 +444,7 @@
 
             /* Style spécifique pour la section messages */
             #section-messages .dashboard-content {
-                max-height: calc(100vh - 200px);
+                max-height: 800px;
                 overflow: hidden;
                 display: flex;
                 flex-direction: column;
