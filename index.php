@@ -10,6 +10,8 @@
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
         <!-- Leaflet pour la carte interactive statique (OpenStreetMap) -->
         <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+        <!-- Icone -->
+        <link rel="website icon" type="png" href="ico/kelfoncia-or.png">
         <style>
             /* ---------- VARIABLES & RESET ---------- */
             :root {

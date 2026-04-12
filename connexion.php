@@ -17,6 +17,8 @@ if (!empty($_SESSION['user_id'])) {
         <link rel="stylesheet" href="css/style.css">
         <!-- face-api.js for real facial recognition -->
         <script defer src="https://cdn.jsdelivr.net/npm/face-api.js@0.22.2/dist/face-api.min.js"></script>
+        <!-- Icone -->
+        <link rel="website icon" type="png" href="ico/kelfoncia-or.png">
         <style>
             /* Styles spécifiques à la page auth */
             .auth-page {
