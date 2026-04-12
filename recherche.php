@@ -10,7 +10,7 @@
         <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
         <link rel="stylesheet" href="css/style.css">
         <!-- Icone -->
-        <link rel="website icon" type="png" href="ico/kelfoncia-circle.png">
+        <link rel="website icon" type="png" href="ico/kelfoncia-or.png">
     </head>
     <body>
         <!-- HEADER (copier depuis header.php) -->

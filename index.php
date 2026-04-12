@@ -11,7 +11,7 @@
         <!-- Leaflet pour la carte interactive statique (OpenStreetMap) -->
         <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
         <!-- Icone -->
-        <link rel="website icon" type="png" href="ico/kelfoncia-circle.png">
+        <link rel="website icon" type="png" href="ico/kelfoncia-or.png">
         <style>
             /* ---------- VARIABLES & RESET ---------- */
             :root {
